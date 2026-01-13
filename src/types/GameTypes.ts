@@ -12,6 +12,11 @@ export interface PlayerConfig {
   cameraLerpX: number;
   cameraLerpY: number;
   cameraOffsetY: number;
+
+  // ✅ 新增：速度影响系数
+  // 垂直速度每增加 1，水平加速度增加多少？
+  // 例如：下落速度 800 * 1.5 = 额外增加 1200 加速度
+  verticalToHorizontalRatio: number; // 新增：垂直移动与水平移动的速度比率
 }
 
 export interface CameraConfig {
@@ -54,6 +59,8 @@ export interface LevelConfig {
   cloudCount: number;      // 初始数量
   cleanupThreshold: number; // 回收阈值 (下边界)
   spawnBuffer: number;     // ✅ 新增：生成缓冲 (上边界，替代硬编码的 100)
+
+  worldWidthRatio: number; // ✅ 新增：世界宽度倍率
 }
 
 // ✅ 完善：主配置接口

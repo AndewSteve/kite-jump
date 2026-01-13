@@ -4,6 +4,9 @@ import { GameConfig } from '../config/consts';
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 
+  // 计算出世界的实际宽度
+  private worldWidth: number;
+
   // ✅ 类型安全 Getter：从此告别 this.body!
   private get arcadeBody(): Phaser.Physics.Arcade.Body {
     return this.body as Phaser.Physics.Arcade.Body;
@@ -12,12 +15,15 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'kite');
 
+    // 计算实际活动宽度：720 * 1.5 = 1080
+    this.worldWidth = scene.scale.width * GameConfig.level.worldWidthRatio;
+
     // 1. 将自己添加到场景和物理世界中
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
     // 2. 初始化物理属性 (从配置读取)
-    this.setCollideWorldBounds(false); // 允许飞出屏幕
+    // this.setCollideWorldBounds(false); // 允许飞出屏幕
     this.setDragX(GameConfig.player.dragX);
     
     // 设置最大速度 (注意：X轴受限，Y轴上升飞快但下落受限)
@@ -38,12 +44,20 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityY(GameConfig.player.maxFallSpeed);
     }
 
+    // ✅ 2. 核心玩法：计算动态加速度
+    // 获取当前垂直速度的绝对值（不管是飞升还是坠落）
+    const absVerticalSpeed = Math.abs(this.arcadeBody.velocity.y);
+
+    // 基础加速度 + (垂直速度 * 系数)
+    // 速度越快，加速度越大，操作越灵敏
+    const dynamicAccel = GameConfig.player.acceleration + (absVerticalSpeed * GameConfig.player.verticalToHorizontalRatio);
+
     // B. 输入控制
     if (this.cursors.left.isDown) {
-      this.setAccelerationX(-GameConfig.player.acceleration);
+      this.setAccelerationX(-dynamicAccel);
       this.setFlipX(true);
     } else if (this.cursors.right.isDown) {
-      this.setAccelerationX(GameConfig.player.acceleration);
+      this.setAccelerationX(dynamicAccel);
       this.setFlipX(false);
     } else {
       this.setAccelerationX(0);
@@ -60,10 +74,15 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     const halfWidth = this.width / 2;
     const screenWidth = this.scene.scale.width;
 
-    if (this.x < -halfWidth) {
-      this.x = screenWidth + halfWidth;
-    } else if (this.x > screenWidth + halfWidth) {
-      this.x = -halfWidth;
+    // 左边界限制
+    if (this.x < halfWidth) {
+      this.x = halfWidth;
+      this.setVelocityX(0); // 撞墙停下
+    } 
+    // 右边界限制 (使用 worldWidth)
+    else if (this.x > this.worldWidth - halfWidth) {
+      this.x = this.worldWidth - halfWidth;
+      this.setVelocityX(0); // 撞墙停下
     }
   }
 

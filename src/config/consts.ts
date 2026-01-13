@@ -23,6 +23,11 @@ export const GameConfig: IGameConfig = {
     dragX: 800,            // 水平空气阻力（松手后停下的快慢）
     maxFallSpeed: 800,     // 最大下落速度（防止下落过快看不清）
     maxFlySpeed: 10000,     // 最大上升速度（防止上升过快看不清）
+
+    // ✅ 新增：速度影响系数
+    // 垂直速度每增加 1，水平加速度增加多少？
+    // 例如：下落速度 800 * 1.5 = 额外增加 1200 加速度
+    verticalToHorizontalRatio: 2.0,
     
     // 摄像机跟随参数
     cameraLerpX: 0,        // X轴跟随平滑度 (0 = 不跟随)
@@ -32,10 +37,10 @@ export const GameConfig: IGameConfig = {
 
   // --- 相机设置 (独立配置) ---
   camera: {
-    lerpX: 0,        // X轴不跟随
+    lerpX: 0.1,        // X轴不跟随
     lerpY: 0.08,     // Y轴跟随平滑度：数值越小越平滑，但也越滞后。0.08 比 0.1 更柔和
     offsetY: 400,    // 垂直偏移
-    deadzoneX: 1.5,  // 死区倍率
+    deadzoneX: 0.2,  // 死区倍率
     roundPixels: false, // 🔴 关键优化：设为 false 可以减少高分屏下的“一卡一卡”的像素抖动感
   },
 
@@ -48,6 +53,9 @@ export const GameConfig: IGameConfig = {
     // 例如：1.5 倍屏幕高度。意味着你可以掉下来一整屏多还能救回来，再多就死
     deathDepth: 1280 * 1,
     spawnBuffer: 100,     // ✅ 新增：云朵生成的上边界缓冲 (避免一开始就卡在屏幕顶端)
+
+    // ✅ 新增：世界宽度倍率
+    worldWidthRatio: 1.5,
   },
 
   // ✅ 新增：云朵类型配置表

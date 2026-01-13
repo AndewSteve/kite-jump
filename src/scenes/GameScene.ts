@@ -20,6 +20,9 @@ export default class GameScene extends Phaser.Scene {
   private isGameRunning: boolean = false;
   private startY: number = 0;
 
+  // 新增：缓存世界宽度
+  private worldWidth!: number;
+
   constructor() {
     super('GameScene');
   }
@@ -33,10 +36,19 @@ export default class GameScene extends Phaser.Scene {
   create() {
     this.scene.launch('UIScene');
     const { width, height } = this.scale;
+    // 计算世界宽度
+    this.worldWidth = width * GameConfig.level.worldWidthRatio;
 
     // --- 背景 ---
-    this.background = this.add.tileSprite(width / 2, height / 2, width, height, 'bg')
-      .setScrollFactor(0);
+    // ✅ 修改：背景图需要铺满整个 1.5倍 宽度
+    // 或者我们保持背景图大小，让它跟随相机移动（简单的视差）
+    this.background = this.add.tileSprite(
+        this.worldWidth / 2, // 中心点放在新世界的中心
+        height / 2, 
+        this.worldWidth, // 宽度拉长
+        height, 
+        'bg'
+    ).setScrollFactor(0); // 依然固定在相机上，我们在 update 里手动滚动
 
     // --- 云朵组 ---
     // ✅ 关键：指定 classType 为 Cloud，这样 create 出来的就是 Cloud 实例
@@ -49,7 +61,7 @@ export default class GameScene extends Phaser.Scene {
 
     // --- 玩家 ---
     // ✅ 使用 Player 类创建
-    this.player = new Player(this, width / 2, height - 200);
+    this.player = new Player(this, this.worldWidth / 2, height - 200);
     
     // 初始化状态
     this.startY = this.player.y;
@@ -60,6 +72,8 @@ export default class GameScene extends Phaser.Scene {
     // --- 相机 ---
     this.cameraManager = new CameraManager(this);
     this.cameraManager.follow(this.player);
+    // ✅ 设置相机的水平边界，防止看到黑边
+    this.cameras.main.setBounds(0, -Infinity, this.worldWidth, Infinity);
 
     // --- 碰撞 ---
     this.physics.add.overlap(this.player, this.clouds, this.hitCloud, undefined, this);
@@ -91,6 +105,10 @@ export default class GameScene extends Phaser.Scene {
 
     // 2. 视差滚动
     this.background.tilePositionY = this.cameras.main.scrollY * 0.5;
+
+    // X轴也需要跟随一点点，增加立体感
+     // (可选) 如果背景是无缝的，可以这样做
+     this.background.tilePositionX = this.cameras.main.scrollX * 0.5;
 
     // 3. 云朵回收与生成
     this.recycleClouds();
@@ -132,7 +150,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private spawnCloud(y: number) {
-    const x = Phaser.Math.Between(50, this.scale.width - 50);
+    const x = Phaser.Math.Between(50, this.worldWidth - 50);
     
     // 权重随机算法
     const cloudTypes = Object.values(GameConfig.clouds.types);
