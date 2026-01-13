@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import GameScene from './scenes/GameScene';
-import { GameConfig } from './config/consts';
+import { GameConfig } from './config/GameConfig';
 import UIScene from './scenes/UIScene';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -13,6 +13,7 @@ const config: Phaser.Types.Core.GameConfig = {
     arcade: {
       gravity: GameConfig.physics.gravity, // 向下的加速度，比默认重力小，模拟风筝的漂浮感
       debug: false, // 开发时设为 true 可以看到碰撞框
+      fixedStep: GameConfig.physics.fixedStep,
     },
   },
   scene: [GameScene, UIScene],

@@ -1,6 +1,6 @@
 // src/CameraManager.ts
 import Phaser from 'phaser';
-import { GameConfig } from '../config/consts';
+import { GameConfig } from '../config/GameConfig';
 
 export default class CameraManager {
   private scene: Phaser.Scene;

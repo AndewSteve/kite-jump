@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
-import { GameConfig } from '../config/consts';
+import { GameConfig } from '../config/GameConfig';
+import { EVENTS, gameEvents } from '../managers/events';
+import PlayerState from './PlayerState';
+import PlayerStatusUI from '../ui/PlayerStatusUI'; // ✅ 引入新类
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -7,8 +10,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   // 计算出世界的实际宽度
   private worldWidth: number;
 
+  // ✅ 新增
+  public playerState: PlayerState;
+  private statusUI: PlayerStatusUI; // ✅ 替换 uiGraphics
+
   // ✅ 类型安全 Getter：从此告别 this.body!
-  private get arcadeBody(): Phaser.Physics.Arcade.Body {
+  public get arcadeBody(): Phaser.Physics.Arcade.Body {
     return this.body as Phaser.Physics.Arcade.Body;
   }
 
@@ -21,6 +28,15 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 1. 将自己添加到场景和物理世界中
     scene.add.existing(this);
     scene.physics.add.existing(this);
+
+    // 初始化状态
+    this.playerState = new PlayerState(this);
+    
+    // ✅ 实例化 UI 类
+    this.statusUI = new PlayerStatusUI(scene, this);
+    // 启用物理平滑插值 (Phaser 3.60+ 新特性)
+    // 即使物理只有 60fps，渲染时会自动补间
+    this.arcadeBody.setDamping(true); // 配合阻力更加丝滑
 
     // 2. 初始化物理属性 (从配置读取)
     // this.setCollideWorldBounds(false); // 允许飞出屏幕
@@ -39,9 +55,39 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
    * 每一帧自动调用 (需要在 Scene 的 update 中手动触发)
    */
   update() {
-    // A. 物理限制：手动限制最大下落速度 (Terminal Velocity)
-    if (this.arcadeBody.velocity.y > GameConfig.player.maxFallSpeed) {
-      this.setVelocityY(GameConfig.player.maxFallSpeed);
+    this.playerState.update(this.scene.game.loop.delta);
+
+    // ✅ 调用 UI 更新
+    this.statusUI.update();
+
+    // A. 重力变化
+    const gravityMult = this.playerState.getGravityMultiplier();
+    // 基础重力 * 倍率
+    this.arcadeBody.setGravityY(GameConfig.physics.gravity.y * (gravityMult - 1)); 
+    // 注意：Phaser 的 body.gravity 是额外叠加的，world.gravity 是基础
+    // 如果你之前在 consts 设了 world gravity，这里 setGravityY 是设置“个体重力”
+    // 更准确的做法是修改 body.gravity.y 直接覆盖，或者利用 accelerationY
+    // 简单做法：
+    // 假设 consts 里的 gravity.y 是 500。
+    // 如果倍率是 1.3 (+30%)，我们需要让总重力变成 500 * 1.3 = 650
+    // 所以 body.setGravityY(500 * 0.3) = 150。总重力 = 500 + 150 = 650。
+    this.arcadeBody.setGravityY(GameConfig.physics.gravity.y * (gravityMult - 1));
+
+    // B. 操控手感变化 (冻僵变沉)
+    const controlMult = this.playerState.getControlModifier();
+    const currentAccel = GameConfig.player.acceleration * controlMult;
+    const currentMaxSpeed = GameConfig.player.moveSpeed * controlMult;
+
+    // C. 冲刺时的特殊物理
+    if (this.playerState.isDashing) {
+        // 冲刺期间，强制向上速度，且无视阻力
+        this.setVelocityY(GameConfig.playerState.dashSpeed);
+        // 冲刺期间无敌 (穿墙逻辑不变，但撞障碍物逻辑在 InteractableEntity 里判断)
+    } else {
+        // 非冲刺状态：限制最大下落速度
+        if (this.arcadeBody.velocity.y > GameConfig.player.maxFallSpeed) {
+            this.setVelocityY(GameConfig.player.maxFallSpeed);
+        }
     }
 
     // ✅ 2. 核心玩法：计算动态加速度
@@ -50,7 +96,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // 基础加速度 + (垂直速度 * 系数)
     // 速度越快，加速度越大，操作越灵敏
-    const dynamicAccel = GameConfig.player.acceleration + (absVerticalSpeed * GameConfig.player.verticalToHorizontalRatio);
+    const dynamicAccel = currentAccel + (absVerticalSpeed * GameConfig.player.verticalToHorizontalRatio);
 
     // B. 输入控制
     if (this.cursors.left.isDown) {
@@ -112,5 +158,16 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     
     // 显隐控制 (可选)
     this.setVisible(isEnabled ? true : this.visible);
+  }
+
+  public die(cause: string) {
+    // 触发游戏结束事件，传递死亡原因
+    gameEvents.emit(EVENTS.GAME_OVER, cause);
+  }
+
+  // 销毁时记得清空 Graphics
+  destroy(fromScene?: boolean) {
+      this.statusUI.destroy();
+      super.destroy(fromScene);
   }
 }
