@@ -60,9 +60,19 @@ export interface IPlayerStateConfig {
 export interface ICameraConfig {
   lerpX: number;
   lerpY: number;
-  offsetY: number;
   deadzoneX: number;
+  deadzoneY: number;
   roundPixels: boolean;
+  // ✅ 新增：动态相机参数
+  offsets: {
+    climbing: number, // 向上飞时，相机向上偏，人就在下面
+    falling: number,   // 下落时，相机向下偏，人就在上面
+  },
+  fallingThreshold: number, // 判定下落的时间阈值 (秒)
+  zoom: {
+    default: number,
+    sprinting: number, // 视场变大 (拉远)
+  },
 }
 
 export interface ILevelConfig {

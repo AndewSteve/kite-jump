@@ -40,17 +40,23 @@ export default class GameScene extends Phaser.Scene {
     this.worldWidth = width * GameConfig.level.worldWidthRatio;
 
     // --- 背景 ---
+    // 1. 计算需要的覆盖尺寸
+    // 当相机缩小时(0.85)，视野变大，所以背景图必须比屏幕大，才能填满缩小的镜头
+    // 加上 .setScrollFactor(0) 后，物体是跟着镜头缩放的，所以物理尺寸必须加大
+    const minZoom = GameConfig.camera.zoom.sprinting; // 0.85
+    const bgWidth = this.worldWidth / minZoom; // 确保宽度足够覆盖
+    const bgHeight = height / minZoom;         // 确保高度足够覆盖 (1280 / 0.85 ≈ 1506)
+
+    // --- 背景 ---
     // ✅ 修改：背景图需要铺满整个 1.5倍 宽度
     // 或者我们保持背景图大小，让它跟随相机移动（简单的视差）
-    this.background = this.add
-      .tileSprite(
-        this.worldWidth / 2, // 中心点放在新世界的中心
-        height / 2,
-        this.worldWidth, // 宽度拉长
-        height,
-        "bg"
-      )
-      .setScrollFactor(0); // 依然固定在相机上，我们在 update 里手动滚动
+    this.background = this.add.tileSprite(
+        width / 2,   // ✅ 修正 X：使用屏幕中心 (360)，而不是世界中心 (540)
+        height / 2,  // ✅ 修正 Y：使用屏幕中心
+        bgWidth,     // ✅ 修正 W：足够大的宽度
+        bgHeight,    // ✅ 修正 H：足够大的高度 (解决上下黑边)
+        'bg'
+    ).setScrollFactor(0);
 
     // --- 云朵组 ---
     // ✅ 关键：指定 classType 为 Cloud，这样 create 出来的就是 Cloud 实例
@@ -135,7 +141,7 @@ export default class GameScene extends Phaser.Scene {
     );
   }
 
-  update() {
+  update(_time: number, delta: number) {
     if (!this.isGameRunning) return;
 
     // ✅ 1. 委托 Player 处理物理和输入
@@ -152,7 +158,8 @@ export default class GameScene extends Phaser.Scene {
     this.recycleEntities();
 
     // 4. 相机更新
-    this.cameraManager.update();
+    console.log('CameraManager Update');
+    this.cameraManager.update(delta);
 
     // 5. 分数逻辑
     const previousHighestY = this.highestY;

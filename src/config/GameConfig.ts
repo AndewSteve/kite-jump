@@ -21,10 +21,19 @@ export const GameConfig: IGameConfig = {
   camera: {
     lerpX: 0.1,        // X轴不跟随
     lerpY: 0.08,     // Y轴跟随平滑度：数值越小越平滑，但也越滞后。0.08 比 0.1 更柔和
-    offsetY: 400,    // 垂直偏移
     deadzoneX: 0.2,  // 死区倍率
+    deadzoneY: 0.1,  // 死区倍率
     roundPixels: true, 
-    // roundPixels: false, // 🔴 关键优化：设为 false 可以减少高分屏下的“一卡一卡”的像素抖动感
+    // ✅ 新增：动态相机参数
+    offsets: {
+      climbing: 300, // 向上飞时，相机向上偏，人就在下面
+      falling: -300,   // 下落时，相机向下偏，人就在上面
+    },
+    fallingThreshold: 0.5, // 判定下落的时间阈值 (秒)
+    zoom: {
+      default: 1.0,
+      sprinting: 0.9, // 视场变大 (拉远)
+    }
   },
 
   // --- 关卡生成 ---
