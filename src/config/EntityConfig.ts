@@ -39,17 +39,17 @@ export const EntityConfig: Record<string, ISpawnDefinition> = {
         ]
       })
     },
-    golden_cloud: {
-      weight: 10,
-      init: () => ({
-        texture: 'cloud',
-        color: 0xffd700,
-        actions: [
-          new ScoreAction(200),           
-          new VanishAction()
-        ]
-      })
-    },
+    // golden_cloud: {
+    //   weight: 10,
+    //   init: () => ({
+    //     texture: 'cloud',
+    //     color: 0xffd700,
+    //     actions: [
+    //       new ScoreAction(200),           
+    //       new VanishAction()
+    //     ]
+    //   })
+    // },
     cold_cloud: {
       weight: 10,
       init: () => ({

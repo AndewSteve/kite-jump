@@ -16,6 +16,15 @@ const config: Phaser.Types.Core.GameConfig = {
       fixedStep: GameConfig.physics.fixedStep,
     },
   },
+  // ✅ 新增：缩放与居中配置
+  scale: {
+    // 模式：FIT (保持长宽比缩放以适应屏幕，不会拉伸变形)
+    // 如果你坚持要 1:1 像素显示不缩放，可以用 Phaser.Scale.NONE
+    mode: Phaser.Scale.FIT, 
+    
+    // 居中：水平和垂直都居中
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
   scene: [GameScene, UIScene],
 };
 
