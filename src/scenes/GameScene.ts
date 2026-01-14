@@ -6,6 +6,8 @@ import { EVENTS, gameEvents } from "../managers/events";
 import Player from "../entities/Player";
 // ✅ 引入新系统
 import InteractableEntity from "../entities/InteractableEntity";
+import DataManager from "../managers/DataManager";
+import { EntityType } from "../types/GameTypes";
 
 export default class GameScene extends Phaser.Scene {
   // ✅ 1. 类型改为 Player 类
@@ -84,13 +86,24 @@ export default class GameScene extends Phaser.Scene {
     // ✅ 设置相机的水平边界，防止看到黑边
     this.cameras.main.setBounds(0, -Infinity, this.worldWidth, Infinity);
 
-    // --- 碰撞 ---
+    // 1. 物理层：玩家身体 vs 互动物体
+    // 这里的 processCallback (第三个参数) 可以用来做更细的过滤，比如冲刺时无敌不触发陷阱
     this.physics.add.overlap(
       this.player,
       this.interactables,
       this.hitInteractable,
       undefined,
       this
+    );
+
+    // 2. ✅ 感应层：磁场 vs 互动物体
+    // 这就是你想要的“乐观碰撞”：先判定碰到了，再在回调里检查类型
+    this.physics.add.overlap(
+        this.player.magnetZone, 
+        this.interactables, 
+        this.handleMagnetSensing, // 磁场感应到了
+        this.checkCanMagnet,      // 过滤器 (Process Callback)
+        this
     );
 
     // --- 事件 ---
@@ -145,7 +158,7 @@ export default class GameScene extends Phaser.Scene {
     if (!this.isGameRunning) return;
 
     // ✅ 1. 委托 Player 处理物理和输入
-    this.player.update();
+    this.player.update(_time, delta);
 
     // 2. 视差滚动
     this.background.tilePositionY = this.cameras.main.scrollY * 0.5;
@@ -158,7 +171,6 @@ export default class GameScene extends Phaser.Scene {
     this.recycleEntities();
 
     // 4. 相机更新
-    console.log('CameraManager Update');
     this.cameraManager.update(delta);
 
     // 5. 分数逻辑
@@ -182,6 +194,10 @@ export default class GameScene extends Phaser.Scene {
     this.isGameRunning = false;
     this.physics.pause();
     this.player.setTint(0x555555);
+
+    // ✅ 保存记录 (存入历史，更新金币)
+    // 注意：这里我们用 Score 作为金币基准，你可以根据需要调整
+    DataManager.addRecord(this.currentScore, heightScore);
 
     gameEvents.emit(EVENTS.SHOW_GAME_OVER, {
       finalHeight: heightScore,
@@ -259,6 +275,19 @@ export default class GameScene extends Phaser.Scene {
       }
     }
 
+    let finalDef = selectedDef;
+
+    // ✅ Lv3 风神降临逻辑：正面道具 -> 金币
+    if (this.player && this.player.playerState.buffs.hasTag('State.GoldMode')) {
+        // 创建一个临时的配置对象来检查类型
+        const tempConfig = selectedDef.init();
+        
+        if (tempConfig.type === EntityType.Buff) {
+            // 替换为金币 (假设 spawnTable 里有 'coin')
+            finalDef = GameConfig.spawnTable['coin']; 
+        }
+    }
+
     // ✅ 获取/创建 Cloud 实例
     // 使用 get() 可以自动利用对象池 (如果是刚被 kill 的云，会复用它)
     const entity = this.interactables.get(x, y) as InteractableEntity;
@@ -267,7 +296,7 @@ export default class GameScene extends Phaser.Scene {
       // ✅ 调用 Cloud 自己的 setup 方法
       entity.setActive(true);
       entity.setVisible(true);
-      entity.configure(selectedDef.init());
+      entity.configure(finalDef.init());
     }
   }
 
@@ -324,5 +353,59 @@ export default class GameScene extends Phaser.Scene {
 
     // 委托给实体自己处理，场景不需要知道它是云还是鸟
     entity.onHit(playerEntity);
+  }
+
+  /**
+   * 过滤器：只有符合条件的才触发回调
+   * 类似于 Unity 的 "Layer Collision Matrix"
+   */
+  private checkCanMagnet(_magnetZone: any, target: any): boolean {
+    const entity = target as InteractableEntity;
+    
+    // 1. 只吸 Buff
+    if (entity.entityType !== EntityType.Buff) return false;
+    
+    // 2. 已经被吸过的/不活跃的 不吸
+    if (!entity.active) return false;
+
+    // 3. (可选) 更严格的圆形判定
+    // Arcade Physics 的 overlap 默认是 AABB (矩形包围盒)。
+    // 哪怕你 setCircle，它在这一步依然是按“正方形”检测的（为了性能）。
+    // 如果你想要完美的圆形判定，可以在这里加一道 Distance Check。
+    // const distSq = Phaser.Math.Distance.BetweenPointsSquared(
+    //   this.player.getCenter(),
+    //   entity.getCenter()
+    // );
+    // const r = this.player.getMagnetRadius();
+    // if (distSq > r * r){ 
+    //   console.log('Magnet check failed by distance.');
+    //   return false;
+    // }
+
+    return true;
+  }
+
+  /**
+   * 磁场回调：吸过来！
+   */
+  private handleMagnetSensing(_magnetZone: any, target: any) {
+    const entity = target as InteractableEntity;
+    // const playerPos = this.player.getCenter();
+    const playerEntity = this.player;
+
+    // 委托给实体自己处理，场景不需要知道它是云还是鸟
+    entity.onHit(playerEntity);
+
+    // 简单的吸附逻辑：让物体向玩家移动
+    // 使用 Arcade Physics 的 moveTo Object
+    // this.physics.moveToObject(
+    //   entity, 
+    //   this.player, 
+    //   GameConfig.player.magnetForce
+    // ); // 600 是吸附速度
+
+    // 注意：这里我们只是让它飞过来。
+    // 等它真的撞到 this.player (物理身体) 时，会触发上面的 handlePhysicalCollision，
+    // 从而执行吃金币/加冲刺的逻辑。
   }
 }

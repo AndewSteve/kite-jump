@@ -14,6 +14,11 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   public playerState: PlayerState;
   private statusUI: PlayerStatusUI; // ✅ 替换 uiGraphics
 
+
+  // ✅ 新增：磁场传感器 (不可见，但有物理判定)
+  public magnetZone: Phaser.GameObjects.Zone; 
+  private magnetPhysicsBody: Phaser.Physics.Arcade.Body; // 方便类型提示
+
   // ✅ 类型安全 Getter：从此告别 this.body!
   public get arcadeBody(): Phaser.Physics.Arcade.Body {
     return this.body as Phaser.Physics.Arcade.Body;
@@ -46,6 +51,39 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 这里我们先设一个巨大的Y上限，具体的下落限制在 update 里做
     this.setMaxVelocity(GameConfig.player.moveSpeed, GameConfig.player.maxFlySpeed);
 
+    // 假设风筝图片是 128x128
+    // 我们希望受击判定只有中间 30px 大小 (手感更好，不容易死)
+    const hitRadius = GameConfig.player.hitRadius; // 半径 15
+
+    // ✅ 1. 设置圆形半径
+    this.arcadeBody.setCircle(hitRadius);
+
+    // ✅ 2. 修正偏移 (Offset)
+    // 默认 setCircle 会把圆放在图片左上角。我们需要把它挪到图片中心。
+    // 公式：Offset = (图片宽/2) - 半径
+    // 假设图片宽高你是知道的，或者动态获取
+    const offsetX = (this.width / 2) - hitRadius;
+    const offsetY = (this.height / 2) - hitRadius -60;
+    
+    this.arcadeBody.setOffset(offsetX, offsetY);
+
+
+    // --- 初始化磁场传感器 ---
+    // 创建一个 Zone (没有纹理的物体)
+    this.magnetZone = scene.add.zone(x, y, 100, 100);
+    scene.physics.add.existing(this.magnetZone);
+    
+    // 获取 Zone 的物理 Body
+    this.magnetPhysicsBody = this.magnetZone.body as Phaser.Physics.Arcade.Body;
+    
+    // 设置为圆形的触发器
+    // 初始半径先给个 0，update 里会动态更新
+    this.magnetPhysicsBody.setCircle(1); 
+    this.magnetPhysicsBody.setAllowGravity(false); // 磁场不受重力
+    this.magnetPhysicsBody.setImmovable(true);     // 磁场不会被撞飞
+    // 关键：不参与物理碰撞反应，只负责触发 overlap
+    // 在 Phaser Arcade 中，overlap 默认就是不阻挡的，所以不需要像 Unity 那样设 isTrigger
+
     // 3. 初始化输入
     // 注意：这里假设键盘必然存在。如果是移动端触摸，可以在这里扩展触摸逻辑
     this.cursors = scene.input.keyboard!.createCursorKeys();
@@ -54,34 +92,32 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   /**
    * 每一帧自动调用 (需要在 Scene 的 update 中手动触发)
    */
-  update() {
-    this.playerState.update(this.scene.game.loop.delta);
-
+  update(_time: number, delta: number) {
+    // ✅ 1. 驱动 Buff 系统 (处理计时器、过期移除)
+    // 传入单位：秒
+    this.updateMagnetZone(); // ✅ 同步磁场位置
+    this.playerState.update(delta);
+    // this.updateDashVisuals(); // ✅ 更新冲刺视觉效果
     // ✅ 调用 UI 更新
     this.statusUI.update();
 
-    // A. 重力变化
-    const gravityMult = this.playerState.getGravityMultiplier();
-    // 基础重力 * 倍率
-    this.arcadeBody.setGravityY(GameConfig.physics.gravity.y * (gravityMult - 1)); 
-    // 注意：Phaser 的 body.gravity 是额外叠加的，world.gravity 是基础
-    // 如果你之前在 consts 设了 world gravity，这里 setGravityY 是设置“个体重力”
-    // 更准确的做法是修改 body.gravity.y 直接覆盖，或者利用 accelerationY
-    // 简单做法：
-    // 假设 consts 里的 gravity.y 是 500。
-    // 如果倍率是 1.3 (+30%)，我们需要让总重力变成 500 * 1.3 = 650
-    // 所以 body.setGravityY(500 * 0.3) = 150。总重力 = 500 + 150 = 650。
-    this.arcadeBody.setGravityY(GameConfig.physics.gravity.y * (gravityMult - 1));
 
-    // B. 操控手感变化 (冻僵变沉)
-    const controlMult = this.playerState.getControlModifier();
-    const currentAccel = GameConfig.player.acceleration * controlMult;
-    const currentMaxSpeed = GameConfig.player.moveSpeed * controlMult;
+    // A. 重力变化
+    this.arcadeBody.setGravityY(
+      this.playerState.getFinalGravityY()
+    );
+    // B. 阻力
+    this.setDragX(this.playerState.getFinalDragX());
+    // C. 速度限制
+    const maxSpeed = this.playerState.getFinalMaxSpeed();
+    this.setMaxVelocity(maxSpeed, GameConfig.player.maxFlySpeed);
 
     // C. 冲刺时的特殊物理
     if (this.playerState.isDashing) {
+        // ✅ 实现“恒定速度” (Lv1=1800, Lv2=2200, Lv3=2500)
+        let targetSpeed = this.playerState.getDashSpeed();
         // 冲刺期间，强制向上速度，且无视阻力
-        this.setVelocityY(GameConfig.playerState.dashSpeed);
+        this.setVelocityY(targetSpeed);
         // 冲刺期间无敌 (穿墙逻辑不变，但撞障碍物逻辑在 InteractableEntity 里判断)
     } else {
         // 非冲刺状态：限制最大下落速度
@@ -90,28 +126,69 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
-    // ✅ 2. 核心玩法：计算动态加速度
-    // 获取当前垂直速度的绝对值（不管是飞升还是坠落）
+    const accel = this.playerState.getFinalAcceleration();
+    // 动态垂直补偿 (这属于手感微调，保留在 Controller 层没问题)
     const absVerticalSpeed = Math.abs(this.arcadeBody.velocity.y);
-
-    // 基础加速度 + (垂直速度 * 系数)
-    // 速度越快，加速度越大，操作越灵敏
-    const dynamicAccel = currentAccel + (absVerticalSpeed * GameConfig.player.verticalToHorizontalRatio);
-
-    // B. 输入控制
+    const dynamicAccel = accel + (absVerticalSpeed * GameConfig.player.verticalToHorizontalRatio);
+    
     if (this.cursors.left.isDown) {
-      this.setAccelerationX(-dynamicAccel);
-      this.setFlipX(true);
+        this.setAccelerationX(-dynamicAccel);
+        this.setFlipX(true);
     } else if (this.cursors.right.isDown) {
-      this.setAccelerationX(dynamicAccel);
-      this.setFlipX(false);
+        this.setAccelerationX(dynamicAccel);
+        this.setFlipX(false);
     } else {
-      this.setAccelerationX(0);
+        this.setAccelerationX(0);
     }
 
-    // C. 穿墙逻辑 (Screen Wrap)
     this.checkScreenWrap();
   }
+
+
+
+  // ✅ 新增：获取磁场半径 (基础 + 升级)
+  public getMagnetRadius(): number {
+    // 直接转发
+    return this.playerState.getMagnetRadius();
+  }
+
+  private updateMagnetZone() {
+    // ✅ 1. 核心：让磁场跟随玩家
+    // 注意：Body 的位置是左上角，所以要根据半径居中
+    const magnetRadius = this.getMagnetRadius();
+    
+    // 更新磁场半径 (以支持动态升级)
+    // setCircle(radius, offsetX, offsetY)
+    // Phaser 的 Zone 中心点对齐比较诡异，通常需要手动计算 offset
+    this.magnetPhysicsBody.setCircle(magnetRadius);
+    
+    // 将 Zone 移动到玩家中心
+    // 因为 setCircle 后 anchor 可能会变，最稳妥的方式是直接对齐 center
+    const center = this.getCenter();
+    
+    // 手动计算 body 位置使其居中
+    // body.x = center.x - radius
+    this.magnetPhysicsBody.x = center.x - magnetRadius;
+    this.magnetPhysicsBody.y = center.y - magnetRadius -60;
+  }
+
+  // private updateDashVisuals() {
+  //   const vm = (this.scene as any).visualManager; // 假设你有 VisualManager
+    
+  //   if (this.buffs.hasTag('State.Dash.Lv3')) {
+  //      // 金色粒子 + 速度线
+  //      vm.setTrailStyle('gold_particle');
+  //   } else if (this.buffs.hasTag('State.Dash.Lv2')) {
+  //      // 宽拖尾 + 速度线
+  //      vm.setTrailStyle('wide_trail');
+  //   } else if (this.buffs.hasTag('State.Dash.Lv1')) {
+  //      // 白色气流
+  //      vm.setTrailStyle('white_stream');
+  //   } else {
+  //      // 关闭拖尾
+  //      vm.setTrailStyle('none');
+  //   }
+  // }
 
   /**
    * 穿墙逻辑封装
@@ -167,7 +244,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
   // 销毁时记得清空 Graphics
   destroy(fromScene?: boolean) {
-      this.statusUI.destroy();
-      super.destroy(fromScene);
+    this.magnetZone.destroy();
+    this.statusUI.destroy();
+    super.destroy(fromScene);
   }
 }

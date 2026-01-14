@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import GameScene from './scenes/GameScene';
 import { GameConfig } from './config/GameConfig';
 import UIScene from './scenes/UIScene';
+import MainMenuScene from './scenes/MainMenuScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -12,7 +13,7 @@ const config: Phaser.Types.Core.GameConfig = {
     default: 'arcade',
     arcade: {
       gravity: GameConfig.physics.gravity, // 向下的加速度，比默认重力小，模拟风筝的漂浮感
-      debug: false, // 开发时设为 true 可以看到碰撞框
+      debug: true, // 开发时设为 true 可以看到碰撞框
       fixedStep: GameConfig.physics.fixedStep,
     },
   },
@@ -25,7 +26,8 @@ const config: Phaser.Types.Core.GameConfig = {
     // 居中：水平和垂直都居中
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [GameScene, UIScene],
+  scene: [MainMenuScene,GameScene, UIScene],
+  // scene: [GameScene, UIScene],
 };
 
 new Phaser.Game(config);

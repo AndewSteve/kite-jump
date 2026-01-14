@@ -1,18 +1,12 @@
 import Phaser from 'phaser';
 import type { IAction, InteractionContext } from '../actions/ActionInterfaces';
 import Player from '../entities/Player'; // 只需要引入 Player 类型
-
-// 配置接口：用于初始化实体
-export interface EntityConfig {
-  texture: string;    // 图片 key
-  color?: number;     // 染色 (可选)
-  scale?: number;     // 缩放 (可选)
-  actions: IAction[]; // ✅ 核心：挂载的行为列表
-}
+import type { IEntityConfig } from '../types/GameTypes';
 
 export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
   private actions: IAction[] = [];
   private isInteracted: boolean = false;
+  public entityType: string = 'neutral'; // ✅ 新增属性
 
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string) {
     super(scene, x, y, texture);
@@ -27,11 +21,13 @@ export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
    * 通用初始化方法
    * 无论是云、鸟、金币，都通过这个方法配置
    */
-  public configure(config: EntityConfig) {
+  public configure(config: IEntityConfig) {
+    this.entityType = config.type; // ✅ 记录类型
     // 1. 视觉设置
     this.setTexture(config.texture);
     if (config.color !== undefined) this.setTint(config.color);
-    if (config.scale !== undefined) this.setScale(config.scale);
+    // 重置缩放 (防止继承上一个对象的缩放)
+    this.setScale(config.scale !== undefined ? config.scale : 1);
     
     this.setAlpha(1);
     this.setVisible(true);
@@ -39,9 +35,17 @@ export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
 
     // 2. 物理设置 (默认设置为静态物体，如果需要动态物体可以扩展 Config)
     if (this.arcadeBody) {
-        this.arcadeBody.enable = true;
-        this.arcadeBody.setAllowGravity(false);
-        this.arcadeBody.setImmovable(true);
+      this.arcadeBody.enable = true;
+      this.arcadeBody.setAllowGravity(false);
+      this.arcadeBody.setImmovable(true);
+      this.arcadeBody.setVelocity(0, 0); // 确保速度清零
+
+      // ✅✅✅ 核心修复：强制同步物理框大小与贴图一致
+      // 这一步非常关键，因为 setTexture 不会自动改 Body
+      this.setSize(this.width, this.height);
+      
+      // ✅ 确保偏移归零 (防止之前的 offset 残留导致框偏到左上角)
+      this.setOffset(0, 0);
     }
 
     // 3. 行为注入
@@ -55,6 +59,14 @@ export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
   public onHit(player: Player) {
     if (this.isInteracted) return;
     this.isInteracted = true;
+
+    // ✅ 核心修复：立即刹车！
+    // 无论之前是被磁场吸过来的，还是原本就在动，这一刻必须停下
+    if (this.arcadeBody) {
+        this.arcadeBody.setVelocity(0, 0); // 速度归零
+        this.arcadeBody.stop();            // 停止物理模拟
+        this.arcadeBody.enable = false;    // 禁用物理体，防止二次碰撞
+    }
 
     // 构建上下文
     const context: InteractionContext = {

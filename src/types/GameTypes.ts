@@ -2,11 +2,21 @@
 
 import type { IAction } from "../actions/ActionInterfaces";
 
+// ✅ 新增：使用可擦除的字符串类型（erasableSyntaxOnly 不允许 enum）
+export const EntityType = {
+  Buff: 'buff',       // 有利道具 (可被磁场吸附)
+  Hazard: 'hazard',   // 有害陷阱/敌人 (不可吸附，撞击扣血)
+  Neutral: 'neutral', // 中立物体 (仅作为平台，无特殊反应)
+} as const;
+
+export type EntityType = typeof EntityType[keyof typeof EntityType];
+
 // ✅ 1. 将 EntityConfig 移到这里
 export interface IEntityConfig {
   texture: string;
   color?: number;
   scale?: number;
+  type: EntityType; // ✅ 新增：用于区分好坏
   actions: IAction[]; // 行为列表
 }
 
@@ -27,9 +37,9 @@ export interface IPlayerConfig {
   dragX: number;
   maxFallSpeed: number;
   maxFlySpeed: number;
-  cameraLerpX: number;
-  cameraLerpY: number;
-  cameraOffsetY: number;
+  baseRadius: number; // 基础吸附范围 (像素)
+  magnetForce: number; // 磁力强度 / 吸附速度
+  hitRadius: number; // 受击判定半径
 
   // ✅ 新增：速度影响系数
   // 垂直速度每增加 1，水平加速度增加多少？
@@ -52,9 +62,6 @@ export interface IPlayerStateConfig {
     extremeGravity: number, // 累计 +80%
     frozenDrag: number,     // 操控变沉：加速度和最高速减少 50%
   },
-  // 冲刺系统
-  dashDuration: number,    // 冲刺持续时间 (ms)
-  dashSpeed: number,      // 冲刺时的向上速度
 }
 
 export interface ICameraConfig {

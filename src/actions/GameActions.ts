@@ -1,4 +1,5 @@
 import { EVENTS, gameEvents } from '../managers/events';
+import type { IBuffConfig } from '../mechanics/BuffTypes';
 import type { IAction, InteractionContext } from './ActionInterfaces';
 
 /**
@@ -43,7 +44,9 @@ export class ColdnessIncrementAction implements IAction {
     this.coldIncrease = coldIncrease;
   }
   execute(ctx: InteractionContext): void {
-    ctx.player.playerState.addColdness(this.coldIncrease);
+    const player = ctx.player;
+    if (player.playerState.isDashing) return;
+    player.playerState.addColdness(this.coldIncrease);
   }
 }
 
@@ -75,6 +78,19 @@ export class BoostAction implements IAction {
   execute(ctx: InteractionContext): void {
     // 调用 Player 封装好的 boost 方法
     ctx.player.boost(this.force);
+  }
+}
+
+export class ApplyBuffAction implements IAction {
+  private config: IBuffConfig;
+
+  constructor(config: IBuffConfig) {
+    this.config = config;
+  }
+
+  execute(ctx: InteractionContext): void {
+    // ✅ 路径变更为：ctx.player.playerState.buffs
+    ctx.player.playerState.buffs.addBuff(this.config);
   }
 }
 
