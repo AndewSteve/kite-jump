@@ -50,7 +50,7 @@ export const GameConfig: IGameConfig = {
     worldWidthRatio: 1.5,
     // ✅ 新增：像素与米的换算比例
     // 假设 10 像素 = 1 米 (根据你之前的 UI 逻辑 Score = (startY - y) / 10)
-    pixelsPerMeter: 10,
+    pixelsPerMeter: 100,
 
     // ✅ 新增配置
     maxSpawnsPerRow: 2,   // 每一层最多生成 2 个物体
@@ -65,5 +65,5 @@ export const GameConfig: IGameConfig = {
 
   // ✅ 核心：生成表 (Spawn Table)
   // 所有的实体定义都在这里，GameScene 对此一无所知
-  spawnTable: EntityConfig,
+  entityTable: EntityConfig,
 };

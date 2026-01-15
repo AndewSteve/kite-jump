@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
-import type { IAction, InteractionContext } from '../actions/ActionInterfaces';
+import type { IEntityAction, InteractionContext } from '../actions/ActionInterfaces';
 import Player from '../entities/Player'; // 只需要引入 Player 类型
 import type { IEntityConfig } from '../types/GameTypes';
 
 export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
-  private actions: IAction[] = [];
+  private actions: IEntityAction[] = [];
   private isInteracted: boolean = false;
   public entityType: string = 'neutral'; // ✅ 新增属性
 
@@ -72,11 +72,17 @@ export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
     const context: InteractionContext = {
       target: this,
       player: player,
-      scene: this.scene
+      scene: this.scene,
+      isCancelled: false
     };
 
-    // ⚡️ 执行所有挂载的行为
-    this.actions.forEach(action => action.execute(context));
+    for (const action of this.actions) {
+        // ✅ 如果之前的 Action (比如曹魏转化) 已经把物体销毁/禁用了
+        // 后面的伤害逻辑就不应该执行了
+        if (!this.active) break; 
+        if (context.isCancelled) break;
+        action.execute(context);
+    }
   }
 
   /**

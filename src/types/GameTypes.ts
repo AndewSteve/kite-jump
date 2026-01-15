@@ -1,12 +1,13 @@
 // import Phaser from 'phaser';
 
-import type { IAction } from "../actions/ActionInterfaces";
+import type { IEntityAction } from "../actions/ActionInterfaces";
 
 // ✅ 新增：使用可擦除的字符串类型（erasableSyntaxOnly 不允许 enum）
 export const EntityType = {
   Buff: 'buff',       // 有利道具 (可被磁场吸附)
   Hazard: 'hazard',   // 有害陷阱/敌人 (不可吸附，撞击扣血)
   Neutral: 'neutral', // 中立物体 (仅作为平台，无特殊反应)
+  Coin: 'coin',     // 金币 (可被磁场吸附)
 } as const;
 
 export type EntityType = typeof EntityType[keyof typeof EntityType];
@@ -16,8 +17,9 @@ export interface IEntityConfig {
   texture: string;
   color?: number;
   scale?: number;
+  comment?: string;
   type: EntityType; // ✅ 新增：用于区分好坏
-  actions: IAction[]; // 行为列表
+  actions: IEntityAction[]; // 行为列表
 }
 
 // ✅ 2. 定义“生成定义” (用于配置表)
@@ -26,6 +28,13 @@ export interface ISpawnDefinition {
   // 工厂函数：每次生成时调用，返回一个新的配置对象
   // 为什么要用函数？因为 Action 可能包含状态，我们希望每个实体都有自己独立的 Action 实例
   init: () => IEntityConfig; 
+}
+
+// 生态群系配置接口
+export interface IBiomeConfig {
+  minHeight: number;      // 比如 0, 1000, 5000
+  bgTexture?: string;     // 该区域背景图
+  spawnTable: Record<string, ISpawnDefinition>; // { 'normal_cloud': 100, 'iron_vulture': 20 }
 }
 
 // ✅ 新增：详细的子配置接口
@@ -40,6 +49,8 @@ export interface IPlayerConfig {
   baseRadius: number; // 基础吸附范围 (像素)
   magnetForce: number; // 磁力强度 / 吸附速度
   hitRadius: number; // 受击判定半径
+
+  maxHealth: number; // ✅ 新增：最大生命值
 
   // ✅ 新增：速度影响系数
   // 垂直速度每增加 1，水平加速度增加多少？
@@ -111,5 +122,6 @@ export interface IGameConfig {
   camera: ICameraConfig; // 不再是 any
   level: ILevelConfig;
   playerState: IPlayerStateConfig;
-  spawnTable: Record<string, ISpawnDefinition>;
+  // ✅ 实体定义表改为工厂：每次生成都拿到全新 IEntityConfig 实例
+  entityTable: Record<string, () => IEntityConfig>;
 }

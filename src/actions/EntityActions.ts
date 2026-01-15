@@ -1,12 +1,14 @@
+import { KiteConfigs } from '../config/KiteConfig';
 import { EVENTS, gameEvents } from '../managers/events';
 import type { IBuffConfig } from '../mechanics/BuffTypes';
-import type { IAction, InteractionContext } from './ActionInterfaces';
+import { StatType } from '../mechanics/StatDefinitions';
+import type { IEntityAction, InteractionContext } from './ActionInterfaces';
 
 /**
  * 行为：减速 + 增加寒冷
  * 逻辑：如果不在冲刺状态，将向上速度强制压制到 threshold (默认 -266)，并增加寒冷
  */
-export class SlowDownAction implements IAction {
+export class SlowDownAction implements IEntityAction {
   private limitSpeed: number; // 速度上限 (注意向上是负数，这里的上限其实是数值更大的负数或正数)
 
   // 默认限制为 -266 (即 -800/3)，如果玩家当前是 -1000 (很快)，会被拉回 -266 (很慢)
@@ -32,7 +34,7 @@ export class SlowDownAction implements IAction {
   }
 }
 
-export class ColdnessIncrementAction implements IAction {
+export class ColdnessIncrementAction implements IEntityAction {
   private coldIncrease: number;
 
   /**
@@ -50,7 +52,7 @@ export class ColdnessIncrementAction implements IAction {
   }
 }
 
-export class DashEnergyIncrementAction implements IAction {
+export class DashEnergyIncrementAction implements IEntityAction {
   private dashIncrease: number;
   /**
    * 添加冲刺能量, 可以为负数减少冲刺能量, 此外不会产生其他SFX或特效
@@ -67,7 +69,7 @@ export class DashEnergyIncrementAction implements IAction {
 /**
  * 行为：给玩家施加垂直冲量
  */
-export class BoostAction implements IAction {
+export class BoostAction implements IEntityAction {
   private force: number;
 
   constructor(force: number) {
@@ -81,7 +83,7 @@ export class BoostAction implements IAction {
   }
 }
 
-export class ApplyBuffAction implements IAction {
+export class ApplyBuffAction implements IEntityAction {
   private config: IBuffConfig;
 
   constructor(config: IBuffConfig) {
@@ -97,7 +99,7 @@ export class ApplyBuffAction implements IAction {
 /**
  * 行为：播放消失动画并禁用实体
  */
-export class VanishAction implements IAction {
+export class VanishAction implements IEntityAction {
   private duration: number;
 
   constructor(duration: number = 150) {
@@ -127,10 +129,12 @@ export class VanishAction implements IAction {
   }
 }
 
+
+
 /**
  * (预留) 行为：加分
  */
-export class ScoreAction implements IAction {
+export class ScoreAction implements IEntityAction {
   private score: number;
   constructor(score: number) {
     this.score = score;
@@ -140,7 +144,25 @@ export class ScoreAction implements IAction {
   }
 }
 
-export class GameOverAction implements IAction {
+export class AddCoinAction implements IEntityAction {
+  private amount: number;
+  constructor(amount: number) { this.amount = amount; }
+
+  execute(ctx: InteractionContext) {
+    // ✅ 读取倍率 (蜀国默认是 1.0)
+    const mult = ctx.player.playerState.stats.get(StatType.CoinMultiplier);
+    
+    // 冲刺时翻倍逻辑 (蜀国被动提到冲刺时价值翻倍，这里可以叠加)
+    let finalAmount = Math.floor(this.amount * mult);
+    if (ctx.player.playerState.isDashing
+      && ctx.player.playerState.buffs.hasTag(KiteConfigs.shu.tag)
+    ) finalAmount *= 2; 
+
+    gameEvents.emit(EVENTS.ADD_COIN, finalAmount);
+  }
+}
+
+export class GameOverAction implements IEntityAction {
   private cause: string;
   constructor(cause: string) {
     this.cause = cause;

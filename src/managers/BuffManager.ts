@@ -1,8 +1,9 @@
 // src/managers/BuffManager.ts
 import StatSystem from '../mechanics/StatSystem';
 import { type IBuffConfig, BuffInstance } from '../mechanics/BuffTypes';
-import { type IModifier } from '../mechanics/StatDefinitions';
+import { StatType, type IModifier } from '../mechanics/StatDefinitions';
 import Player from '../entities/Player';
+import { DashConfig } from '../config/BuffConfig';
 
 export default class BuffManager {
   private player: Player;
@@ -19,10 +20,23 @@ export default class BuffManager {
     this.statSystem = statSystem;
   }
 
-  // ✅ 核心：每帧更新
+  // ✅ 核心：每帧更新,输入 dt 秒数
   public update(dt: number) { // dt in seconds
     // 1. 更新所有 Buff 的计时器
     this.activeBuffs.forEach(buff => {
+      if (buff.config.tickInterval) {
+        buff.tickAccumulator += dt;
+        while (buff.tickAccumulator >= buff.config.tickInterval) {
+          // 触发 Tick 行为
+          if (buff.config.onTick) {
+            const context = { player: this.player, contextCancelled: false };
+            buff.config.onTick.forEach(action => {
+              action.execute(context);
+            });
+          }
+          buff.tickAccumulator -= buff.config.tickInterval;
+        }
+      }
       if (buff.config.duration > 0) {
         buff.timer -= dt;
         if (buff.timer <= 0) {
@@ -46,6 +60,14 @@ export default class BuffManager {
 
     // 2. 创建新实例 (孔明灯逻辑：这里会创建一个全新的实例，独立计时)
     const newBuff = new BuffInstance(config);
+
+    // 特例：如果是冲刺 Buff，应用持续时间加成
+    if (newBuff.config.tags 
+      && newBuff.config.tags.length > 0 
+      && newBuff.config.tags.includes(DashConfig.universalTag)
+      && newBuff.config.duration > 0) {
+      newBuff.timer += this.statSystem.get(StatType.DashDurationIncrease);
+    }
     this.activeBuffs.push(newBuff);
     
     this.onBuffAdded(newBuff);
@@ -68,6 +90,13 @@ export default class BuffManager {
     // B. 应用 Tags (例如 WindGod)
     if (buff.config.tags) {
       buff.config.tags.forEach(tag => this.tags.add(tag));
+    }
+
+    if (buff.config.onAdd) {
+      const context = { player: this.player, contextCancelled: false };
+      buff.config.onAdd.forEach(action => {
+        action.execute(context);
+      });
     }
     
     console.log(`Buff Added: ${buff.config.id}`);

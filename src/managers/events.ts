@@ -15,4 +15,5 @@ export const EVENTS = {
   UPDATE_DASH: 'update-dash',       // 更新冲刺值 (0-100)
 
   ADD_SCORE: 'add-score',         // Game Logic: 增加分数
+  ADD_COIN: 'add-coin',           // Game Logic: 增加金币
 };

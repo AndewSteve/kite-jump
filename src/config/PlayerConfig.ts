@@ -12,6 +12,8 @@ export const PlayerConfig: IPlayerConfig = {
   magnetForce: 600, // 磁力强度 / 吸附速度
   hitRadius: 15, // 受击判定半径
 
+  maxHealth: 3, // ✅ 新增：最大生命值
+
   // ✅ 新增：速度影响系数
   // 垂直速度每增加 1，水平加速度增加多少？
   // 例如：下落速度 800 * 1.5 = 额外增加 1200 加速度

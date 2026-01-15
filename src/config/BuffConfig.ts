@@ -1,3 +1,4 @@
+import { ColdnessIncrementAction } from "../actions/BuffActions";
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
 
@@ -5,9 +6,9 @@ import { StatType, ModifierType } from "../mechanics/StatDefinitions";
 // 加速度 +100% (x2)，阻力 +100% (x2) -> 极致灵敏，松手即停
 const DashControlMods = [
   { stat: StatType.Acceleration, type: ModifierType.PercentAdd, value: 1.0 },
-  { stat: StatType.Drag, type: ModifierType.PercentAdd, value: 1.0 },
+  { stat: StatType.Drag, type: ModifierType.PercentAdd, value: -0.5 },
   // 磁力全开 (比如加 500 范围)
-  { stat: StatType.MagnetRange, type: ModifierType.Flat, value: 500 }
+  { stat: StatType.GoldMagnetRange, type: ModifierType.Flat, value: 500 }
 ];
 
 export const DashConfig = {
@@ -25,7 +26,8 @@ export const DashConfig = {
     tag: 'State.Dash.Lv3',
     duration: 6,
     speed: -2500,
-  }
+  },
+  universalTag: 'State.Dash',
 }
 
 // Lv1: 雏鹰起飞
@@ -56,4 +58,38 @@ export const DashLv3Buff: IBuffConfig = {
   maxStack: 1,
   tags: ['State.Dash', DashConfig.Lv3.tag, 'State.Invincible', 'State.GoldMode'], // 金币模式标签
   modifiers: [...DashControlMods]
+};
+
+export const TransitionDashConfig = {
+  tag: 'State.Transition',
+  duration: 6,
+  speed: -2000,
+};
+
+// 过渡冲刺 Buff
+export const TransitionBuff: IBuffConfig = {
+  id: 'biome_transition',
+  name: 'Biome Transition',
+  duration: -1, // ♾️ 永久，直到 Phase 结束手动移除
+  maxStack: 1,
+  tags: [
+    'State.Dash',       // ✅ 复用：让 getFinalGravityY 返回 0
+    'State.Invincible', // ✅ 复用：无敌
+    TransitionDashConfig.tag  // 🆕 新增：用于区分普通冲刺，锁定输入
+  ],
+  modifiers: [
+    // 可以加一些视觉上的 Modifier，比如拖尾宽度
+  ]
+};
+
+export const SkyLaternBuff: IBuffConfig = {
+  id: 'sky_lantern',
+  name: 'Sky Lantern',
+  duration: 8,
+  maxStack: 2,
+  tags: ['Buff.SkyLantern'],
+  tickInterval: 1.0, // 每秒触发一次
+  onTick: [
+    new ColdnessIncrementAction(-6) // 每秒减少 6 点寒冷
+  ],
 };

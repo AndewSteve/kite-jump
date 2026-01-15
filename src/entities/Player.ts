@@ -3,10 +3,10 @@ import { GameConfig } from '../config/GameConfig';
 import { EVENTS, gameEvents } from '../managers/events';
 import PlayerState from './PlayerState';
 import PlayerStatusUI from '../ui/PlayerStatusUI'; // ✅ 引入新类
+import DataManager from '../managers/DataManager';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
-
   // 计算出世界的实际宽度
   private worldWidth: number;
 
@@ -18,6 +18,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   // ✅ 新增：磁场传感器 (不可见，但有物理判定)
   public magnetZone: Phaser.GameObjects.Zone; 
   private magnetPhysicsBody: Phaser.Physics.Arcade.Body; // 方便类型提示
+
+  public goldMagnetZone: Phaser.GameObjects.Zone; 
+  private goldMagnetPhysicsBody: Phaser.Physics.Arcade.Body; // 方便类型提示
 
   // ✅ 类型安全 Getter：从此告别 this.body!
   public get arcadeBody(): Phaser.Physics.Arcade.Body {
@@ -84,10 +87,19 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 关键：不参与物理碰撞反应，只负责触发 overlap
     // 在 Phaser Arcade 中，overlap 默认就是不阻挡的，所以不需要像 Unity 那样设 isTrigger
 
+    // --- 初始化金色磁场传感器 ---
+    this.goldMagnetZone = scene.add.zone(x, y, 100, 100);
+    scene.physics.add.existing(this.goldMagnetZone);
+    this.goldMagnetPhysicsBody = this.goldMagnetZone.body as Phaser.Physics.Arcade.Body;
+    this.goldMagnetPhysicsBody.setCircle(1);
+    this.goldMagnetPhysicsBody.setAllowGravity(false);
+    this.goldMagnetPhysicsBody.setImmovable(true);
+
     // 3. 初始化输入
     // 注意：这里假设键盘必然存在。如果是移动端触摸，可以在这里扩展触摸逻辑
     this.cursors = scene.input.keyboard!.createCursorKeys();
   }
+  
 
   /**
    * 每一帧自动调用 (需要在 Scene 的 update 中手动触发)
@@ -152,7 +164,16 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     return this.playerState.getMagnetRadius();
   }
 
+  public getGoldMagnetRadius(): number {
+    // 金色磁场半径更大一些
+    return this.playerState.getGoldMagnetRadius();
+  }
+
   private updateMagnetZone() {
+    // 将 Zone 移动到玩家中心
+    // 因为 setCircle 后 anchor 可能会变，最稳妥的方式是直接对齐 center
+    const center = this.getCenter();
+
     // ✅ 1. 核心：让磁场跟随玩家
     // 注意：Body 的位置是左上角，所以要根据半径居中
     const magnetRadius = this.getMagnetRadius();
@@ -162,14 +183,17 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // Phaser 的 Zone 中心点对齐比较诡异，通常需要手动计算 offset
     this.magnetPhysicsBody.setCircle(magnetRadius);
     
-    // 将 Zone 移动到玩家中心
-    // 因为 setCircle 后 anchor 可能会变，最稳妥的方式是直接对齐 center
-    const center = this.getCenter();
     
     // 手动计算 body 位置使其居中
     // body.x = center.x - radius
     this.magnetPhysicsBody.x = center.x - magnetRadius;
     this.magnetPhysicsBody.y = center.y - magnetRadius -60;
+
+    // ✅ 2. 金色磁场
+    const goldMagnetRadius = this.getGoldMagnetRadius();
+    this.goldMagnetPhysicsBody.setCircle(goldMagnetRadius);
+    this.goldMagnetPhysicsBody.x = center.x - goldMagnetRadius;
+    this.goldMagnetPhysicsBody.y = center.y - goldMagnetRadius -60;
   }
 
   // private updateDashVisuals() {
@@ -219,7 +243,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // Math.min(-1000, -600) = -1000 (保留更快的速度)
     // 如果当前速度是 200 (下落)，目标是 -600，Math.min(200, -600) = -600 (起飞)
     const currentVel = this.arcadeBody.velocity.y;
-    this.setVelocityY(Math.min(currentVel, force));
+    const tarForce = force * DataManager.getBoostScale();
+    this.setVelocityY(Math.min(currentVel, tarForce));
   }
 
   /**

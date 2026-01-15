@@ -1,5 +1,7 @@
 // src/managers/DataManager.ts
 
+import { GameConfig } from "../config/GameConfig";
+
 export interface GameRecord {
   date: string;
   score: number;
@@ -15,13 +17,15 @@ export interface UserSaveData {
     windMastery: number; // 御风值等级
     auraRange: number;   // 灵韵磁场等级
   };
+  selectedKiteId: 'none' | 'shu' | 'wei' | 'wu'; // 当前选中的风筝
 }
 
 const DEFAULT_SAVE: UserSaveData = {
   currency: 1000, // 初始给点钱方便测试
   highScore: 0,
   history: [],
-  upgrades: { lightness: 0, windMastery: 0, auraRange: 0 }
+  upgrades: { lightness: 0, windMastery: 0, auraRange: 0 },
+  selectedKiteId: 'none'
 };
 
 export default class DataManager {
@@ -110,6 +114,6 @@ export default class DataManager {
 
   // C. 灵韵磁场：每级增加 4像素 的判定半径
   static getHitboxRadiusBonus(): number {
-    return this.data.upgrades.auraRange * 4;
+    return this.data.upgrades.auraRange * 0.01 * GameConfig.player.baseRadius; // 转为像素
   }
 }
