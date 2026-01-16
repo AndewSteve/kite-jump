@@ -102,6 +102,8 @@ export interface ILevelConfig {
   spawnBuffer: number;     // ✅ 新增：生成缓冲 (上边界，替代硬编码的 100)
 
   worldWidthRatio: number; // ✅ 新增：世界宽度倍率
+  transitionSpeed: number; // 过渡阶段的垂直速度（像素/秒）
+  transitionHeigth:number;
 
   // ✅ 新增：每行最大生成数量 (比如 1-2 个)
   maxSpawnsPerRow: number;

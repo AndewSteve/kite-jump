@@ -3,6 +3,7 @@ import { type IGamePhase } from '../phases/PhaseSystem';
 import { IdlePhase, NormalPhase, TransitionPhase } from '../phases/PhasesConfig';
 import { BiomeId, type IBiomeData } from '../types/BiomeTypes';
 import { BiomeLibrary } from '../config/BiomeDataConfig';
+import { GameConfig } from '../config/GameConfig';
 
 export default class PhaseManager {
   private scene: GameScene;
@@ -20,7 +21,8 @@ export default class PhaseManager {
     
     // 预设接下来的顺序 (或者动态生成)
     // 示例：L1 -> L3 -> L2/L4 随机
-    this.biomeQueue = [BiomeId.L3_CloudMarsh];
+    this.biomeQueue = [BiomeId.L2_RedCliff];
+    // this.biomeQueue = [BiomeId.L3_CloudMarsh];
   }
 
   public update(dt: number) {
@@ -39,7 +41,10 @@ export default class PhaseManager {
   public onPhaseComplete() {
     if (this.currentPhase instanceof NormalPhase) {
       // 正常关卡结束 -> 进过渡 (固定2000米过渡，或读取配置)
-      this.switchPhase(new TransitionPhase(2000), BiomeLibrary[BiomeId.L1_Frost]);
+      this.switchPhase(
+        new TransitionPhase(GameConfig.level.transitionHeigth), 
+        BiomeLibrary[BiomeId.L1_Frost]
+      );
     } 
     else if (this.currentPhase instanceof TransitionPhase) {
       // 过渡结束 -> 进下一个生态
@@ -55,7 +60,7 @@ export default class PhaseManager {
     }
 
     // 2. 队列空了，随机 L2 或 L4
-    return Math.random() > 0.5 ? BiomeId.L2_RedCliff : BiomeId.L4_WindCave;
+    return Math.random() > 0.5 ? BiomeId.L2_RedCliff : BiomeId.L2_RedCliff;
   }
 
   // 对外查询接口

@@ -275,7 +275,7 @@ export default class PlayerState {
     return this.stats.get(StatType.Acceleration);
   }
 
-  public getFinalMaxSpeed(): number {
+  public getXMaxSpeed(): number {
     return this.stats.get(StatType.MoveSpeed);
   }
 

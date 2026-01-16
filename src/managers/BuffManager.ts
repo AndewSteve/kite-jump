@@ -43,6 +43,12 @@ export default class BuffManager {
           this.removeBuffInstance(buff);
         }
       }
+      if (buff.config.onUpdate) {
+        const context = { player: this.player, contextCancelled: false };
+        buff.config.onUpdate.forEach(action => {
+          action.execute(context);
+        });
+      }
     });
   }
 
@@ -113,6 +119,13 @@ export default class BuffManager {
       });
     }
 
+    if (buff.config.onRemove) {
+      const context = { player: this.player, contextCancelled: false };
+      buff.config.onRemove.forEach(action => {
+        action.execute(context);
+      });
+    }
+
     // B. 移除 Tags
     // 注意：如果还有其他同名 Buff (比如堆叠了2层 WindGod)，不能直接移除 Tag
     // 需要检查是否还有其他 Buff 提供了这个 Tag
@@ -140,6 +153,13 @@ export default class BuffManager {
   public removeByTag(tag: string) {
     const buffsToRemove = this.activeBuffs.filter(buff => 
       buff.config.tags?.includes(tag)
+    );
+    buffsToRemove.forEach(buff => this.removeBuffInstance(buff));
+  }
+
+  public removeBuffById(buffId: string) {
+    const buffsToRemove = this.activeBuffs.filter(buff => 
+      buff.config.id === buffId
     );
     buffsToRemove.forEach(buff => this.removeBuffInstance(buff));
   }

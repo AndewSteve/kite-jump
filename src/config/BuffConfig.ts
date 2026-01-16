@@ -1,4 +1,4 @@
-import { ColdnessIncrementAction } from "../actions/BuffActions";
+import { ColdnessIncrementAction, SummonAction } from "../actions/BuffActions";
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
 
@@ -92,4 +92,25 @@ export const SkyLaternBuff: IBuffConfig = {
   onTick: [
     new ColdnessIncrementAction(-6) // 每秒减少 6 点寒冷
   ],
+};
+
+// ✅ L2 生态机制控制器
+export const RedCliffMechanicBuff: IBuffConfig = {
+  id: 'biome_l2_control',
+  name: '赤壁环境控制',
+  duration: -1,   // 永久 (直到 Phase 结束被移除)
+  maxStack: 1,
+  
+  // 核心节奏：10秒一次循环 (5秒存在 + 5秒空窗)
+  tickInterval: 10.0, 
+  
+  // 1. 进场时立即召唤一次 (不用等10秒)
+  onAdd: [
+    new SummonAction('vent', 5.0, 'random_screen_x')
+  ],
+  
+  // 2. 每10秒召唤一次
+  onTick: [
+    new SummonAction('vent', 5.0, 'random_screen_x')
+  ]
 };

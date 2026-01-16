@@ -44,7 +44,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.statusUI = new PlayerStatusUI(scene, this);
     // 启用物理平滑插值 (Phaser 3.60+ 新特性)
     // 即使物理只有 60fps，渲染时会自动补间
-    this.arcadeBody.setDamping(true); // 配合阻力更加丝滑
+    // this.arcadeBody.setDamping(true); // 配合阻力更加丝滑
 
     // 2. 初始化物理属性 (从配置读取)
     // this.setCollideWorldBounds(false); // 允许飞出屏幕
@@ -121,7 +121,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // B. 阻力
     this.setDragX(this.playerState.getFinalDragX());
     // C. 速度限制
-    const maxSpeed = this.playerState.getFinalMaxSpeed();
+    const maxSpeed = this.playerState.getXMaxSpeed();
     this.setMaxVelocity(maxSpeed, GameConfig.player.maxFlySpeed);
 
     // C. 冲刺时的特殊物理

@@ -1,3 +1,4 @@
+import type { IBuffConfig } from "../mechanics/BuffTypes";
 import type { ISpawnDefinition } from "./GameTypes";
 
 // ✅ 1. 使用 as const 定义 Biome ID
@@ -27,6 +28,7 @@ export interface IEnvironmentStats {
   dragMod?: number;    // 阻力修正
   windForceX?: number; // 额外的横向推力
   coldGrowthRateMod?: number; // 寒冷增长率修正
+
 }
 
 // ✅ 4. 纯数据结构：生态配置
@@ -42,5 +44,6 @@ export interface IBiomeData {
   // 核心玩法配置
   spawnTable: Record<string, ISpawnDefinition>;
   stats: IEnvironmentStats;
+  buffs?: IBuffConfig[]; // 该生态特有的 Buff 列表
   mechanic: MechanicType;
 }

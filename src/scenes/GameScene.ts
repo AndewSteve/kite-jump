@@ -12,6 +12,8 @@ import SpawnManager from "../managers/SpawnManager";
 import PhaseManager from "../managers/PhaseManager";
 import BackgroundManager from "../managers/BackgroundManager";
 import ScoreManager from "../managers/ScoreManager";
+import SummonManager from "../managers/SummonManager";
+import { ThermalVent } from "../entities/summons/ThermalVent";
 
 export default class GameScene extends Phaser.Scene {
   // ✅ 1. 类型改为 Player 类
@@ -23,6 +25,7 @@ export default class GameScene extends Phaser.Scene {
   public cameraManager!: CameraManager;
   public spawnManager!: SpawnManager;
   public phaseManager!: PhaseManager; // 公开，给其他系统调用
+  public summonManager!: SummonManager;
   private isGameRunning: boolean = false;
 
   // 新增：缓存世界宽度
@@ -34,6 +37,8 @@ export default class GameScene extends Phaser.Scene {
 
   preload() {
     this.load.image("bg", "assets/bg.png");
+    this.load.image("bg_frost", "assets/bg_frost.png");
+    this.load.image("云层", "assets/云层.png");
     this.load.image("kite", "assets/kite.png");
     this.load.image("cloud", "assets/cloud.png");
   }
@@ -61,7 +66,8 @@ export default class GameScene extends Phaser.Scene {
     this.scoreManager = new ScoreManager(this, this.player.y); // ✅ 传入初始 Y
     this.spawnManager = new SpawnManager(this, this.interactables, this.player);
     this.phaseManager = new PhaseManager(this);
-
+    this.summonManager = new SummonManager(this);
+    this.summonManager.register('vent', ThermalVent, 'screen', 5);
     // 初始化状态
     this.player.setEnabled(false); // 初始暂停
     this.isGameRunning = false;
@@ -258,7 +264,7 @@ export default class GameScene extends Phaser.Scene {
     const playerEntity = this.player;
     
     // 委托给实体自己处理，场景不需要知道它是云还是鸟
-    
+
     entity.onHit(playerEntity);
     // 简单的吸附逻辑：让物体向玩家移动
     // 使用 Arcade Physics 的 moveTo Object

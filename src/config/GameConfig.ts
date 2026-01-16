@@ -52,6 +52,9 @@ export const GameConfig: IGameConfig = {
     // 假设 10 像素 = 1 米 (根据你之前的 UI 逻辑 Score = (startY - y) / 10)
     pixelsPerMeter: 100,
 
+    transitionSpeed: -1000, // 过渡阶段的垂直速度（像素/秒）
+    transitionHeigth: 100,
+
     // ✅ 新增配置
     maxSpawnsPerRow: 2,   // 每一层最多生成 2 个物体
     minSpawnDistance: 150 // 两个物体至少间隔 150 像素

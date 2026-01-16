@@ -1,5 +1,6 @@
 import { EntityConfig } from "./EntityConfig";
 import { BiomeId, MechanicType, type IBiomeData } from "../types/BiomeTypes";
+import { RedCliffMechanicBuff } from "./BuffConfig";
 
 const StandardSpawnTable = {
   normal_cloud: {
@@ -34,6 +35,9 @@ const RedCliffSpawnTable = {
   // 假设有热气流道具
   // thermal_vent: { weight: 50, init: EntityConfig.thermal_vent },
 };
+export const RedCliffConfigs = {
+  holdSpeed: -300, // 赤壁热流停留速度
+}
 
 
 // ✅ 静态数据表：这里是“导演”的剧本库
@@ -51,16 +55,19 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L2_RedCliff,
     name: "赤壁余烬",
     durationMeters: 400,
-    backgroundTexture: 'bg_redcliff',
+    // backgroundTexture: 'bg_redcliff',
+    backgroundTexture: 'bg_frost',
     spawnTable: RedCliffSpawnTable,
     stats: { gravityMod: 0, dragMod: -0.1, coldGrowthRateMod: -0.3 }, // 热流上升快，阻力略减
-    mechanic: MechanicType.ThermalUpdraft
+    mechanic: MechanicType.ThermalUpdraft,
+    buffs: [ RedCliffMechanicBuff ]
   },
   [BiomeId.L3_CloudMarsh]: {
     id: BiomeId.L3_CloudMarsh,
     name: "云梦泽",
     durationMeters: 400,
-    backgroundTexture: 'bg_marsh',
+    // backgroundTexture: 'bg_marsh',
+    backgroundTexture: 'bg_frost',
     spawnTable: StandardSpawnTable,
     stats: { dragMod: 0.5 }, // 阻力+50% (粘滞)
     mechanic: MechanicType.FogBlindness
@@ -69,7 +76,8 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L4_WindCave,
     name: "墨家风洞",
     durationMeters: 400,
-    backgroundTexture: 'bg_wind',
+    // backgroundTexture: 'bg_wind',
+    backgroundTexture: 'bg_frost',
     spawnTable: StandardSpawnTable,
     stats: { windForceX: 200 }, // 侧向风
     mechanic: MechanicType.CrossWind

@@ -11,6 +11,7 @@ export interface IBuffConfig {
   tags?: string[];     // 赋予玩家的标签，例如 ['State.WindGod']
   onAdd?: IBuffAction[];
   onRemove?: IBuffAction[];
+  onUpdate?: IBuffAction[]; // 每帧触发的行为
   onTick?: IBuffAction[]; // 每秒触发的行为
   tickInterval?: number; // 触发间隔(秒)
   // 数值修改列表
