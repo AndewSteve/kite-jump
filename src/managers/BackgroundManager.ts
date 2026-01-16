@@ -41,7 +41,7 @@ export default class BackgroundManager {
      .setDepth(-100);    // 确保永远在最底层
 
     this.cloudOverlay = this.scene.add.tileSprite(
-        width / 2, height / 2, bgWidth, bgHeight, '云层'
+        width / 2, height / 2, bgWidth, bgHeight, 'cloud_overlay'
     )
     .setScrollFactor(0)
     .setDepth(-90) // ✅ Depth: -90 (在背景之上，物体之下)

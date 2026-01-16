@@ -38,7 +38,10 @@ export default class GameScene extends Phaser.Scene {
   preload() {
     this.load.image("bg", "assets/bg.png");
     this.load.image("bg_frost", "assets/bg_frost.png");
-    this.load.image("云层", "assets/云层.png");
+    this.load.image("cloud_overlay", "assets/cloud_overlay.png");
+    this.load.image("cloud_overlay_alpha", "assets/cloud_overlay_alpha.png");
+    this.load.image("transi_cloud_alpha", "assets/transi_cloud_alpha.png");
+    this.load.image("transi_cloud_alpha_full", "assets/transi_cloud_alpha_full.png");
     this.load.image("kite", "assets/kite.png");
     this.load.image("cloud", "assets/cloud.png");
   }
@@ -51,10 +54,13 @@ export default class GameScene extends Phaser.Scene {
 
     // ✅ 移交给 Manager
     // ✅ 初始化渲染管理器 (自动注册 Shader)
+    // ✅ 预热 Alpha 纹理
     this.renderManager = new RenderManager(this);
     this.backgroundManager = new BackgroundManager(this);
 
     // --- 云朵组 ---
+    // 👹 强制预热黑魔法
+    // 创建一个不可见的图片，强迫 Phaser 把 'cloud_alpha' 上传到 GPU
     // ✅ 关键：指定 classType 为 Cloud，这样 create 出来的就是 Cloud 实例
     this.interactables = this.physics.add.group({
       classType: InteractableEntity,

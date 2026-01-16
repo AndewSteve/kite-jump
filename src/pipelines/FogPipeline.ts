@@ -1,26 +1,20 @@
 import Phaser from 'phaser';
 
-// ✅ 1. 标准 MultiPipeline 顶点着色器 (直接复用 Phaser 3.90 推荐模板)
 const FogVertShader = `
 precision mediump float;
-
 uniform mat4 uProjectionMatrix;
-
 attribute vec2 inPosition;
 attribute vec2 inTexCoord;
 attribute float inTexId;
 attribute float inTintEffect;
 attribute vec4 inTint;
-
 varying vec2 outTexCoord;
 varying float outTexId;
 varying float outTintEffect;
 varying vec4 outTint;
-
 void main ()
 {
     gl_Position = uProjectionMatrix * vec4(inPosition, 1.0, 1.0);
-
     outTexCoord = inTexCoord;
     outTexId = inTexId;
     outTint = inTint;
@@ -28,14 +22,14 @@ void main ()
 }
 `;
 
-// ✅ 2. 适配 MultiPipeline 的片元着色器
 const FogFragShader = `
 #define SHADER_NAME FOG_FS
-
 precision mediump float;
 
 uniform sampler2D uMainSampler[%count%];
-uniform float uFadeHeight; // 0.0 - 1.0 (Fade takes up how much of the texture height?)
+uniform vec2 uResolution; // 需要屏幕分辨率
+uniform float uBottomRatio; // 雾气底部在屏幕高度的百分比 (Phaser坐标系, 0=顶)
+uniform float uSoftness;    // 渐变软度 (比如 0.2 = 20% 屏幕高度)
 
 varying vec2 outTexCoord;
 varying float outTexId;
@@ -45,26 +39,33 @@ varying vec4 outTint;
 void main()
 {
     vec4 texture;
-
     %forloop%
 
-    vec4 color = texture * outTint;
+    // 1. 基础颜色 (纹理颜色 * Tint颜色)
+    // 假设你的 transi_cloud_alpha.png 是带透明度的 RGBA
+    vec4 baseColor = texture * outTint;
 
-    // ✅ NEW LOGIC: Fade based on UV (Texture) Coordinates
-    // outTexCoord.y goes from 0.0 (Top) to 1.0 (Bottom)
-    
-    // We want the bottom to be transparent (alpha 0) and top to be opaque (alpha 1)
-    // 1.0 - outTexCoord.y flips it: 1.0 (Top) -> 0.0 (Bottom)
-    float distanceFromBottom = 1.0 - outTexCoord.y;
+    // 2. 计算屏幕空间的 Y 坐标 (0.0=底, 1.0=顶)
+    float screenY = gl_FragCoord.y / uResolution.y;
 
-    // Calculate Smooth Alpha
-    // If distance < uFadeHeight, alpha fades from 0 to 1
-    // smoothstep(min, max, value)
-    float alphaMask = smoothstep(0.0, uFadeHeight, distanceFromBottom);
+    // 3. 转换 Phaser 的 uBottomRatio 到 WebGL 坐标
+    // Phaser: 0在顶, 0.3在上方
+    // WebGL: 0在底, 0.7在上方
+    // 所以雾的物理底边在 WebGL 的 (1.0 - uBottomRatio) 处
+    float fogBottomY = 1.0 - uBottomRatio;
 
-    color.a *= alphaMask;
+    // 4. 计算 alpha 遮罩
+    // 我们希望：
+    // 当 y <= fogBottomY 时，alpha = 0 (完全透明)
+    // 当 y >= fogBottomY + uSoftness 时，alpha = 1 (完全不透明)
+    // smoothstep 会在两个值之间生成平滑的 0->1 曲线 (Sigmoid)
+    float alphaMask = smoothstep(fogBottomY, fogBottomY + uSoftness, screenY);
 
-    gl_FragColor = color;
+    // 5. 应用遮罩
+    baseColor.a *= alphaMask;
+    baseColor.rgb *= alphaMask; // 预乘 Alpha
+
+    gl_FragColor = baseColor;
 }
 `;
 
@@ -72,9 +73,8 @@ export default class FogPipeline extends Phaser.Renderer.WebGL.Pipelines.MultiPi
   constructor(game: Phaser.Game) {
     super({
       game,
-      vertShader: FogVertShader, // 必须提供完整的 VertShader
+      vertShader: FogVertShader,
       fragShader: FogFragShader,
-      // ❌ 移除 uniforms 属性，Phaser 3.90 会自动解析 shader 字符串获取它们
     });
   }
 }
