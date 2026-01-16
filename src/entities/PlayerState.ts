@@ -272,11 +272,21 @@ export default class PlayerState {
   }
 
   public getFinalAcceleration(): number {
-    return this.stats.get(StatType.Acceleration);
+    const baseAccel = this.stats.get(StatType.Acceleration);
+    return baseAccel * this.getVelocityMultiplier() * GameConfig.player.verticalToHorizontalRatio;
+  }
+
+  private getVelocityMultiplier(): number {
+    if (this.player.body == null) return 1.0;
+    // 获取当前垂直速度绝对值 (无论上升还是下落)
+    const currentVy = Math.abs(this.player.body.velocity.y);
+    const refSpeed = GameConfig.playerState.velocityScalingRef;
+    return 1 + (currentVy / refSpeed);
   }
 
   public getXMaxSpeed(): number {
-    return this.stats.get(StatType.MoveSpeed);
+    const baseSpeed = this.stats.get(StatType.MoveSpeed);
+    return baseSpeed * this.getVelocityMultiplier();
   }
 
   public getMagnetRadius(): number {

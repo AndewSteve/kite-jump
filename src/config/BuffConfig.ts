@@ -1,6 +1,7 @@
-import { ColdnessIncrementAction, SummonAction } from "../actions/BuffActions";
+import { ColdnessIncrementAction, SpawnMode, SummonAction } from "../actions/BuffActions";
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
+import { SummonId } from "./SummonConfig";
 
 // --- 公共的操控性修正 (模拟之前的 2.0x 乘数) ---
 // 加速度 +100% (x2)，阻力 +100% (x2) -> 极致灵敏，松手即停
@@ -106,11 +107,28 @@ export const RedCliffMechanicBuff: IBuffConfig = {
   
   // 1. 进场时立即召唤一次 (不用等10秒)
   onAdd: [
-    new SummonAction('vent', 5.0, 'random_screen_x')
+    new SummonAction(SummonId.ThermalVent, 5.0, SpawnMode.RandomScreenX)
   ],
   
   // 2. 每10秒召唤一次
   onTick: [
-    new SummonAction('vent', 5.0, 'random_screen_x')
+    new SummonAction(SummonId.ThermalVent, 5.0, SpawnMode.RandomScreenX)
   ]
+};
+
+// ✅ L3 云梦泽机制控制器
+export const CloudMarshMechanicBuff: IBuffConfig = {
+  id: 'biome_l3_control',
+  name: '云梦泽大雾',
+  duration: -1,   // 永久 (直到 Phase 结束被自动清理)
+  maxStack: 1,
+  
+  // 进场时召唤大雾
+  onAdd: [
+    // 参数2: lifeTime = -1 (永久，直到被 clearAll)
+    // 参数3: SpawnMode.RandomScreenX (这里传什么都无所谓，FogOverlay 会自己跑到顶上去)
+    new SummonAction(SummonId.FogOverlay, -1, SpawnMode.RandomScreenX)
+  ],
+  
+  // L3 不需要 onTick 循环召唤，只要一个遮罩盖住就行
 };

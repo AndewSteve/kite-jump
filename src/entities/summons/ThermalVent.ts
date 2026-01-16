@@ -1,7 +1,9 @@
-import { RedCliffConfigs } from '../../config/BiomeDataConfig';
 import { GameConfig } from '../../config/GameConfig';
 import { BaseSummon, type ISummonInitData } from '../../summon/BaseSummon';
 
+const RedCliffConfigs = {
+  holdSpeed: -300, // 赤壁热流停留速度
+}
 
 export class ThermalVent extends BaseSummon {
   private isDespawning: boolean = false; // ✅ 状态锁

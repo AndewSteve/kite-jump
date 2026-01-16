@@ -5,6 +5,7 @@ import { GameConfig } from '../config/GameConfig';
 import { EntityType, type ISpawnDefinition } from '../types/GameTypes';
 import type GameScene from '../scenes/GameScene';
 import { KiteConfigs } from '../config/KiteConfig';
+import { EntityConfig } from '../config/EntityConfig';
 
 
 
@@ -192,7 +193,7 @@ export default class SpawnManager {
             
             if (tempConfig.type === EntityType.Buff) {
                 // 替换为金币 (假设 spawnTable 里有 'coin')
-              finalDef.init = () => (GameConfig.entityTable['coin']());
+              finalDef.init = () => (EntityConfig['coin']());
             }
         }
     

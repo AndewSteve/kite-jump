@@ -1,5 +1,5 @@
-import Phaser from 'phaser';
-import Player from '../entities/Player';
+import type Phaser from 'phaser';
+import type Player from '../entities/Player';
 import type InteractableEntity from '../entities/InteractableEntity'; // 稍后定义
 
 // 交互上下文：包含触发瞬间的所有信息

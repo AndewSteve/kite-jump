@@ -21,6 +21,7 @@ export const PlayerConfig: IPlayerConfig = {
 }
 
 export const PlayerStateConfig: IPlayerStateConfig = {
+  velocityScalingRef: 2000,
   // ✅ 新增：根据策划案配置
   coldBaseRate: 1.5,      // 基础增长 (每秒)
   coldHeightFactor: 0.5,  // 高度系数 (每 1000m 增加多少)

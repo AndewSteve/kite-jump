@@ -13,7 +13,7 @@ import PhaseManager from "../managers/PhaseManager";
 import BackgroundManager from "../managers/BackgroundManager";
 import ScoreManager from "../managers/ScoreManager";
 import SummonManager from "../managers/SummonManager";
-import { ThermalVent } from "../entities/summons/ThermalVent";
+import RenderManager from "../managers/RenderManager";
 
 export default class GameScene extends Phaser.Scene {
   // ✅ 1. 类型改为 Player 类
@@ -27,7 +27,7 @@ export default class GameScene extends Phaser.Scene {
   public phaseManager!: PhaseManager; // 公开，给其他系统调用
   public summonManager!: SummonManager;
   private isGameRunning: boolean = false;
-
+  public renderManager!: RenderManager; // ✅ 新增
   // 新增：缓存世界宽度
   private worldWidth!: number;
 
@@ -50,6 +50,8 @@ export default class GameScene extends Phaser.Scene {
     this.worldWidth = width * GameConfig.level.worldWidthRatio;
 
     // ✅ 移交给 Manager
+    // ✅ 初始化渲染管理器 (自动注册 Shader)
+    this.renderManager = new RenderManager(this);
     this.backgroundManager = new BackgroundManager(this);
 
     // --- 云朵组 ---
@@ -67,7 +69,6 @@ export default class GameScene extends Phaser.Scene {
     this.spawnManager = new SpawnManager(this, this.interactables, this.player);
     this.phaseManager = new PhaseManager(this);
     this.summonManager = new SummonManager(this);
-    this.summonManager.register('vent', ThermalVent, 'screen', 5);
     // 初始化状态
     this.player.setEnabled(false); // 初始暂停
     this.isGameRunning = false;
@@ -158,6 +159,8 @@ export default class GameScene extends Phaser.Scene {
   update(time: number, delta: number) {
     if (!this.isGameRunning) return;
 
+    // ✅ 驱动渲染更新 (如果有 uTime 需求)
+    this.renderManager.update(time, delta);
     // 1. 导演层：决定游戏所处阶段 (切换状态、刷怪开关、物理环境)
     this.phaseManager.update(delta);
 

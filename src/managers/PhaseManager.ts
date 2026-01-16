@@ -21,8 +21,8 @@ export default class PhaseManager {
     
     // 预设接下来的顺序 (或者动态生成)
     // 示例：L1 -> L3 -> L2/L4 随机
-    this.biomeQueue = [BiomeId.L2_RedCliff];
-    // this.biomeQueue = [BiomeId.L3_CloudMarsh];
+    // this.biomeQueue = [BiomeId.L2_RedCliff];
+    this.biomeQueue = [BiomeId.L3_CloudMarsh];
   }
 
   public update(dt: number) {
@@ -43,7 +43,7 @@ export default class PhaseManager {
       // 正常关卡结束 -> 进过渡 (固定2000米过渡，或读取配置)
       this.switchPhase(
         new TransitionPhase(GameConfig.level.transitionHeigth), 
-        BiomeLibrary[BiomeId.L1_Frost]
+        BiomeLibrary[BiomeId.L3_CloudMarsh]
       );
     } 
     else if (this.currentPhase instanceof TransitionPhase) {
@@ -60,7 +60,7 @@ export default class PhaseManager {
     }
 
     // 2. 队列空了，随机 L2 或 L4
-    return Math.random() > 0.5 ? BiomeId.L2_RedCliff : BiomeId.L2_RedCliff;
+    return Math.random() > 0.5 ? BiomeId.L3_CloudMarsh : BiomeId.L3_CloudMarsh;
   }
 
   // 对外查询接口

@@ -3,7 +3,6 @@ import { type IGamePhase } from './PhaseSystem';
 import GameScene from '../scenes/GameScene';
 import { TransitionBuff, TransitionDashConfig } from '../config/BuffConfig';
 import { BiomeId, type IBiomeData } from '../types/BiomeTypes';
-import { ModifierType, StatType } from '../mechanics/StatDefinitions';
 import { GameConfig } from '../config/GameConfig';
 
 
@@ -113,41 +112,22 @@ export class NormalPhase implements IGamePhase {
   }
 
   private applyEnvStats(scene: GameScene, isApplying: boolean) {
-    if (!this.data || !this.data.stats) return; // ✅ 双重保险
+    if (!this.data || !this.data.envModifiers) return; // ✅ 双重保险
     const stats = scene.player.playerState.stats;
-    const s = this.data.stats;
-    const method = isApplying ? 'addModifier' : 'removeModifier';
+    const s = this.data.envModifiers;
     const sourceId = 'biome_env';
 
-    if (s.gravityMod) {
+    s.forEach(mod => {
       if (isApplying) {
-        stats.addModifier(StatType.GravityScale, { sourceId, type: ModifierType.PercentAdd, value: s.gravityMod });
+        stats.addModifier(mod.stat, {
+          sourceId: sourceId,
+          type: mod.type,
+          value: mod.value,
+        });
       } else {
-        stats.removeModifier(StatType.GravityScale, sourceId);
+        stats.removeModifier(mod.stat, sourceId);
       }
-    }
-    // ... 同理处理 dragMod, windForce
-    if (s.dragMod) {
-      if (isApplying) {
-        stats.addModifier(StatType.Drag, { sourceId, type: ModifierType.PercentAdd, value: s.dragMod });
-      } else {
-        stats.removeModifier(StatType.Drag, sourceId);
-      }
-    }
-    if (s.windForceX) {
-      if (isApplying) {
-        stats.addModifier(StatType.WindForce, { sourceId, type: ModifierType.Flat, value: s.windForceX });
-      } else {
-        stats.removeModifier(StatType.WindForce, sourceId);
-      }
-    }
-    if (s.coldGrowthRateMod) {
-      if (isApplying) {
-        stats.addModifier(StatType.ColdGrowthRate, { sourceId, type: ModifierType.PercentAdd, value: s.coldGrowthRateMod });
-      } else {
-        stats.removeModifier(StatType.ColdGrowthRate, sourceId);
-      }
-    }
+    });
   }
 
   canSpawnEntities(): boolean { return true; } // 允许生成

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BaseSummon, type SpaceType, type ISummonInitData } from '../summon/BaseSummon';
 import GameScene from '../scenes/GameScene';
+import { SummonConfig, SummonId } from '../config/SummonConfig';
 
 // 注册表类型定义
 type SummonClass = new (scene: Phaser.Scene, x: number, y: number) => BaseSummon;
@@ -22,6 +23,16 @@ export default class SummonManager {
 
   constructor(scene: GameScene) {
     this.scene = scene;
+    // ✅ 构造时自动初始化所有配置
+    this.initRegistry();
+  }
+
+  // ✅ 遍历配置表进行注册
+  private initRegistry() {
+    Object.entries(SummonConfig).forEach(([key, def]) => {
+      this.register(key, def.classType, def.space, def.poolSize);
+    });
+    console.log(`[SummonManager] Registered ${this.pools.size} summon types.`);
   }
 
   /**
@@ -49,7 +60,7 @@ export default class SummonManager {
   /**
    * 实例化 (Unity: Instantiate)
    */
-  public summon(key: string, x: number, y: number, options?: Partial<ISummonInitData>) {
+  public summon(key: SummonId | string, x: number, y: number, options?: Partial<ISummonInitData>) {
     const group = this.pools.get(key);
     const config = this.configs.get(key);
 

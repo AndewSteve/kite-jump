@@ -1,6 +1,7 @@
 import { EntityConfig } from "./EntityConfig";
-import { BiomeId, MechanicType, type IBiomeData } from "../types/BiomeTypes";
-import { RedCliffMechanicBuff } from "./BuffConfig";
+import { BiomeId, type IBiomeData } from "../types/BiomeTypes";
+import { CloudMarshMechanicBuff, RedCliffMechanicBuff } from "./BuffConfig";
+import { ModifierType, StatType } from "../mechanics/StatDefinitions";
 
 const StandardSpawnTable = {
   normal_cloud: {
@@ -19,14 +20,14 @@ const StandardSpawnTable = {
     weight: 10,
     init: EntityConfig.coin,
   },
-  cold_cloud: {
-    weight: 10,
-    init: EntityConfig.cold_cloud,
-  },
-  iron_vulture: {
-    weight: 20,
-    init: EntityConfig.iron_vulture,
-  },
+  // cold_cloud: {
+  //   weight: 10,
+  //   init: EntityConfig.cold_cloud,
+  // },
+  // iron_vulture: {
+  //   weight: 20,
+  //   init: EntityConfig.iron_vulture,
+  // },
 };
 
 const RedCliffSpawnTable = {
@@ -35,9 +36,6 @@ const RedCliffSpawnTable = {
   // 假设有热气流道具
   // thermal_vent: { weight: 50, init: EntityConfig.thermal_vent },
 };
-export const RedCliffConfigs = {
-  holdSpeed: -300, // 赤壁热流停留速度
-}
 
 
 // ✅ 静态数据表：这里是“导演”的剧本库
@@ -48,8 +46,6 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     durationMeters: 300, // 300米
     backgroundTexture: 'bg_frost',
     spawnTable: StandardSpawnTable,
-    stats: { gravityMod: 0 }, // 无修正
-    mechanic: MechanicType.None
   },
   [BiomeId.L2_RedCliff]: {
     id: BiomeId.L2_RedCliff,
@@ -58,9 +54,14 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     // backgroundTexture: 'bg_redcliff',
     backgroundTexture: 'bg_frost',
     spawnTable: RedCliffSpawnTable,
-    stats: { gravityMod: 0, dragMod: -0.1, coldGrowthRateMod: -0.3 }, // 热流上升快，阻力略减
-    mechanic: MechanicType.ThermalUpdraft,
-    buffs: [ RedCliffMechanicBuff ]
+    buffs: [ RedCliffMechanicBuff ],
+    envModifiers: [
+      {
+        stat: StatType.ColdGrowthRate,
+        type: ModifierType.PercentAdd,
+        value: -0.2, // 减少 20%
+      }
+    ],
   },
   [BiomeId.L3_CloudMarsh]: {
     id: BiomeId.L3_CloudMarsh,
@@ -69,8 +70,15 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     // backgroundTexture: 'bg_marsh',
     backgroundTexture: 'bg_frost',
     spawnTable: StandardSpawnTable,
-    stats: { dragMod: 0.5 }, // 阻力+50% (粘滞)
-    mechanic: MechanicType.FogBlindness
+    envModifiers: [
+      {
+        stat: StatType.Drag,
+        type: ModifierType.PercentAdd,
+        value: 0.5, // 阻力+50% (粘滞)
+      }
+    ],
+    // ✅ 2. 机制逻辑：大雾遮罩
+    buffs: [ CloudMarshMechanicBuff ]
   },
   [BiomeId.L4_WindCave]: {
     id: BiomeId.L4_WindCave,
@@ -79,7 +87,5 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     // backgroundTexture: 'bg_wind',
     backgroundTexture: 'bg_frost',
     spawnTable: StandardSpawnTable,
-    stats: { windForceX: 200 }, // 侧向风
-    mechanic: MechanicType.CrossWind
   }
 };

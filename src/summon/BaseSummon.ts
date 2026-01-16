@@ -1,7 +1,11 @@
 import Phaser from 'phaser';
 import Player from '../entities/Player';
 
-export type SpaceType = 'world' | 'screen';
+export const SpaceType = {
+  World: 'world',
+  Screen: 'screen'
+} as const;
+export type SpaceType = typeof SpaceType[keyof typeof SpaceType];
 
 export interface ISummonInitData {
   x: number;

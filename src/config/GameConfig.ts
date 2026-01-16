@@ -1,7 +1,6 @@
 // src/consts.ts
 
 import type { IGameConfig } from "../types/GameTypes";
-import { EntityConfig } from "./EntityConfig";
 import { PlayerConfig, PlayerStateConfig } from "./PlayerConfig";
 
 
@@ -65,8 +64,4 @@ export const GameConfig: IGameConfig = {
 
   // ✅ 新增：玩家状态配置
   playerState: PlayerStateConfig,
-
-  // ✅ 核心：生成表 (Spawn Table)
-  // 所有的实体定义都在这里，GameScene 对此一无所知
-  entityTable: EntityConfig,
 };

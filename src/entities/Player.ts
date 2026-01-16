@@ -139,15 +139,11 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     const accel = this.playerState.getFinalAcceleration();
-    // 动态垂直补偿 (这属于手感微调，保留在 Controller 层没问题)
-    const absVerticalSpeed = Math.abs(this.arcadeBody.velocity.y);
-    const dynamicAccel = accel + (absVerticalSpeed * GameConfig.player.verticalToHorizontalRatio);
-    
     if (this.cursors.left.isDown) {
-        this.setAccelerationX(-dynamicAccel);
+        this.setAccelerationX(-accel);
         this.setFlipX(true);
     } else if (this.cursors.right.isDown) {
-        this.setAccelerationX(dynamicAccel);
+        this.setAccelerationX(accel);
         this.setFlipX(false);
     } else {
         this.setAccelerationX(0);

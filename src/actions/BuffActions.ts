@@ -34,12 +34,19 @@ export class DashEnergyIncrementAction implements IBuffAction {
   }
 }
 
+export const SpawnMode = {
+  RandomX: 'random_x',
+  PlayerPos: 'player_pos',
+  RandomScreenX: 'random_screen_x'
+} as const;
+export type SpawnMode = typeof SpawnMode[keyof typeof SpawnMode];
+
 export class SummonAction implements IBuffAction {
   private prefabKey: string;
   private lifeTime: number;
-  private spawnMode: 'random_x' | 'player_pos' | 'random_screen_x';
+  private spawnMode: SpawnMode;
 
-  constructor(prefabKey: string, lifeTime: number, spawnMode: 'random_x' | 'player_pos' | 'random_screen_x' = 'random_x') {
+  constructor(prefabKey: string, lifeTime: number, spawnMode: SpawnMode = SpawnMode.RandomX) {
     this.prefabKey = prefabKey;
     this.lifeTime = lifeTime;
     this.spawnMode = spawnMode;

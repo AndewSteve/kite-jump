@@ -1,12 +1,12 @@
 import Phaser from 'phaser';
 import type { IEntityAction, InteractionContext } from '../actions/ActionInterfaces';
 import Player from '../entities/Player'; // 只需要引入 Player 类型
-import type { IEntityConfig } from '../types/GameTypes';
+import { EntityType, type IEntityConfig } from '../types/GameTypes';
 
 export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
   private actions: IEntityAction[] = [];
   private isInteracted: boolean = false;
-  public entityType: string = 'neutral'; // ✅ 新增属性
+  public entityType: string = EntityType.Neutral; // ✅ 新增属性
 
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string) {
     super(scene, x, y, texture);

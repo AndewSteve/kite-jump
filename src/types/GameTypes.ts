@@ -59,6 +59,7 @@ export interface IPlayerConfig {
 }
 
 export interface IPlayerStateConfig {
+  velocityScalingRef: number;
   coldBaseRate: number; // 体温降低速率
   coldHeightFactor: number; // 体温降低速率
   thresholds: {
@@ -124,6 +125,4 @@ export interface IGameConfig {
   camera: ICameraConfig; // 不再是 any
   level: ILevelConfig;
   playerState: IPlayerStateConfig;
-  // ✅ 实体定义表改为工厂：每次生成都拿到全新 IEntityConfig 实例
-  entityTable: Record<string, () => IEntityConfig>;
 }
