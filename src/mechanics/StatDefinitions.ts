@@ -19,15 +19,18 @@ export const StatType = {
   CoinMultiplier: 'coin_multiplier',  // 金币价值倍率 (默认 1.0)
   SpawnRateWind: 'spawn_rate_wind',   // 唤风符生成倍率 (默认 1.0)
 
-  WindForce: 'wind_force',         // 风力强度 (默认 0.0)
+  // ✅ 新增：环境侧风力 (默认为 0)
+  EnvironmentWindX: 'env_wind_x',
+  EnvironmentWindY: 'env_wind_y',
 } as const;
 
 export type StatType = typeof StatType[keyof typeof StatType];
 
 // 2. 修改器类型
 export const ModifierType = {
-  Flat: 0,      // 加法 (Base + 10)
-  PercentAdd: 1 // 百分比加成 (Base * (1 + 0.1))
+  Flat: 'flat',             // 加法：Base + 10
+  PercentAdd: 'percent_add', // 叠乘：Base * (1 + 0.2 + 0.3)
+  Multiplier: 'multiplier',  // 独立乘区：Base * (...) * 0.5 * 2.0
 } as const;
 
 export type ModifierType = typeof ModifierType[keyof typeof ModifierType];

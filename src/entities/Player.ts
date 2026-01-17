@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
 import { GameConfig } from '../config/GameConfig';
-import { EVENTS, gameEvents } from '../managers/events';
+import { EVENTS, gameEvents } from '../config/Events';
 import PlayerState from './PlayerState';
 import PlayerStatusUI from '../ui/PlayerStatusUI'; // ✅ 引入新类
 import DataManager from '../managers/DataManager';
+import { TextureKeys } from '../config/AssetKeys';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -28,7 +29,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 'kite');
+    super(scene, x, y, TextureKeys.PlayerKite);
 
     // 计算实际活动宽度：720 * 1.5 = 1080
     this.worldWidth = scene.scale.width * GameConfig.level.worldWidthRatio;
@@ -118,6 +119,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.arcadeBody.setGravityY(
       this.playerState.getFinalGravityY()
     );
+    // ✅ B. 新增：应用侧风 (Gravity X)
+    // 这会让玩家在不操作时也产生漂移，且顺风快逆风慢
+    // 注意：如果阻力(Drag)很大，风力必须足够大(>800)才能吹动玩家
+    this.arcadeBody.setGravityX(this.playerState.getFinalGravityX());
     // B. 阻力
     this.setDragX(this.playerState.getFinalDragX());
     // C. 速度限制

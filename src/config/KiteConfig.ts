@@ -1,6 +1,7 @@
-import { DashEnergyIncrementAction } from "../actions/BuffActions";
+import { DashEnergyIncrementAction, SpawnModifierAction } from "../actions/BuffActions";
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
+import { EntityId } from "./EntityConfig";
 
 export const KiteConfigs = {
   shu: {
@@ -16,7 +17,6 @@ export const KiteConfigs = {
     description: 'Eastern Wu: Cold resistance, more wind talismans, start with dash.',
     coldnessMultiplier: 0.9, // 东吴寒冷增长减半
     windSpawnMultiplier: 2.0,  // 东吴唤风符生成概率翻倍
-    windSpawnKey: 'red_cloud' // 唤风符的实体标识
   }
 }
 
@@ -56,7 +56,14 @@ export const WuBuff: IBuffConfig = {
   duration: -1,
   maxStack: 1,
   tags: ['Passive.WuSpawn', 'Passive.StartDash'], // 标记
-  onAdd: [ new DashEnergyIncrementAction(100) ], // 开局增加100点冲刺能量
+  onAdd: [ 
+    new DashEnergyIncrementAction(100),
+    new SpawnModifierAction({
+      entityId: EntityId.NormalCloud,
+      modifier: { type: ModifierType.Multiplier, value: 2.0, sourceId: 'Passive.WuSpawn' },
+      isAdding: true
+    })
+  ], // 开局增加100点冲刺能量
   modifiers: [
     { stat: StatType.ColdGrowthRate, type: ModifierType.PercentAdd, value: -0.1 } // 寒冷增长 -10%
   ]

@@ -16,4 +16,6 @@ export const EVENTS = {
 
   ADD_SCORE: 'add-score',         // Game Logic: 增加分数
   ADD_COIN: 'add-coin',           // Game Logic: 增加金币
+  
+  WIND_CHANGE: 'wind-change',    // 环境风力变化
 };

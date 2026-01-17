@@ -1,3 +1,4 @@
+import type { EntityId } from "../config/EntityConfig";
 import type { IBuffConfig } from "../mechanics/BuffTypes";
 import type { ModifierType, StatType } from "../mechanics/StatDefinitions";
 import type { ISpawnDefinition } from "./GameTypes";
@@ -25,7 +26,7 @@ export interface IBiomeData {
   foregroundEffect?: string;
 
   // 核心玩法配置
-  spawnTable: Record<string, ISpawnDefinition>;
+  spawnTable: Partial<Record<EntityId, ISpawnDefinition>>;
   buffs?: IBuffConfig[]; // 该生态特有的 Buff 列表
   // ✅ 核心修改：统一使用通用的 Modifiers 数组
   // 这和 IBuffConfig 里的 modifiers 结构完全一致

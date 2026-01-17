@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { BaseSummon, type SpaceType, type ISummonInitData } from '../summon/BaseSummon';
+import { BaseSummon, type SpaceType, type ISummonInitData } from '../entities/summons/BaseSummon';
 import GameScene from '../scenes/GameScene';
 import { SummonConfig, SummonId } from '../config/SummonConfig';
 
@@ -92,6 +92,18 @@ export default class SummonManager {
     }
     
     return entity;
+  }
+
+  /**
+   * ✅ 新增：查询当前场上某种召唤物的活跃数量
+   * 用于 Action 判断是否要生成新的 (比如落雷逻辑：场上只能有一道雷)
+   */
+  public getActiveCount(key: SummonId | string): number {
+    const group = this.pools.get(key);
+    if (!group) return 0;
+    
+    // countActive(true) 返回所有 active = true 的成员数量
+    return group.countActive(true);
   }
 
   /**

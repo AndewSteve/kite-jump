@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { EVENTS, gameEvents } from "../managers/events";
+import { EVENTS, gameEvents } from "../config/Events";
 import { GameConfig } from "../config/GameConfig";
 
 export default class UIScene extends Phaser.Scene {

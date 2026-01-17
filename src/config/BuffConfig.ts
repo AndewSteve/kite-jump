@@ -1,4 +1,5 @@
-import { ColdnessIncrementAction, SpawnMode, SummonAction } from "../actions/BuffActions";
+import { ChangeWindAction, ColdnessIncrementAction, DashEnergyIncrementAction, ResetWindAction, SpawnMode, SummonAction } from "../actions/BuffActions";
+import { LightningStrikeAction } from "../actions/MechanicActions";
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
 import { SummonId } from "./SummonConfig";
@@ -131,4 +132,105 @@ export const CloudMarshMechanicBuff: IBuffConfig = {
   ],
   
   // L3 不需要 onTick 循环召唤，只要一个遮罩盖住就行
+};
+
+export const WindCaveMechanicBuff: IBuffConfig = {
+  id: 'biome_l4_control',
+  name: '墨家风洞机制',
+  duration: -1, // 永久
+  maxStack: 1,
+  tickInterval: 5.0, // ✅ 每 5 秒切一次风
+
+  // 进场：召唤风向标 + 初始变风
+  onAdd: [
+    new SummonAction(SummonId.WindVane, -1, SpawnMode.RandomScreenX), // 位置由 WindVane 自己修正
+    new ChangeWindAction()
+  ],
+
+  // 心跳：变风
+  onTick: [
+    new ChangeWindAction()
+  ],
+
+  // 退场：重置风力 (非常重要！)
+  onRemove: [
+    new ResetWindAction()
+  ]
+};
+
+// 八卦盾
+export const TacticsConfig = {
+  tag: 'Buff.Tactics',
+}
+export const TacticsBuff: IBuffConfig = {
+  id: 'tactics_buff',
+  name: '墨家战术',
+  duration: -1, // 永久
+  maxStack: 1,
+  tags: [TacticsConfig.tag],
+};
+
+// 1. 雷暴 Buff
+export const WeatherThunderBuff: IBuffConfig = {
+  id: 'weather_thunder_buff',
+  name: '雷暴环境',
+  duration: -1, // 由 WeatherManager 手动移除
+  maxStack: 1,
+  
+  // 机制1：每秒回能 8%
+  tickInterval: 1.0,
+  onTick: [
+    new DashEnergyIncrementAction(8),
+    // ✅ 尝试落雷：40% 概率
+    // 逻辑：每秒醒来一次 -> 检查场上没雷 -> 40%概率 -> 召唤 -> (雷存在1.5s+0.3s) -> 期间不会再召唤
+    new LightningStrikeAction(0.4)
+  ],
+  
+  // 冲刺免疫雷击逻辑 -> 已经在 Player.ts 的 update 里通过 tags.includes('State.Invincible') 处理
+};
+
+// 2. 暴雪 Buff
+export const WeatherBlizzardBuff: IBuffConfig = {
+  id: 'weather_blizzard_buff',
+  name: '暴雪环境',
+  duration: -1,
+  maxStack: 1,
+  modifiers: [
+    // 机制1：寒冷值增长 1.2倍
+    {
+      stat: StatType.ColdGrowthRate,
+      type: ModifierType.Multiplier,
+      value: 1.2 
+    },
+    // 机制2：重力 1.2倍
+    {
+      stat: StatType.GravityScale,
+      type: ModifierType.Multiplier, // 注意：这里用 Multiplier 比 PercentAdd 更安全，防止和其他重力Buff叠加失控
+      value: 1.2
+    }
+  ]
+};
+
+// 3. 极光 Buff
+export const WeatherAuroraBuff: IBuffConfig = {
+  id: 'weather_aurora_buff',
+  name: '极光环境',
+  duration: -1,
+  maxStack: 1,
+  modifiers: [
+    // 机制1：低重力 (0.6倍)
+    {
+      stat: StatType.GravityScale,
+      type: ModifierType.Multiplier,
+      value: 0.6
+    },
+    // 机制2：寒冷值不再增加 (增长率乘 0)
+    {
+      stat: StatType.ColdGrowthRate,
+      type: ModifierType.Multiplier,
+      value: 0
+    }
+  ],
+  // 可以在 onAdd 里加一个 Action 把当前寒冷值清零 (如果策划要求瞬间暖和)
+  // onAdd: [ new ResetColdnessAction() ] 
 };

@@ -11,9 +11,6 @@ export interface IGamePhase {
 
   // 离开阶段时触发 (清理特效、解锁输入)
   onExit(scene: GameScene): void;
-
-  // 询问该阶段是否允许生成障碍物
-  canSpawnEntities(): boolean;
   
   // 询问该阶段是否允许玩家控制
   isInputEnabled(): boolean;

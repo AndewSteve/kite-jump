@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import Player from '../entities/Player';
+import Player from '../Player';
 
 export const SpaceType = {
   World: 'world',
@@ -19,6 +19,7 @@ export interface ISummonInitData {
  * 类似于 Unity 的 MonoBehaviour (针对召唤物)
  */
 export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
+  protected isDespawning: boolean = false; // ✅ 移到基类，统一管理状态
   protected lifeTimer: number = 0;
   protected maxLifeTime: number = -1;
   protected target: Player | null = null;
@@ -36,6 +37,7 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
     this.setActive(true);
     this.setVisible(true);
     this.body!.enable = true; // 确保物理开启
+    this.isDespawning = false; // ✅ 关键：复活时重置状态
     
     this.setPosition(data.x, data.y);
     this.lifeTimer = 0;
@@ -56,7 +58,7 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
    * 设置坐标空间 (Unity: Screen Space Overlay vs World Space)
    */
   public setSpaceType(space: SpaceType) {
-    if (space === 'screen') {
+    if (space === SpaceType.Screen) {
       this.setScrollFactor(0); // 0 = 锁定在屏幕 (UI空间/相机空间)
     } else {
       this.setScrollFactor(1); // 1 = 跟随世界 (世界空间)
@@ -68,6 +70,8 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
    */
   preUpdate(time: number, delta: number) {
     super.preUpdate(time, delta);
+    // 如果正在退场中，就不要再触发时间的 despawn 了
+    if (this.isDespawning) return;
     
     // 自动销毁逻辑
     if (this.maxLifeTime > 0) {
@@ -81,15 +85,35 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
   }
 
   public despawn() {
-    // this.setActive(false);
-    // this.setVisible(false);
-    if (this.body) this.body.enable = false;
+    if (this.isDespawning) return; // 防止重复调用
+    this.isDespawning = true; // 锁定状态
+
+    // ⛔️ 不要在这里 setActive(false)！
+    // 而是把决定权交给子类钩子
     this.onDespawn();
-    // 如果是 Group 管理的，这里不需要 destroy，只需要 setActive(false) 等待复用
+  }
+
+  /**
+   * ✅ 终结技：真正让物体消失并回收
+   * 这个方法应该由 onDespawn 的实现者在事情办完后调用
+   */
+  protected kill() {
+    this.setActive(false);
+    this.setVisible(false);
+    if (this.body) this.body.enable = false;
+    // 状态已在 onSpawn 重置，这里不需要改 isDespawning
+    console.log(`[BaseSummon] ${this.constructor.name} returned to pool.`);
   }
 
   // --- 供子类覆盖的生命周期 ---
   protected abstract onStart(data: ISummonInitData): void;
   protected abstract onUpdate(dt: number): void;
-  protected onDespawn(): void {}
+  /**
+   * 子类重写此方法来处理退场逻辑。
+   * ⚠️ 必须在逻辑结束后手动调用 this.kill()！
+   */
+  protected onDespawn(): void {
+    // 默认行为：没有动画，直接死
+    this.kill();
+  }
 }

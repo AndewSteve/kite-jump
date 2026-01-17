@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
-import { BaseSummon, type ISummonInitData } from '../../summon/BaseSummon';
+import { BaseSummon, type ISummonInitData } from './BaseSummon';
 import { GameConfig } from '../../config/GameConfig';
 import { PipelineID } from '../../managers/RenderManager'; // 确保引入了常量
+import { TextureKeys } from '../../config/AssetKeys';
 
 export class FogOverlay extends BaseSummon {
-  private isDespawning: boolean = false;
   private fogVisual?: Phaser.GameObjects.TileSprite;
   private xOffset: number = 0;
   private readonly MOVE_SPEED_X = 20; // 水平移动速度
@@ -41,7 +41,7 @@ export class FogOverlay extends BaseSummon {
         height * this.FOG_BOTTOM_RATIO, 
         neededWidth, 
         fogHeight, 
-        'transi_cloud_alpha_full' // ✅ 使用新合成的贴图
+        TextureKeys.FogOverlay // 👈 类型安全，以后换图名只需要改 AssetKeys
     );
 
     this.fogVisual
@@ -93,21 +93,22 @@ export class FogOverlay extends BaseSummon {
     this.fogVisual.tilePositionX += this.xOffset;
   }
 
-  public despawn() {
-    if (this.isDespawning || !this.fogVisual) return;
-    this.isDespawning = true;
-
-    this.scene.tweens.add({
-        targets: this.fogVisual,
-        alpha: 0,
-        duration: 1500,
-        onComplete: () => {
-            if (this.fogVisual) {
-                this.fogVisual.destroy();
-                this.fogVisual = undefined;
-            }
-            super.despawn();
-        }
-    });
+  protected override onDespawn(): void {
+    if (this.fogVisual) {
+       this.scene.tweens.add({
+          targets: this.fogVisual,
+          alpha: 0,
+          duration: 1500,
+          onComplete: () => {
+             this.fogVisual?.destroy();
+             this.fogVisual = undefined;
+             // ✅ 核心控制器回收
+             this.kill();
+          }
+       });
+    } else {
+       // 如果没有视觉对象，直接回收
+       this.kill();
+    }
   }
 }

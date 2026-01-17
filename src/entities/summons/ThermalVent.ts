@@ -1,13 +1,11 @@
 import { GameConfig } from '../../config/GameConfig';
-import { BaseSummon, type ISummonInitData } from '../../summon/BaseSummon';
+import { BaseSummon, type ISummonInitData } from './BaseSummon';
 
 const RedCliffConfigs = {
   holdSpeed: -300, // 赤壁热流停留速度
 }
 
 export class ThermalVent extends BaseSummon {
-  private isDespawning: boolean = false; // ✅ 状态锁
-  
   constructor(scene: Phaser.Scene, x: number, y: number) {
     // 假设你在 preload 加载了一个叫 'vfx_red_column' 的图
     // 或者直接用 'pixel' 纯色块拉伸
@@ -15,7 +13,6 @@ export class ThermalVent extends BaseSummon {
   }
 
   protected onStart(_data: ISummonInitData): void {
-    this.isDespawning = false; // ✅ 重置状态
     // 1. 设置外观 (红光柱)
     this.setTint(0xff0000);
     this.setAlpha(0);
@@ -94,20 +91,14 @@ export class ThermalVent extends BaseSummon {
   }
 
   protected onDespawn(): void {
-    // 1. 防止重复调用 (preUpdate 每帧都会检查 lifeTime，可能导致多次调用)
-    if (this.isDespawning) return;
-    this.isDespawning = true;
-
     // 2. 播放淡出动画
     this.scene.tweens.add({
         targets: this,
         alpha: 0,
         duration: 500, // 0.3秒淡出
         onComplete: () => {
-            // 3. 动画结束后，调用父类的 despawn 彻底禁用/回收
-            // super.despawn();
-            this.setActive(false);
-            this.setVisible(false);
+          // ✅ 动画播完了，告诉父类“我可以死了”
+          this.kill();
         }
     });
   }

@@ -1,6 +1,9 @@
 import { GameConfig } from "../config/GameConfig";
+import { EVENTS, gameEvents } from "../config/Events";
+import { ModifierType, StatType } from "../mechanics/StatDefinitions";
 import type GameScene from "../scenes/GameScene";
 import type { IBuffAction, IBuffContext } from "./ActionInterfaces";
+import type { EntityId } from "../config/EntityConfig";
 
 export class ColdnessIncrementAction implements IBuffAction {
   private coldIncrease: number;
@@ -79,5 +82,76 @@ export class SummonAction implements IBuffAction {
     summonMgr.summon(this.prefabKey, x, y, { lifeTime: this.lifeTime });
     
     console.log(`[Buff Action] Summoned ${this.prefabKey}`);
+  }
+}
+
+export class ChangeWindAction implements IBuffAction {
+  execute(ctx: IBuffContext): void {
+    const stats = ctx.player.playerState.stats;
+    const sourceId = 'biome_l4_wind';
+
+    // 1. 随机生成风力
+    // 假设 Drag 是 800，我们需要 >800 才能吹动静止玩家
+    // 设定风力在 [1000, 1500] 之间，随机左右
+    // 或者有 20% 概率无风
+    const isWindy = Phaser.Math.RND.frac() > 0.2;
+    let windValue = 0;
+    
+    if (isWindy) {
+       const direction = Phaser.Math.RND.pick([-1, 1]); // 左 或 右
+       const strength = Phaser.Math.Between(1000, 1500);
+       windValue = direction * strength;
+    }
+
+    // 2. 清理旧风力
+    stats.removeModifier(StatType.EnvironmentWindX, sourceId);
+
+    // 3. 应用新风力
+    if (windValue !== 0) {
+      stats.addModifier(StatType.EnvironmentWindX, {
+        sourceId: sourceId,
+        type: ModifierType.Flat,
+        value: windValue
+      });
+    }
+
+    // 4. 发出事件，通知风向标 UI
+    gameEvents.emit(EVENTS.WIND_CHANGE, windValue);
+    console.log(`[WindCave] Wind changed to: ${windValue}`);
+  }
+}
+
+export class ResetWindAction implements IBuffAction {
+  execute(ctx: IBuffContext): void {
+    const stats = ctx.player.playerState.stats;
+    stats.removeModifier(StatType.EnvironmentWindX, 'biome_l4_wind');
+    gameEvents.emit(EVENTS.WIND_CHANGE, 0);
+  }
+}
+
+export class SpawnModifierAction implements IBuffAction {
+  private entityId: EntityId;
+  private modifier: { type: ModifierType; value: number; sourceId: string; } | undefined;
+  private isAdding: boolean;
+  constructor(
+    config:{entityId: EntityId, 
+    modifier: { type: ModifierType; value: number; sourceId: string; },
+    isAdding: boolean}
+  ) {
+    this.entityId = config.entityId;
+    this.modifier = config.modifier;
+    this.isAdding = config.isAdding;
+  }
+  execute(ctx: IBuffContext): void {
+    const scene = ctx.player.scene as GameScene;
+    if (!scene) {
+      console.warn("SpawnModifierAction: Scene not found on player.");
+      return;
+    }
+    if (this.isAdding && this.modifier) {
+      scene.spawnManager.addWeightModifier(this.entityId, this.modifier);
+    } else if (!this.isAdding && this.modifier) {
+      scene.spawnManager.removeWeightModifier(this.entityId, this.modifier.sourceId);
+    }
   }
 }

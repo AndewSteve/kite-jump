@@ -1,24 +1,26 @@
-import { EntityConfig } from "./EntityConfig";
+import { EntityConfig, EntityId } from "./EntityConfig";
 import { BiomeId, type IBiomeData } from "../types/BiomeTypes";
-import { CloudMarshMechanicBuff, RedCliffMechanicBuff } from "./BuffConfig";
+import { CloudMarshMechanicBuff, RedCliffMechanicBuff, WindCaveMechanicBuff } from "./BuffConfig";
 import { ModifierType, StatType } from "../mechanics/StatDefinitions";
+import { TextureKeys } from "./AssetKeys";
+import type { ISpawnDefinition } from "../types/GameTypes";
 
 const StandardSpawnTable = {
-  normal_cloud: {
+  [EntityId.NormalCloud]: {
     weight: 70,
-    init: EntityConfig.normal_cloud,
+    init: EntityConfig[EntityId.NormalCloud],
   },
-  purple_cloud: {
+  [EntityId.UnbrokenFire]: {
     weight: 20,
-    init: EntityConfig.unbroken_fire,
+    init: EntityConfig[EntityId.UnbrokenFire],
   },
-  red_cloud: {
+  [EntityId.RedCloud]: {
     weight: 1,
-    init: EntityConfig.red_cloud,
+    init: EntityConfig[EntityId.RedCloud],
   },
-  coin: {
+  [EntityId.Coin]: {
     weight: 10,
-    init: EntityConfig.coin,
+    init: EntityConfig[EntityId.Coin],
   },
   // cold_cloud: {
   //   weight: 10,
@@ -28,14 +30,14 @@ const StandardSpawnTable = {
   //   weight: 20,
   //   init: EntityConfig.iron_vulture,
   // },
-};
+} satisfies Partial<Record<EntityId, ISpawnDefinition>>
 
 const RedCliffSpawnTable = {
   // L2 特有刷怪配置
-  normal_cloud: { weight: 30, init: EntityConfig.normal_cloud }, 
+  [EntityId.NormalCloud]: { weight: 30, init: EntityConfig[EntityId.NormalCloud] }, 
   // 假设有热气流道具
   // thermal_vent: { weight: 50, init: EntityConfig.thermal_vent },
-};
+} satisfies Partial<Record<EntityId, ISpawnDefinition>>
 
 
 // ✅ 静态数据表：这里是“导演”的剧本库
@@ -44,15 +46,14 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L1_Frost,
     name: "寒霜荒原",
     durationMeters: 300, // 300米
-    backgroundTexture: 'bg_frost',
+    backgroundTexture: TextureKeys.BgFrost,
     spawnTable: StandardSpawnTable,
   },
   [BiomeId.L2_RedCliff]: {
     id: BiomeId.L2_RedCliff,
     name: "赤壁余烬",
     durationMeters: 400,
-    // backgroundTexture: 'bg_redcliff',
-    backgroundTexture: 'bg_frost',
+    backgroundTexture: TextureKeys.BgRedCliff,
     spawnTable: RedCliffSpawnTable,
     buffs: [ RedCliffMechanicBuff ],
     envModifiers: [
@@ -67,8 +68,7 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L3_CloudMarsh,
     name: "云梦泽",
     durationMeters: 400,
-    // backgroundTexture: 'bg_marsh',
-    backgroundTexture: 'bg_frost',
+    backgroundTexture: TextureKeys.BgMarsh,
     spawnTable: StandardSpawnTable,
     envModifiers: [
       {
@@ -84,8 +84,9 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L4_WindCave,
     name: "墨家风洞",
     durationMeters: 400,
-    // backgroundTexture: 'bg_wind',
-    backgroundTexture: 'bg_frost',
+    backgroundTexture: TextureKeys.BgWindCave,
     spawnTable: StandardSpawnTable,
+    // ✅ 挂载机制
+    buffs: [ WindCaveMechanicBuff ]
   }
 };

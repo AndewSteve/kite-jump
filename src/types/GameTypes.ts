@@ -19,7 +19,9 @@ export interface IEntityConfig {
   scale?: number;
   comment?: string;
   type: EntityType; // ✅ 新增：用于区分好坏
-  actions: IEntityAction[]; // 行为列表
+  onHit: IEntityAction[]; // 碰撞行为列表
+  onSpawn?: IEntityAction[]; // ✅ 新增：生成时触发的行为列表
+  onRecycle?: IEntityAction[]; // ✅ 新增：回收时触发的行为列表
 }
 
 // ✅ 2. 定义“生成定义” (用于配置表)

@@ -1,8 +1,9 @@
 import { KiteConfigs } from '../config/KiteConfig';
-import { EVENTS, gameEvents } from '../managers/events';
+import { EVENTS, gameEvents } from '../config/Events';
 import type { IBuffConfig } from '../mechanics/BuffTypes';
 import { StatType } from '../mechanics/StatDefinitions';
 import type { IEntityAction, InteractionContext } from './ActionInterfaces';
+import type { BaseSummon } from '../entities/summons/BaseSummon';
 
 /**
  * 行为：减速 + 增加寒冷
@@ -96,6 +97,46 @@ export class ApplyBuffAction implements IEntityAction {
   }
 }
 
+export class ApplyDamageAction implements IEntityAction {
+  private damageAmount: number;
+
+  constructor(damageAmount: number) {
+    this.damageAmount = damageAmount;
+  }
+
+  execute(ctx: InteractionContext): void {
+    ctx.player.playerState.applyDamage(this.damageAmount);
+  }
+}
+
+export class HealAction implements IEntityAction {
+  private healAmount: number;
+  constructor(healAmount: number) {
+    this.healAmount = healAmount;
+  }
+  execute(ctx: InteractionContext): void {
+    ctx.player.playerState.heal(this.healAmount);
+  }
+}
+
+export class HasBuffTagOrVanishAction implements IEntityAction {
+  private tag: string;
+  private removeBuff: boolean = false;
+  constructor(config:{tag: string, removeBuff: boolean}) {
+    this.tag = config.tag;
+    this.removeBuff = config.removeBuff;
+  }
+  execute(ctx: InteractionContext): void {
+    if (!ctx.player.playerState.buffs.hasTag(this.tag)) {
+      if (this.removeBuff) {
+        ctx.player.playerState.buffs.removeByTag(this.tag);
+      }
+      new VanishAction().execute(ctx);
+      ctx.isCancelled = true;
+    }
+  }
+}
+
 /**
  * 行为：播放消失动画并禁用实体
  */
@@ -169,5 +210,34 @@ export class GameOverAction implements IEntityAction {
   }
   execute(_ctx: InteractionContext): void {
     gameEvents.emit(EVENTS.GAME_OVER, this.cause);
+  }
+}
+
+// 1. 召唤附属物并绑定引用
+export class SpawnLinkedSummonAction implements IEntityAction {
+  private summonId: string;
+  constructor(summonId: string) {
+    this.summonId = summonId;
+  }
+  execute(ctx: InteractionContext): void {
+    // 召唤
+    const scene = ctx.scene as any; // GameScene
+    const summon = scene.summonManager.summon(this.summonId, ctx.target.x, ctx.target.y);
+    
+    // ✅ 绑定引用：让 Entity 记住它召唤了谁
+    if (summon) {
+      ctx.target.linkedRef = summon;
+    }
+  }
+}
+
+// 2. 销毁绑定的附属物
+export class RemoveLinkedSummonAction implements IEntityAction {
+  execute(ctx: InteractionContext): void {
+    const summon = ctx.target.linkedRef as BaseSummon;
+    if (summon && summon.active) {
+      summon.despawn(); // 优雅退场
+    }
+    ctx.target.linkedRef = null;
   }
 }

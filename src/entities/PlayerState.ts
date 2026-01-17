@@ -57,6 +57,9 @@ export default class PlayerState {
     this.stats.initStat(StatType.ColdGrowthRate, 1.0);
     this.stats.initStat(StatType.DashDurationIncrease, 0.0);
     this.stats.initStat(StatType.CoinMultiplier, 1.0);
+    // ✅ 新增：初始化风力为 0
+    this.stats.initStat(StatType.EnvironmentWindX, 0);
+    this.stats.initStat(StatType.EnvironmentWindY, 0);
 
     // ✅ 应用风筝被动 (三国改装)
     const kiteId = DataManager.data.selectedKiteId || 'none'; // 默认无风筝
@@ -235,6 +238,13 @@ export default class PlayerState {
   // --- Getters: 提供给 Player 用于物理计算 ---
 
   /**
+   * ✅ 获取当前环境施加的横向重力
+   */
+  public getFinalGravityX(): number {
+    return this.stats.get(StatType.EnvironmentWindX);
+  }
+
+  /**
    * 获取当前的重力
    */
   public getFinalGravityY(): number {
@@ -243,8 +253,9 @@ export default class PlayerState {
     // buff主要见于syncColdnessToStats
     const buffScale = this.stats.get(StatType.GravityScale);
     const totalScale = lightnessMult * buffScale;
-
-    return GameConfig.physics.gravity.y * (totalScale - 1);
+    // ✅ 叠加环境力 Y (比如漩涡向上的吸力)
+    const envForceY = this.stats.get(StatType.EnvironmentWindY);
+    return GameConfig.physics.gravity.y * (totalScale - 1) + envForceY;
   }
 
   /**

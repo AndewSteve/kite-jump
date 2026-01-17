@@ -62,13 +62,4 @@ export default class PhaseManager {
     // 2. 队列空了，随机 L2 或 L4
     return Math.random() > 0.5 ? BiomeId.L3_CloudMarsh : BiomeId.L3_CloudMarsh;
   }
-
-  // 对外查询接口
-  public get canSpawn(): boolean {
-    return this.currentPhase.canSpawnEntities();
-  }
-
-  public get isInputEnabled(): boolean {
-    return this.currentPhase.isInputEnabled();
-  }
 }

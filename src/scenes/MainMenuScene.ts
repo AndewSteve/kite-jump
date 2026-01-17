@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import DataManager from '../managers/DataManager';
+import { AssetManifest } from '../config/AssetManifest';
+import { TextureKeys } from '../config/AssetKeys';
 
 export default class MainMenuScene extends Phaser.Scene {
   private currencyText!: Phaser.GameObjects.Text;
@@ -9,9 +11,13 @@ export default class MainMenuScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("bg", "assets/bg.png");
-    this.load.image("kite", "assets/kite.png");
-    this.load.image("cloud", "assets/cloud.png");
+    AssetManifest.forEach(asset => {
+      if (asset.type === 'image') {
+        this.load.image(asset.key, asset.path);
+      } else if (asset.type === 'spritesheet' && asset.frameConfig) {
+        this.load.spritesheet(asset.key, asset.path, asset.frameConfig);
+      }
+    });
   }
 
   create() {
@@ -45,7 +51,7 @@ export default class MainMenuScene extends Phaser.Scene {
 
     // A. 左侧 2/3：风筝展示
     // 这里放个大大的风筝图，稍微带点浮动动画
-    const kitePreview = this.add.image(width * 0.33, contentY + contentH / 2, 'kite');
+    const kitePreview = this.add.image(width * 0.33, contentY + contentH / 2, TextureKeys.PlayerKite);
     kitePreview.setScale(2);
     this.tweens.add({
         targets: kitePreview,

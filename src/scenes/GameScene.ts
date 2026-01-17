@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { GameConfig } from "../config/GameConfig";
 import CameraManager from "../managers/CameraManager";
-import { EVENTS, gameEvents } from "../managers/events";
+import { EVENTS, gameEvents } from "../config/Events";
 // ✅ 引入实体类
 import Player from "../entities/Player";
 // ✅ 引入新系统
@@ -14,6 +14,8 @@ import BackgroundManager from "../managers/BackgroundManager";
 import ScoreManager from "../managers/ScoreManager";
 import SummonManager from "../managers/SummonManager";
 import RenderManager from "../managers/RenderManager";
+import { AssetManifest } from "../config/AssetManifest";
+import WeatherManager from "../managers/WeatherManager";
 
 export default class GameScene extends Phaser.Scene {
   // ✅ 1. 类型改为 Player 类
@@ -28,6 +30,7 @@ export default class GameScene extends Phaser.Scene {
   public summonManager!: SummonManager;
   private isGameRunning: boolean = false;
   public renderManager!: RenderManager; // ✅ 新增
+  public weatherManager!: WeatherManager;
   // 新增：缓存世界宽度
   private worldWidth!: number;
 
@@ -36,14 +39,14 @@ export default class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("bg", "assets/bg.png");
-    this.load.image("bg_frost", "assets/bg_frost.png");
-    this.load.image("cloud_overlay", "assets/cloud_overlay.png");
-    this.load.image("cloud_overlay_alpha", "assets/cloud_overlay_alpha.png");
-    this.load.image("transi_cloud_alpha", "assets/transi_cloud_alpha.png");
-    this.load.image("transi_cloud_alpha_full", "assets/transi_cloud_alpha_full.png");
-    this.load.image("kite", "assets/kite.png");
-    this.load.image("cloud", "assets/cloud.png");
+    // ✅ 自动化加载所有配置好的资源
+    AssetManifest.forEach(asset => {
+      if (asset.type === 'image') {
+        this.load.image(asset.key, asset.path);
+      } else if (asset.type === 'spritesheet' && asset.frameConfig) {
+        this.load.spritesheet(asset.key, asset.path, asset.frameConfig);
+      }
+    });
   }
 
   create() {
@@ -84,6 +87,7 @@ export default class GameScene extends Phaser.Scene {
     this.cameraManager.follow(this.player);
     // ✅ 设置相机的水平边界，防止看到黑边
     this.cameras.main.setBounds(0, -Infinity, this.worldWidth, Infinity);
+    this.weatherManager = new WeatherManager(this);
 
     // 1. 物理层：玩家身体 vs 互动物体
     // 这里的 processCallback (第三个参数) 可以用来做更细的过滤，比如冲刺时无敌不触发陷阱
@@ -178,6 +182,7 @@ export default class GameScene extends Phaser.Scene {
     // 3. 视差滚动
     this.cameraManager.update(delta);
     this.backgroundManager.update(this.cameras.main);
+    this.weatherManager.update(delta);
 
 
     // 6. 死亡判定

@@ -1,4 +1,4 @@
-import { EVENTS, gameEvents } from './events';
+import { EVENTS, gameEvents } from '../config/Events';
 import { GameConfig } from '../config/GameConfig';
 import DataManager from './DataManager';
 

@@ -4,24 +4,29 @@ import InteractableEntity from '../entities/InteractableEntity';
 import { GameConfig } from '../config/GameConfig';
 import { EntityType, type ISpawnDefinition } from '../types/GameTypes';
 import type GameScene from '../scenes/GameScene';
-import { KiteConfigs } from '../config/KiteConfig';
-import { EntityConfig } from '../config/EntityConfig';
-
+import { EntityConfig, EntityId } from '../config/EntityConfig';
+import { WeightStat } from '../mechanics/WeightStat';
+import type { IModifier } from '../mechanics/StatDefinitions';
 
 
 export default class SpawnManager {
   private scene: GameScene;
   private interactables: Phaser.Physics.Arcade.Group;
   private player: Player;
-  
+  // ✅ 核心改变：使用 WeightStat 管理每个 ID 的权重
+  // Key: EntityId, Value: WeightStat (Base + Modifiers)
+  private weightStats: Map<EntityId, WeightStat> = new Map();
   // ✅ 移除 currentBiomeIndex, biomesIterator
-  private currentTable: Record<string, ISpawnDefinition> | null = null;
+  // private currentTable: Record<EntityId, ISpawnDefinition> | null = null;
+  // 当前 Biome 的原始定义 (用于 init 和 fallback)
+  private currentDefs: Map<EntityId, ISpawnDefinition> = new Map();
+  public isSpawningEnabled: boolean = false;
 
   constructor(scene: GameScene, group: Phaser.Physics.Arcade.Group, player: Player) {
     this.scene = scene;
     this.interactables = group;
     this.player = player;
-    this.currentTable = null;
+    // this.currentTable = null;
   }
 
   public initClouds(worldWidth: number, _logicHeight: number) {
@@ -31,40 +36,73 @@ export default class SpawnManager {
     }
   }
 
-  // ✅ 新增：由 PhaseManager 调用注入数据
-  public setSpawnTable(table: Record<string, ISpawnDefinition>) {
-    let finalTable = table;
-    if (this.player && this.player.playerState.buffs.hasTag(KiteConfigs.wu.tag)) {
-      
-      // 3. 检查当前表里有没有唤风符 (如果没有就不需要操作)
-      if (finalTable[KiteConfigs.wu.windSpawnKey]) {
-        console.log(`[SpawnManager] 检测到东吴被动，唤风符概率翻倍！`);
+  // --- 外部接口：配置管理 ---
 
-        // 4. ✅ 关键：执行“写时拷贝” (Copy-on-Write)
-        // 我们不能直接修改 originalTable，因为那是全局静态配置
-        
-        // A. 浅拷贝整个 Table 对象
-        finalTable = { ...table };
+  /**
+   * 切换 Biome 时调用：设置基础生成表
+   */
+  public setBaseSpawnTable(table: Record<string, ISpawnDefinition>) {
+    this.currentDefs.clear();
 
-        // B. 取出原始配置
-        const originalDef = finalTable[KiteConfigs.wu.windSpawnKey];
+    // 1. 先把所有现存的 BaseValue 重置为 0 (防止上个 Biome 的东西残留在池子里)
+    this.weightStats.forEach(stat => stat.baseValue = 0);
 
-        // C. 克隆该配置条目并修改权重 (防止修改到原始引用)
-        finalTable[KiteConfigs.wu.windSpawnKey] = {
-          ...originalDef,           // 复制 init 函数和其他属性
-          weight: originalDef.weight * KiteConfigs.wu.windSpawnMultiplier // ⚡️ 翻倍 (0.02 -> 0.04)
-        };
+    // 2. 遍历新表，更新 BaseValue
+    Object.entries(table).forEach(([key, def]) => {
+      const entityId = key as EntityId;
+      this.currentDefs.set(entityId, def);
+
+      // 获取或创建 Stat
+      let stat = this.weightStats.get(entityId);
+      if (!stat) {
+        stat = new WeightStat(0);
+        this.weightStats.set(entityId, stat);
       }
-    }
-
-    this.currentTable = finalTable;
+      
+      // 更新基础权重
+      stat.baseValue = def.weight;
+    });
   }
+
+  /**
+   * 添加权重修正 (天气、BUFF、阶段过滤)
+   * value = 0.25 -> +25%
+   * value = -1.0 -> -100% (Ban)
+   */
+  public addWeightModifier(entityId: EntityId, modifier: IModifier) {
+    let stat = this.weightStats.get(entityId);
+    if (!stat) {
+      // 如果修改了一个当前 Biome 根本不存在的东西，我们也记录下来
+      // 因为可能之后 Biome 切换了，这个 Modifier 还需要保留 (比如全屏禁金币)
+      stat = new WeightStat(0);
+      this.weightStats.set(entityId, stat);
+    }
+    stat.addModifier(modifier);
+  }
+
+  public removeWeightModifier(entityId: EntityId, sourceId: string) {
+    const stat = this.weightStats.get(entityId);
+    if (stat) {
+      stat.removeModifier(sourceId);
+    }
+  }
+
+  // ✅ 1. 精确清理接口：移除指定 Source 的所有修正
+  // 比如天气结束时调用 removeModifiersBySource('weather_blizzard')
+  // 过渡结束时调用 removeModifiersBySource('phase_transition')
+  // 而 'passive_wu' 因为没人调用移除，就会一直存在
+  public removeModifiersBySource(sourceId: string) {
+    this.weightStats.forEach((stat) => {
+      stat.removeModifier(sourceId);
+    });
+  }
+
+  // --- 生成逻辑 ---
 
   // ✅ 简化 Update：不再计算逻辑高度来切 Biome
   public update(worldWidth: number) {
     // 1. 权限检查 (PhaseManager 控制)
-    if (!this.scene.phaseManager.canSpawn) return;
-    if (!this.currentTable) return;
+    if (this.currentDefs.size === 0) return;
 
     // 2. 执行回收与生成 (逻辑保持不变，但使用 this.currentTable)
     this.recycleEntities(worldWidth);
@@ -105,8 +143,8 @@ export default class SpawnManager {
       const entitiesToKill = activeEntities.filter(
         (child) => child && child.active && child.y > threshold
       );
-  
       entitiesToKill.forEach((child) => {
+        child.onRecycle(this.player);
         // ✅ 使用我们刚才在 Cloud.ts 里定义的 disable 方法
         // 这会同时处理 setVisible(false), setActive(false), body.enable = false
         child.disable();
@@ -157,55 +195,60 @@ export default class SpawnManager {
   }
 
   private spawnEntity(x: number, y: number) {
-    // 1. 获取当前生效的 SpawnTable
-    // 如果是东吴(Wu)，我们可以在这里 clone 一份 table 并修改权重
-    // 或者更高效做法：在 roll 点的时候做手脚
-    
-    let table = this.currentTable;
-    if (!table) return; // 安全检查
-    const spawnDefinitions = Object.values(table);
-    
-    // A. 计算总权重
-        let totalWeight = 0;
-        for (const def of spawnDefinitions) {
-          totalWeight += def.weight;
+    // A. 动态计算总权重 (Logic Driven)
+    const candidates: { id: EntityId, finalWeight: number }[] = [];
+    let totalWeight = 0;
+
+    // 遍历所有有权重的 Stat
+    this.weightStats.forEach((stat, id) => {
+        const w = stat.getValue();
+        if (w > 0) {
+            candidates.push({ id, finalWeight: w });
+            totalWeight += w;
         }
-    
-        // B. 随机取值
-        let randomWeight = Phaser.Math.Between(0, totalWeight);
-        let selectedDef = spawnDefinitions[0];
-    
-        // C. 遍历扣除权重
-        for (const def of spawnDefinitions) {
-          randomWeight -= def.weight;
-          if (randomWeight <= 0) {
-            selectedDef = def;
-            break;
-          }
+    });
+
+    if (totalWeight <= 0) return;
+
+    // B. 随机取值
+    let randomWeight = Phaser.Math.Between(0, totalWeight);
+    let selectedId = candidates[0].id;
+
+    for (const candidate of candidates) {
+      randomWeight -= candidate.finalWeight;
+      if (randomWeight <= 0) {
+        selectedId = candidate.id;
+        break;
+      }
+    }
+
+    // C. 获取配置工厂
+    // 注意：如果 Stat 里有权重，但 currentDefs 里没定义（比如纯依靠 Modifier 刷出来的东西），
+    // 我们需要直接去 EntityConfig 拿默认定义。
+    let def = this.currentDefs.get(selectedId);
+    let initFactory = def ? def.init : EntityConfig[selectedId];
+
+    if (!initFactory) {
+        console.warn(`[SpawnManager] No config found for ${selectedId}`);
+        return;
+    }
+
+    // ✅ 保留替换操作 (Gold Mode)
+    // 这种复杂的逻辑替换，依然很难用纯数值抽象，保留 if 逻辑是最务实的
+    if (this.player && this.player.playerState.buffs.hasTag('State.GoldMode')) {
+        const tempConfig = initFactory();
+        if (tempConfig.type === EntityType.Buff) {
+            initFactory = EntityConfig[EntityId.Coin]; // 使用 ID 访问
         }
-    
-        let finalDef = selectedDef;
-    
-        // ✅ Lv3 风神降临逻辑：正面道具 -> 金币
-        if (this.player && this.player.playerState.buffs.hasTag('State.GoldMode')) {
-            // 创建一个临时的配置对象来检查类型
-            const tempConfig = selectedDef.init();
-            
-            if (tempConfig.type === EntityType.Buff) {
-                // 替换为金币 (假设 spawnTable 里有 'coin')
-              finalDef.init = () => (EntityConfig['coin']());
-            }
-        }
-    
-        // ✅ 获取/创建 Cloud 实例
-        // 使用 get() 可以自动利用对象池 (如果是刚被 kill 的云，会复用它)
-        const entity = this.interactables.get(x, y) as InteractableEntity;
-    
-        if (entity) {
-          // ✅ 调用 Cloud 自己的 setup 方法
-          entity.setActive(true);
-          entity.setVisible(true);
-          entity.configure(finalDef.init());
-        }
+    }
+
+    // D. 实例化
+    const entity = this.interactables.get(x, y) as InteractableEntity;
+    if (entity) {
+      entity.setActive(true);
+      entity.setVisible(true);
+      entity.configure(initFactory());
+      entity.onSpawn(this.player);
+    }
   }
 }

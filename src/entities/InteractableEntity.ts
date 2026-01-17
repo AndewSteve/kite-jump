@@ -4,9 +4,12 @@ import Player from '../entities/Player'; // 只需要引入 Player 类型
 import { EntityType, type IEntityConfig } from '../types/GameTypes';
 
 export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
-  private actions: IEntityAction[] = [];
+  private onHitActions: IEntityAction[] = [];
+  public onSpawnActions: IEntityAction[] | undefined;
+  public onRecycleActions: IEntityAction[] | undefined;
   private isInteracted: boolean = false;
   public entityType: string = EntityType.Neutral; // ✅ 新增属性
+  public linkedRef: any = null; // ✅ 通用引用，用于存储召唤出的 Vortex
 
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string) {
     super(scene, x, y, texture);
@@ -49,7 +52,9 @@ export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
     }
 
     // 3. 行为注入
-    this.actions = config.actions;
+    this.onHitActions = config.onHit;
+    this.onSpawnActions = config.onSpawn;
+    this.onRecycleActions = config.onRecycle;
     this.isInteracted = false;
   }
 
@@ -68,21 +73,33 @@ export default class InteractableEntity extends Phaser.Physics.Arcade.Sprite {
         this.arcadeBody.enable = false;    // 禁用物理体，防止二次碰撞
     }
 
-    // 构建上下文
+    this.executeActions(this.onHitActions, player);
+  }
+
+  public onSpawn(player: Player) {
+    if (!this.onSpawnActions) return;
+    this.executeActions(this.onSpawnActions, player);
+  }
+
+  public onRecycle(player: Player) {
+    this.linkedRef = null; // 清理引用
+    if (!this.onRecycleActions) return;
+    this.executeActions(this.onRecycleActions, player);
+  }
+
+  private executeActions(actions: IEntityAction[], player: Player) {
+    // 构造上下文，把 this (Entity) 传进去
     const context: InteractionContext = {
-      target: this,
+      target: this, // ✅ 关键：Action 可以通过 ctx.target 访问到 Entity
       player: player,
       scene: this.scene,
       isCancelled: false
     };
-
-    for (const action of this.actions) {
-        // ✅ 如果之前的 Action (比如曹魏转化) 已经把物体销毁/禁用了
-        // 后面的伤害逻辑就不应该执行了
-        if (!this.active) break; 
-        if (context.isCancelled) break;
-        action.execute(context);
-    }
+    actions.forEach((action) => {
+      if (context.isCancelled) return;
+      if (!this.active) return;
+      action.execute(context);
+    });
   }
 
   /**

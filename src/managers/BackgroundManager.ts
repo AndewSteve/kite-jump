@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GameConfig } from '../config/GameConfig';
+import { TextureKeys } from '../config/AssetKeys';
 
 export default class BackgroundManager {
   private scene: Phaser.Scene;
@@ -36,12 +37,12 @@ export default class BackgroundManager {
         height / 2,  
         bgWidth,     
         bgHeight,    
-        'bg' // 默认 key，会在 switchTexture 中被替换
+        TextureKeys.BgFrost // 默认 key，会在 switchTexture 中被替换
     ).setScrollFactor(0) // 关键：固定在相机上，手动控制 tilePosition
      .setDepth(-100);    // 确保永远在最底层
 
     this.cloudOverlay = this.scene.add.tileSprite(
-        width / 2, height / 2, bgWidth, bgHeight, 'cloud_overlay'
+        width / 2, height / 2, bgWidth, bgHeight, TextureKeys.TransiOverlay
     )
     .setScrollFactor(0)
     .setDepth(-90) // ✅ Depth: -90 (在背景之上，物体之下)

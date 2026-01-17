@@ -42,7 +42,7 @@ void main()
     %forloop%
 
     // 1. 基础颜色 (纹理颜色 * Tint颜色)
-    // 假设你的 transi_cloud_alpha.png 是带透明度的 RGBA
+    // 假设你的 transi_cloud_alpha_full.png 是带透明度的 RGBA
     vec4 baseColor = texture * outTint;
 
     // 2. 计算屏幕空间的 Y 坐标 (0.0=底, 1.0=顶)

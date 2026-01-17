@@ -1,11 +1,17 @@
-import { BaseSummon, SpaceType } from "../summon/BaseSummon";
+import { BaseSummon, SpaceType } from "../entities/summons/BaseSummon";
 import { ThermalVent } from "../entities/summons/ThermalVent";
 import { FogOverlay } from "../entities/summons/FogOverlay";
+import { WindVane } from "../entities/summons/WindVane";
+import { FrostVortex } from "../entities/summons/FrostVortex";
+import { LightningColumn } from "../entities/summons/LightningColumn";
 
 // ✅ 1. 定义召唤物 ID 常量 (替代硬编码字符串)
 export const SummonId = {
   ThermalVent: 'vent', // 对应 L2 热气流
   FogOverlay: 'fog',   // 对应 L3 大雾
+  WindVane: 'wind_vane', // ✅ 新增 ID
+  FrostVortex: 'frost_vortex',
+  LightningColumn: 'lightning_column',
 } as const;
 
 export type SummonId = typeof SummonId[keyof typeof SummonId];
@@ -28,5 +34,20 @@ export const SummonConfig: Record<SummonId, ISummonDef> = {
     classType: FogOverlay,
     space: SpaceType.Screen,
     poolSize: 1 // 全局只需要一个雾层
+  },
+  [SummonId.WindVane]: {
+    classType: WindVane,
+    space: SpaceType.Screen,
+    poolSize: 1
+  },
+  [SummonId.FrostVortex]: {
+    classType: FrostVortex,
+    space: SpaceType.World,
+    poolSize: 3
+  },
+  [SummonId.LightningColumn]: {
+    classType: LightningColumn,
+    space: SpaceType.Screen,
+    poolSize: 3 // 稍微多给点，防止回收延迟导致的卡死，虽然逻辑限制了1个
   }
 };
