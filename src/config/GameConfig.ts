@@ -65,3 +65,12 @@ export const GameConfig: IGameConfig = {
   // ✅ 新增：玩家状态配置
   playerState: PlayerStateConfig,
 };
+
+export const SceneKeys = {
+  Game: 'GameScene',
+  UI: 'UIScene',
+  MainMenu: 'MainMenuScene',
+  Lab: 'LabScene',
+  Preload: 'PreloadScene',
+  Boot: 'BootScene',
+}

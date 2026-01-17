@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { EVENTS, gameEvents } from "../config/Events";
-import { GameConfig } from "../config/GameConfig";
+import { GameConfig, SceneKeys } from "../config/GameConfig";
+import { UITextureKeys } from "../config/AssetKeys";
 
 export default class UIScene extends Phaser.Scene {
   private heightText!: Phaser.GameObjects.Text;
@@ -9,32 +10,20 @@ export default class UIScene extends Phaser.Scene {
   private infoText!: Phaser.GameObjects.Text;
   private container!: Phaser.GameObjects.Container; // 用于包裹结束面板
   private graphics!: Phaser.GameObjects.Graphics; // 用于画背景框
+  private coldText!: Phaser.GameObjects.Text; // 新增：寒冷值文本
+  private gameOverContainer!: Phaser.GameObjects.Container; // 结束面板容器
 
   constructor() {
-    super("UIScene");
+    super(SceneKeys.UI);
   }
 
   create() {
     const { width } = this.scale;
 
-    // --- 1. 实时分数 (左上角) ---
-    this.heightText = this.add.text(20, 20, "Height: 0m", {
-      fontSize: "32px",
-      color: "#000",
-      fontStyle: "bold",
-    });
-    // 2. ✅ 实时分数 (右上角)
-    this.scoreText = this.add
-      .text(width - 20, 20, "Score: 0", {
-        fontSize: "32px",
-        color: "#000",
-        fontStyle: "bold",
-      })
-      .setOrigin(1, 0); // 右对齐
-
     // --- 2. 初始状态：显示开始画面 ---
-    this.showStartScreen();
+    // this.showStartScreen();
     this.setupEvents();
+    this.createTopFrameUI(width);
   }
 
   private setupEvents() {
@@ -56,7 +45,7 @@ export default class UIScene extends Phaser.Scene {
     gameEvents.on(
       EVENTS.UPDATE_HEIGHT,
       (height: number) => {
-        this.heightText.setText(`Height: ${height}m`);
+        this.heightText.setText(height.toString() + "m");
       },
       this
     );
@@ -65,7 +54,8 @@ export default class UIScene extends Phaser.Scene {
     gameEvents.on(
       EVENTS.UPDATE_SCORE,
       (score: number) => {
-        this.scoreText.setText(`Score: ${score}`);
+        console.log("Score updated:", score);
+        this.scoreText.setText(score.toString());
       },
       this
     );
@@ -209,5 +199,91 @@ export default class UIScene extends Phaser.Scene {
     });
 
     return button;
+  }
+
+  private createTopFrameUI(screenWidth: number) {
+    // --- A. 容器位置 ---
+    const containerX = screenWidth / 2;
+    const containerY = 60; 
+    
+    this.container = this.add.container(containerX, containerY);
+
+    // --- B. 3-Slice 核心逻辑 (高清适配版) ---
+    
+    // 1. 设定目标显示尺寸
+    const displayWidth = screenWidth * 0.96; // 比如 680px
+    const displayHeight = 80;                // 比如 80px
+
+    // 2. 设定原图尺寸
+    const sourceHeight = 480; // 原图高度
+    
+    // 3. 计算缩放比 ( 80 / 480 = 0.1666... )
+    const scaleFactor = displayHeight / sourceHeight;
+
+    // 4. 反推“逻辑宽度”
+    // 我们需要创建一个巨大的 NineSlice，这样缩放后它才刚好等于 displayWidth
+    const logicalWidth = displayWidth / scaleFactor; 
+
+    // 5. 设定切片参数 (基于 2800x480 的原图像素)
+    // 左右耳朵大概 230px，上下设为 0 (垂直方向允许均匀压缩)
+    const leftOffset = 230;
+    const rightOffset = 230;
+    const topOffset = 0;    // ✅ 关键：设为0，变成水平 3-Slice
+    const bottomOffset = 0; // ✅ 关键：设为0
+
+    const frame = this.add.nineslice(
+        0, 0, 
+        UITextureKeys.UITopFrame, 
+        undefined,
+        logicalWidth, // 👈 使用反推出来的巨大宽度 (~4000px)
+        sourceHeight, // 👈 使用原图高度 (480px)
+        leftOffset, rightOffset, topOffset, bottomOffset
+    );
+
+    // 6. 应用缩放
+    frame.setOrigin(0.5, 0.5);
+    frame.setScale(scaleFactor); // 👈 这一步把 4000x480 的巨物缩成 680x80
+    
+    this.container.add(frame);
+
+    // --- C. 图标与文本排布 ---
+    // 统一配置：图标缩放比例 (原图~256px -> 目标~40px)
+    const iconScale = 0.18; 
+    const textStyle = { 
+        fontSize: '20px', 
+        color: '#ffffff', 
+        fontStyle: 'bold', 
+        fontFamily: 'monospace',
+        stroke: '#000000',
+        strokeThickness: 3
+    };
+
+    // 1. 左侧：沙漏 (寒冷值/时间) - 对应 ui_hourglass_icon
+    // 位置：容器左侧 35% 处
+    const leftX = -displayWidth * 0.40;
+    const iconHourglass = this.add.sprite(leftX, 0, UITextureKeys.UIHourglassIcon).setScale(iconScale);
+    this.coldText = this.add.text(leftX + 25, 0, "0°C", { ...textStyle, color: '#00FFFF' }).setOrigin(0, 0.5);
+
+    // 2. 中间：山峰 (高度) - 对应 ui_mountain_icon
+    const midX = 0;
+    // 图标往左偏移一点，让整体居中
+    const iconMountain = this.add.sprite(midX - 40, 0, UITextureKeys.UIMountainIcon).setScale(iconScale);
+    this.heightText = this.add.text(midX - 10, 0, "0m", textStyle).setOrigin(0, 0.5);
+
+    // 3. 右侧：金币 (分数) - 对应 ui_coin_icon
+    const rightX = displayWidth * 0.26;
+    // 图标在数字左边
+    const iconCoin = this.add.sprite(rightX, 0, UITextureKeys.UICoinIcon).setScale(iconScale);
+    this.scoreText = this.add.text(rightX + 30, 0, "0", { ...textStyle, color: '#FFD700' }).setOrigin(0, 0.5);
+
+    // --- D. 加入容器 ---
+    this.container.add([
+        iconHourglass, this.coldText,
+        iconMountain, this.heightText,
+        iconCoin, this.scoreText
+    ]);
+    
+    this.container.setDepth(100);
+    this.container.setScrollFactor(0);
   }
 }

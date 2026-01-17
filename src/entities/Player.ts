@@ -5,6 +5,7 @@ import PlayerState from './PlayerState';
 import PlayerStatusUI from '../ui/PlayerStatusUI'; // ✅ 引入新类
 import DataManager from '../managers/DataManager';
 import { TextureKeys } from '../config/AssetKeys';
+import { KiteVisual } from './KiteVisual';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -23,13 +24,20 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   public goldMagnetZone: Phaser.GameObjects.Zone; 
   private goldMagnetPhysicsBody: Phaser.Physics.Arcade.Body; // 方便类型提示
 
+  public visual: KiteVisual;
+
   // ✅ 类型安全 Getter：从此告别 this.body!
   public get arcadeBody(): Phaser.Physics.Arcade.Body {
     return this.body as Phaser.Physics.Arcade.Body;
   }
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, TextureKeys.PlayerKite);
+    // super(scene, x, y, TextureKeys.PlayerKite);
+    super(scene, x, y, 'pixel');
+    this.setVisible(false);      // 隐藏物理体
+    // 创建表现层
+    this.visual = new KiteVisual(scene, TextureKeys.BlueKite);
+    scene.add.existing(this.visual);
 
     // 计算实际活动宽度：720 * 1.5 = 1080
     this.worldWidth = scene.scale.width * GameConfig.level.worldWidthRatio;
@@ -67,7 +75,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 公式：Offset = (图片宽/2) - 半径
     // 假设图片宽高你是知道的，或者动态获取
     const offsetX = (this.width / 2) - hitRadius;
-    const offsetY = (this.height / 2) - hitRadius -60;
+    const offsetY = (this.height / 2) - hitRadius;
     
     this.arcadeBody.setOffset(offsetX, offsetY);
 
@@ -143,15 +151,29 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         }
     }
 
+    // 1. 同步位置
+    this.visual.setPosition(this.x, this.y);
+    // 获取环境风力 (如果你有 WindManager)
+    // 如果没有，可以用玩家移动速度的反方向模拟风
+    // 比如：windX = -this.body.velocity.x * 0.01;
+    const windX = Math.sin(_time / 500) * 0.5; // 模拟微风摆动
+    const windY = 0;
+
+    // inputX: -1, 0, 1
+    const inputX = this.cursors.left.isDown ? -1 : (this.cursors.right.isDown ? 1 : 0);
+    
+    // 更新视觉
+    this.visual.updateVisuals(inputX, windX, windY);
     const accel = this.playerState.getFinalAcceleration();
+    // D. 水平移动输入
     if (this.cursors.left.isDown) {
-        this.setAccelerationX(-accel);
-        this.setFlipX(true);
+      this.setAccelerationX(-accel);
+      // this.setFlipX(true);
     } else if (this.cursors.right.isDown) {
-        this.setAccelerationX(accel);
-        this.setFlipX(false);
+      this.setAccelerationX(accel);
+      // this.setFlipX(false);
     } else {
-        this.setAccelerationX(0);
+      this.setAccelerationX(0);
     }
 
     this.checkScreenWrap();
@@ -188,13 +210,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 手动计算 body 位置使其居中
     // body.x = center.x - radius
     this.magnetPhysicsBody.x = center.x - magnetRadius;
-    this.magnetPhysicsBody.y = center.y - magnetRadius -60;
+    this.magnetPhysicsBody.y = center.y - magnetRadius;
 
     // ✅ 2. 金色磁场
     const goldMagnetRadius = this.getGoldMagnetRadius();
     this.goldMagnetPhysicsBody.setCircle(goldMagnetRadius);
     this.goldMagnetPhysicsBody.x = center.x - goldMagnetRadius;
-    this.goldMagnetPhysicsBody.y = center.y - goldMagnetRadius -60;
+    this.goldMagnetPhysicsBody.y = center.y - goldMagnetRadius;
   }
 
   // private updateDashVisuals() {
@@ -259,8 +281,11 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.arcadeBody.setAllowGravity(isEnabled);
     }
     
-    // 显隐控制 (可选)
-    this.setVisible(isEnabled ? true : this.visible);
+    // ✅ 修正：始终隐藏自己 (物理核)，只控制表现层 (visual) 的显隐
+    this.setVisible(false); 
+    if (this.visual) {
+        this.visual.setVisible(isEnabled);
+    }
   }
 
   public die(cause: string) {

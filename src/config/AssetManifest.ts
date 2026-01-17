@@ -1,6 +1,6 @@
 // src/config/AssetManifest.ts
 
-import { TextureKeys } from "./AssetKeys";
+import { TextureKeys, UITextureKeys } from "./AssetKeys";
 
 export interface IAssetDefinition {
   key: string;
@@ -12,6 +12,36 @@ export interface IAssetDefinition {
 export const AssetManifest: IAssetDefinition[] = [
   // --- 角色 ---
   { key: TextureKeys.PlayerKite, path: 'assets/kite.png', type: 'image' },
+  { 
+    key: `${TextureKeys.BlueKite}_body_main`, 
+    path: 'assets/kite_blue_body_main.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.BlueKite}_body_tail`, 
+    path: 'assets/kite_blue_body_tail.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.BlueKite}_left`, 
+    path: 'assets/kite_blue_left.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.BlueKite}_right`, 
+    path: 'assets/kite_blue_right.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.BlueKite}_string`, 
+    path: 'assets/kite_blue_string.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.BlueKite}_knot`, 
+    path: 'assets/kite_blue_knot.png', 
+    type: 'image' 
+  },
   
   // --- 环境/背景 ---
   { key: TextureKeys.BgFrost, path: 'assets/bg_frost.png', type: 'image' },
@@ -32,5 +62,9 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: TextureKeys.ThermalVent, path: 'assets/pixel.png', type: 'image' },
   { key: TextureKeys.WindArrow, path: 'assets/arrow_indicator.png', type: 'image' },
   
-  // ... 其他所有资源
+  // UI 资产
+  { key: UITextureKeys.UITopFrame, path: 'assets/ui_top_frame.png', type: 'image' },
+  { key: UITextureKeys.UIHourglassIcon, path: 'assets/ui_hourglass_icon.png', type: 'image' },
+  { key: UITextureKeys.UIMountainIcon, path: 'assets/ui_mountain_icon.png', type: 'image' },
+  { key: UITextureKeys.UICoinIcon, path: 'assets/ui_coin_icon.png', type: 'image' },
 ];

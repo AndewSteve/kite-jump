@@ -4,6 +4,7 @@
 export const TextureKeys = {
   // --- 角色 ---
   PlayerKite: 'kite',
+  BlueKite: 'kite_blue',
   
   // --- 环境/背景 ---
   BgFrost: 'bg_frost',
@@ -29,3 +30,11 @@ export const TextureKeys = {
 
 // 导出类型，方便函数参数做类型检查
 export type TextureKey = typeof TextureKeys[keyof typeof TextureKeys];
+
+export const UITextureKeys = {
+  UITopFrame: 'ui_top_frame',
+  UIHourglassIcon: 'ui_hourglass_icon',
+  UIMountainIcon: 'ui_mountain_icon',
+  UICoinIcon: 'ui_coin_icon',
+} as const;
+export type UITextureKey = typeof UITextureKeys[keyof typeof UITextureKeys];

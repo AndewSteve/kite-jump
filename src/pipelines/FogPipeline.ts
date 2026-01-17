@@ -27,9 +27,9 @@ const FogFragShader = `
 precision mediump float;
 
 uniform sampler2D uMainSampler[%count%];
-uniform vec2 uResolution; // 需要屏幕分辨率
-uniform float uBottomRatio; // 雾气底部在屏幕高度的百分比 (Phaser坐标系, 0=顶)
-uniform float uSoftness;    // 渐变软度 (比如 0.2 = 20% 屏幕高度)
+uniform vec2 uResolution; 
+uniform float uBottomRatio;
+uniform float uSoftness;
 
 varying vec2 outTexCoord;
 varying float outTexId;
@@ -41,29 +41,28 @@ void main()
     vec4 texture;
     %forloop%
 
-    // 1. 基础颜色 (纹理颜色 * Tint颜色)
-    // 假设你的 transi_cloud_alpha_full.png 是带透明度的 RGBA
+    // 1. 获取基础颜色 (Texture * Tint)
     vec4 baseColor = texture * outTint;
+
+    // 🚨🚨🚨 【核心修复】 🚨🚨🚨
+    // 强制进行 Alpha 预乘！
+    // 解释：当 outTint.a (Tween Alpha) 变小时，我们必须同时让 RGB 变暗。
+    // 否则在 ONE, ONE_MINUS_SRC_ALPHA 混合模式下，低 Alpha 高 RGB 会导致加色发光。
+    baseColor.rgb *= outTint.a;
 
     // 2. 计算屏幕空间的 Y 坐标 (0.0=底, 1.0=顶)
     float screenY = gl_FragCoord.y / uResolution.y;
 
-    // 3. 转换 Phaser 的 uBottomRatio 到 WebGL 坐标
-    // Phaser: 0在顶, 0.3在上方
-    // WebGL: 0在底, 0.7在上方
-    // 所以雾的物理底边在 WebGL 的 (1.0 - uBottomRatio) 处
+    // 3. 转换坐标
     float fogBottomY = 1.0 - uBottomRatio;
 
     // 4. 计算 alpha 遮罩
-    // 我们希望：
-    // 当 y <= fogBottomY 时，alpha = 0 (完全透明)
-    // 当 y >= fogBottomY + uSoftness 时，alpha = 1 (完全不透明)
-    // smoothstep 会在两个值之间生成平滑的 0->1 曲线 (Sigmoid)
     float alphaMask = smoothstep(fogBottomY, fogBottomY + uSoftness, screenY);
 
     // 5. 应用遮罩
+    // 注意：这里 RGB 和 A 都要乘遮罩，保持预乘状态
     baseColor.a *= alphaMask;
-    baseColor.rgb *= alphaMask; // 预乘 Alpha
+    baseColor.rgb *= alphaMask; 
 
     gl_FragColor = baseColor;
 }

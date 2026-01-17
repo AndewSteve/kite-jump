@@ -3,6 +3,9 @@ import GameScene from './scenes/GameScene';
 import { GameConfig } from './config/GameConfig';
 import UIScene from './scenes/UIScene';
 import MainMenuScene from './scenes/MainMenuScene';
+import LabScene from './scenes/LabScene';
+import BootScene from './scenes/BootScene';
+import PreloadScene from './scenes/PreloadScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -26,7 +29,7 @@ const config: Phaser.Types.Core.GameConfig = {
     // 居中：水平和垂直都居中
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [MainMenuScene,GameScene, UIScene],
+  scene: [BootScene, PreloadScene, LabScene, MainMenuScene,GameScene, UIScene],
   // scene: [GameScene, UIScene],
 };
 

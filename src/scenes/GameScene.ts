@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { GameConfig } from "../config/GameConfig";
+import { GameConfig, SceneKeys } from "../config/GameConfig";
 import CameraManager from "../managers/CameraManager";
 import { EVENTS, gameEvents } from "../config/Events";
 // ✅ 引入实体类
@@ -14,7 +14,6 @@ import BackgroundManager from "../managers/BackgroundManager";
 import ScoreManager from "../managers/ScoreManager";
 import SummonManager from "../managers/SummonManager";
 import RenderManager from "../managers/RenderManager";
-import { AssetManifest } from "../config/AssetManifest";
 import WeatherManager from "../managers/WeatherManager";
 
 export default class GameScene extends Phaser.Scene {
@@ -34,23 +33,16 @@ export default class GameScene extends Phaser.Scene {
   // 新增：缓存世界宽度
   private worldWidth!: number;
 
-  constructor() {
-    super("GameScene");
+  constructor(key: string = "GameScene") {
+    super(key);
   }
 
   preload() {
-    // ✅ 自动化加载所有配置好的资源
-    AssetManifest.forEach(asset => {
-      if (asset.type === 'image') {
-        this.load.image(asset.key, asset.path);
-      } else if (asset.type === 'spritesheet' && asset.frameConfig) {
-        this.load.spritesheet(asset.key, asset.path, asset.frameConfig);
-      }
-    });
+
   }
 
   create() {
-    this.scene.launch("UIScene");
+    this.scene.launch(SceneKeys.UI); // 启动 UI 场景
     const { width, height } = this.scale;
     // 计算世界宽度
     this.worldWidth = width * GameConfig.level.worldWidthRatio;
@@ -129,19 +121,8 @@ export default class GameScene extends Phaser.Scene {
     gameEvents.off(EVENTS.GAME_OVER);
     gameEvents.off(EVENTS.GAME_RESTART);
 
-    gameEvents.on(
-      EVENTS.GAME_START,
-      () => {
-        console.log("游戏开始！");
-        this.isGameRunning = true;
-        this.scoreManager.startTracking();
-        this.phaseManager.startFirstPhase();
-        this.spawnManager.initClouds(this.worldWidth, 0);
-        // this.player.setEnabled(true);
-        // this.player.boost(GameConfig.player.startForce);
-      },
-      this
-    );
+    // ✅ 修改：不再写匿名函数，而是绑定到方法
+    gameEvents.on(EVENTS.GAME_START, this.onGameStart, this);
 
     gameEvents.on(
       EVENTS.GAME_OVER,
@@ -158,6 +139,17 @@ export default class GameScene extends Phaser.Scene {
       },
       this
     );
+  }
+
+  // ✅ 新增：提取出来的启动逻辑
+  protected onGameStart() {
+    console.log("游戏开始！");
+    this.isGameRunning = true;
+    this.scoreManager.startTracking();
+    
+    // 标准流程：进入 L1 正常阶段
+    this.phaseManager.startFirstPhase(); 
+    this.spawnManager.initClouds(this.worldWidth, 0);
   }
 
   private enterReadyPhase() {

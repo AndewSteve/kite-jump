@@ -1,23 +1,17 @@
 import Phaser from 'phaser';
 import DataManager from '../managers/DataManager';
-import { AssetManifest } from '../config/AssetManifest';
 import { TextureKeys } from '../config/AssetKeys';
+import { SceneKeys } from '../config/GameConfig';
 
 export default class MainMenuScene extends Phaser.Scene {
   private currencyText!: Phaser.GameObjects.Text;
 
   constructor() {
-    super('MainMenuScene');
+    super(SceneKeys.MainMenu);
   }
 
   preload() {
-    AssetManifest.forEach(asset => {
-      if (asset.type === 'image') {
-        this.load.image(asset.key, asset.path);
-      } else if (asset.type === 'spritesheet' && asset.frameConfig) {
-        this.load.spritesheet(asset.key, asset.path, asset.frameConfig);
-      }
-    });
+
   }
 
   create() {
@@ -82,7 +76,7 @@ export default class MainMenuScene extends Phaser.Scene {
     startBtn.add([btnBg, btnText]);
     const hitArea = new Phaser.Geom.Rectangle(-100, -40, 200, 80);
     startBtn.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains);
-    this.input.enableDebug(startBtn);
+    // this.input.enableDebug(startBtn);
     
     // 交互逻辑
     startBtn.on('pointerdown', () => {
@@ -90,7 +84,7 @@ export default class MainMenuScene extends Phaser.Scene {
         this.tweens.add({
             targets: startBtn, scaleX: 0.9, scaleY: 0.9, duration: 100, yoyo: true,
             onComplete: () => {
-                this.scene.start('GameScene'); // 进入游戏
+                this.scene.start(SceneKeys.Game); // 进入游戏
             }
         });
     });
