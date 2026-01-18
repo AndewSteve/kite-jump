@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 .cooperation
+public\assets\pending
+public\assets\video_alpha_test
