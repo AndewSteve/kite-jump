@@ -3,7 +3,8 @@ import GameScene from '../scenes/GameScene';
 import { EntityId } from '../config/EntityConfig';
 import { WeatherConfig } from '../config/WeatherConfig';
 import { SummonId } from '../config/SummonConfig';
-import { TextureKeys } from '../config/AssetKeys';
+import { TextureKeys, VFXTextureKeys } from '../config/AssetKeys';
+import { PipelineID } from '../managers/RenderManager';
 
 export class LabPhase implements IGamePhase {
   onEnter(scene: GameScene): void {
@@ -76,6 +77,12 @@ export class LabPhase implements IGamePhase {
         scene.player.playerState.addDashEnergy(34);
     });
 
+    // 测试 6: 增加冲刺值
+    keyboard.on('keydown-SIX', () => {
+        console.log("🧪 Test: Spawn Dissolve Effect");
+        this.spawnDissolveEffect(scene);
+    });
+
     // 测试 3: 触发雷暴
     keyboard.on('keydown-Q', () => {
         console.log("🧪 Test: Trigger Thunder");
@@ -97,4 +104,48 @@ export class LabPhase implements IGamePhase {
         scene.weatherManager.stopWeather();
     });
   }
+
+  // ✅ 新增：生成溶解特效的方法
+    private spawnDissolveEffect(scene: GameScene) {
+        const x = scene.player.x + (Math.random() - 0.5) * 200;
+        const y = scene.player.y + (Math.random() - 0.5) * 200;
+
+        // 1. 创建 Sprite
+        // 我们用 VfxRing 作为要溶解的主体，看起来像一个能量环消失
+        const effect = scene.add.sprite(x, y, VFXTextureKeys.VfxRing);
+        
+        // 2. 设置 Pipeline 和基本属性
+        effect.setPipeline(PipelineID.Dissolve);
+        effect.setBlendMode(Phaser.BlendModes.ADD); // 发光效果
+        effect.setScale(2.0);
+        
+        // 初始状态：进度为 0 (Tint R=0, G=255, B=255) -> 完全显示
+        effect.setTint(0x00ffff); 
+
+        // 3. 使用 Tween 驱动生命周期 (核心！)
+        // 我们需要一个对象来存当前的 R 值
+        const tweenData = { progressR: 0 };
+
+        scene.tweens.add({
+            targets: tweenData,
+            progressR: 255, // 目标：R 通道变满 (进度 1.0) -> 完全溶解
+            duration: 1500, // 1.5秒内消失
+            ease: 'Sine.easeInOut',
+            onUpdate: () => {
+                // 每一帧更新 Sprite 的 Tint 颜色
+                // 我们只改变 R 通道，G 和 B 保持 255 (0xff)
+                // Phaser.Display.Color.GetColor(R, G, B)
+                const r = Math.floor(tweenData.progressR);
+                effect.setTint(Phaser.Display.Color.GetColor(r, 255, 255));
+                
+                // 可选：同时让它稍微变大一点
+                effect.scale += 0.01;
+            },
+            onComplete: () => {
+                // 动画结束后销毁 Sprite
+                effect.destroy();
+                console.log("✨ Dissolve Effect Finished & Destroyed");
+            }
+        });
+    }
 }

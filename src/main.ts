@@ -8,7 +8,7 @@ import BootScene from './scenes/BootScene';
 import PreloadScene from './scenes/PreloadScene';
 
 const config: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
+  type: Phaser.WEBGL,
   width: GameConfig.width,   // 使用配置
   height: GameConfig.height, // 使用配置
   parent: 'app',

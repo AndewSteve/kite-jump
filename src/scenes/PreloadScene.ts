@@ -37,6 +37,14 @@ export default class PreloadScene extends Phaser.Scene {
     });
 
     // 3. ✅ 你的核心代码：集中加载所有资产
+    // Load alpha test webp sequence for LabScene experiment.
+    const alphaFrameCount = 59;
+    for (let i = 1; i <= alphaFrameCount; i++) {
+      const frame = String(i).padStart(3, '0');
+      const key = `video_alpha_${frame}`;
+      this.load.image(key, `assets/video_alpha_test/out${frame}.webp`);
+    }
+
     AssetManifest.forEach(asset => {
        if (asset.type === 'image') {
          this.load.image(asset.key, asset.path);

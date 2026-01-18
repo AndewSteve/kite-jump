@@ -38,3 +38,12 @@ export const UITextureKeys = {
   UICoinIcon: 'ui_coin_icon',
 } as const;
 export type UITextureKey = typeof UITextureKeys[keyof typeof UITextureKeys];
+
+export const VFXTextureKeys = {
+  // --- 新增 VFX 特效纹理 ---
+  // 对应截图下方的长条波浪图 (用来做极坐标护盾)
+  VfxNoiseBar: 'vfx_noise_bar', 
+  // 对应截图上方的圆环图 (用来做冲击波)
+  VfxRing: 'vfx_ring',
+} as const;
+export type VFXTextureKey = typeof VFXTextureKeys[keyof typeof VFXTextureKeys];
