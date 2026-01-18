@@ -1,6 +1,6 @@
 import { BoostAction, VanishAction } from "./EntityActions";
 import type { IBuffAction, IBuffContext, IEntityAction, InteractionContext } from "./ActionInterfaces";
-import { KiteConfigs } from "../config/KiteConfig";
+import { KiteConfigs } from "../config/KiteBuffConfig";
 import type GameScene from "../scenes/GameScene";
 import { SummonId } from "../config/SummonConfig";
 

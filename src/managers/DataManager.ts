@@ -1,6 +1,7 @@
 // src/managers/DataManager.ts
 
 import { GameConfig } from "../config/GameConfig";
+import { KiteSkinIDs, type KiteSkinID } from "../config/KiteSkinDef";
 
 export interface GameRecord {
   date: string;
@@ -17,7 +18,7 @@ export interface UserSaveData {
     windMastery: number; // 御风值等级
     auraRange: number;   // 灵韵磁场等级
   };
-  selectedKiteId: 'none' | 'shu' | 'wei' | 'wu'; // 当前选中的风筝
+  selectedKiteId: KiteSkinID; // 当前选中的风筝
 }
 
 const DEFAULT_SAVE: UserSaveData = {
@@ -25,7 +26,7 @@ const DEFAULT_SAVE: UserSaveData = {
   highScore: 0,
   history: [],
   upgrades: { lightness: 0, windMastery: 0, auraRange: 0 },
-  selectedKiteId: 'none'
+  selectedKiteId: KiteSkinIDs.DefaultYellow
 };
 
 export default class DataManager {

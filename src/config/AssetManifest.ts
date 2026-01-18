@@ -42,6 +42,89 @@ export const AssetManifest: IAssetDefinition[] = [
     path: 'assets/items/kite_blue_knot.png', 
     type: 'image' 
   },
+
+  { 
+    key: `${TextureKeys.DefaultYellowKite}_body_main`, 
+    path: 'assets/items/kite_default_yellow_body_main.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.DefaultYellowKite}_body_tail`, 
+    path: 'assets/items/kite_default_yellow_body_tail.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.DefaultYellowKite}_string`, 
+    path: 'assets/items/kite_default_yellow_string.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.DefaultYellowKite}_knot`, 
+    path: 'assets/items/kite_default_yellow_knot.png', 
+    type: 'image' 
+  },
+
+  { 
+    key: `${TextureKeys.RedKite}_body_main`, 
+    path: 'assets/items/kite_red_body_main.png', 
+    type: 'image' 
+  },
+  // { 
+  //   key: `${TextureKeys.RedKite}_body_tail`, 
+  //   path: 'assets/items/kite_red_body_tail.png', 
+  //   type: 'image' 
+  // },
+  { 
+    key: `${TextureKeys.RedKite}_left_tail`, 
+    path: 'assets/items/kite_red_left_tail.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.RedKite}_right_tail`, 
+    path: 'assets/items/kite_red_right_tail.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.RedKite}_string`, 
+    path: 'assets/items/kite_red_string.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.RedKite}_knot`, 
+    path: 'assets/items/kite_red_knot.png', 
+    type: 'image' 
+  },
+
+  { 
+    key: `${TextureKeys.GreenKite}_body_main`, 
+    path: 'assets/items/kite_green_body_main.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.GreenKite}_body_tail`, 
+    path: 'assets/items/kite_green_body_tail.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.GreenKite}_left_tail`, 
+    path: 'assets/items/kite_green_left_tail.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.GreenKite}_right_tail`, 
+    path: 'assets/items/kite_green_right_tail.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.GreenKite}_string`, 
+    path: 'assets/items/kite_green_string.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.GreenKite}_knot`, 
+    path: 'assets/items/kite_green_knot.png', 
+    type: 'image' 
+  },
   
   // --- 环境/背景 ---
   { key: TextureKeys.BgFrost, path: 'assets/bg/bg_frost.png', type: 'image' },

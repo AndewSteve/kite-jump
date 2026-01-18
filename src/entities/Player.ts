@@ -4,8 +4,8 @@ import { EVENTS, gameEvents } from '../config/Events';
 import PlayerState from './PlayerState';
 import PlayerStatusUI from '../ui/PlayerStatusUI'; // ✅ 引入新类
 import DataManager from '../managers/DataManager';
-import { TextureKeys } from '../config/AssetKeys';
 import { KiteVisual } from './KiteVisual';
+import { KiteSkinIDs } from '../config/KiteSkinDef';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -36,7 +36,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'pixel');
     this.setVisible(false);      // 隐藏物理体
     // 创建表现层
-    this.visual = new KiteVisual(scene, TextureKeys.BlueKite);
+    const kiteId = DataManager.data.selectedKiteId || KiteSkinIDs.DefaultYellow;
+    this.visual = new KiteVisual(scene, KiteSkinIDs.Green);
     scene.add.existing(this.visual);
 
     // 计算实际活动宽度：720 * 1.5 = 1080
@@ -242,7 +243,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
    */
   private checkScreenWrap() {
     const halfWidth = this.width / 2;
-    const screenWidth = this.scene.scale.width;
+    // const screenWidth = this.scene.scale.width;
 
     // 左边界限制
     if (this.x < halfWidth) {

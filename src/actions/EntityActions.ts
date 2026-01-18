@@ -1,4 +1,4 @@
-import { KiteConfigs } from '../config/KiteConfig';
+import { KiteConfigs } from '../config/KiteBuffConfig';
 import { EVENTS, gameEvents } from '../config/Events';
 import type { IBuffConfig } from '../mechanics/BuffTypes';
 import { StatType } from '../mechanics/StatDefinitions';

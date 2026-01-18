@@ -18,4 +18,7 @@ export const EVENTS = {
   ADD_COIN: 'add-coin',           // Game Logic: 增加金币
   
   WIND_CHANGE: 'wind-change',    // 环境风力变化
+
+  PHASE_TRANSITION_START: 'phase-transition-start', // 过渡态开始
+  PHASE_NORMAL_START: 'phase-normal-start',         // 正常态开始
 };

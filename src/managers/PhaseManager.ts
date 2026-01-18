@@ -4,6 +4,7 @@ import { IdlePhase, NormalPhase, TransitionPhase } from '../phases/PhasesConfig'
 import { BiomeId, type IBiomeData } from '../types/BiomeTypes';
 import { BiomeLibrary } from '../config/BiomeDataConfig';
 import { GameConfig } from '../config/GameConfig';
+import { EVENTS, gameEvents } from '../config/Events';
 
 export default class PhaseManager {
   private scene: GameScene;
@@ -35,6 +36,16 @@ export default class PhaseManager {
     this.currentPhase.onExit(this.scene);
     this.currentPhase = newPhase;
     this.currentPhase.onEnter(this.scene, data);
+
+    // ✅ 发出事件通知 UI
+    // 如果是过渡态
+    if (newPhase instanceof TransitionPhase) {
+        gameEvents.emit(EVENTS.PHASE_TRANSITION_START);
+    } 
+    // 如果是正常态
+    else if (newPhase instanceof NormalPhase) {
+        gameEvents.emit(EVENTS.PHASE_NORMAL_START);
+    }
   }
 
   // ✅ 核心状态机回调

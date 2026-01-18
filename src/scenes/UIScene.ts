@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import { EVENTS, gameEvents } from "../config/Events";
 import { GameConfig, SceneKeys } from "../config/GameConfig";
 import { UITextureKeys } from "../config/AssetKeys";
+import UIEffectController from "../ui/UIEffectController";
 
 export default class UIScene extends Phaser.Scene {
   private heightText!: Phaser.GameObjects.Text;
@@ -12,6 +13,10 @@ export default class UIScene extends Phaser.Scene {
   private graphics!: Phaser.GameObjects.Graphics; // 用于画背景框
   private coldText!: Phaser.GameObjects.Text; // 新增：寒冷值文本
   private gameOverContainer!: Phaser.GameObjects.Container; // 结束面板容器
+  private coinIcon!: Phaser.GameObjects.Sprite; // ✅ 新增引用保存
+  private coinEffect!: UIEffectController;
+  private heightIcon!: Phaser.GameObjects.Sprite; // ✅ 新增引用保存
+  private heightEffect!: UIEffectController;
 
   constructor() {
     super(SceneKeys.UI);
@@ -19,11 +24,38 @@ export default class UIScene extends Phaser.Scene {
 
   create() {
     const { width } = this.scale;
-
     // --- 2. 初始状态：显示开始画面 ---
     // this.showStartScreen();
     this.setupEvents();
     this.createTopFrameUI(width);
+
+    // 1. 金币/分数特效
+    // 假设我们对 scoreText 做特效 (因为你目前主要是 scoreText 更新)
+    // 如果你有专门的 iconSprite，也可以传 iconSprite
+    this.coinEffect = new UIEffectController(this, [this.coinIcon, this.scoreText], {
+        glowColor: 0xffaa00, // 使用纯白光晕，叠加在金色上会变亮而不是变暗
+        // 关键：扩散系数。
+        // 原图 1.0 的时候，光晕图是 1.6，这样哪怕 Blur 了也能看到一圈边
+        glowSpread: 1.0,
+        glowBlurStrength: 3.0,   // 强度加大
+        punchScale: 1.6      // 缩放倍率
+    });
+
+    // 2. 高度特效 (进入 Phase 过渡时可能用到)
+    this.heightEffect = new UIEffectController(this, [this.heightIcon, this.heightText], {
+        glowColor: 0x00ffff, // 青色
+        glowBlurStrength: 2.0,
+        glowDuration: 0.5,
+        // 呼吸配置
+        sustainScale: 1.15, // 呼吸幅度适中
+        sustainDuration: 1000 // 1秒一次吞吐
+    });
+  }
+
+  // ✅ 核心：接管 update
+  update(_time: number, delta: number) {
+      this.coinEffect?.update(delta);
+      this.heightEffect?.update(delta);
   }
 
   private setupEvents() {
@@ -56,9 +88,20 @@ export default class UIScene extends Phaser.Scene {
       (score: number) => {
         console.log("Score updated:", score);
         this.scoreText.setText(score.toString());
+        this.coinEffect.trigger(); // 🔥 触发特效：续命或启动
       },
       this
     );
+
+    // 进入过渡态：开启呼吸
+    gameEvents.on(EVENTS.PHASE_TRANSITION_START, () => {
+        this.heightEffect.setSustain(true);
+    });
+
+    // 回到正常态：关闭呼吸
+    gameEvents.on(EVENTS.PHASE_NORMAL_START, () => {
+        this.heightEffect.setSustain(false);
+    });
   }
 
   // === 界面状态 1: 开始画面 ===
@@ -267,20 +310,27 @@ export default class UIScene extends Phaser.Scene {
     // 2. 中间：山峰 (高度) - 对应 ui_mountain_icon
     const midX = 0;
     // 图标往左偏移一点，让整体居中
-    const iconMountain = this.add.sprite(midX - 40, 0, UITextureKeys.UIMountainIcon).setScale(iconScale);
+    this.heightIcon = this.add.sprite(midX - 40, 0, UITextureKeys.UIMountainIcon).setScale(iconScale);
     this.heightText = this.add.text(midX - 10, 0, "0m", textStyle).setOrigin(0, 0.5);
 
     // 3. 右侧：金币 (分数) - 对应 ui_coin_icon
     const rightX = displayWidth * 0.26;
     // 图标在数字左边
-    const iconCoin = this.add.sprite(rightX, 0, UITextureKeys.UICoinIcon).setScale(iconScale);
-    this.scoreText = this.add.text(rightX + 30, 0, "0", { ...textStyle, color: '#FFD700' }).setOrigin(0, 0.5);
+    this.coinIcon = this.add.sprite(
+      rightX, 0, UITextureKeys.UICoinIcon
+    )
+      .setScale(iconScale)
+      .setOrigin(0.5, 0.5);
+    this.scoreText = this.add.text(
+      rightX + 30, 0, "0", { ...textStyle, color: '#FFD700' }
+    )
+      .setOrigin(0, 0.5);
 
     // --- D. 加入容器 ---
     this.container.add([
         iconHourglass, this.coldText,
-        iconMountain, this.heightText,
-        iconCoin, this.scoreText
+        this.heightIcon, this.heightText,
+        this.coinIcon, this.scoreText
     ]);
     
     this.container.setDepth(100);

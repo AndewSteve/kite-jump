@@ -2,6 +2,7 @@ import { DashEnergyIncrementAction, SpawnModifierAction } from "../actions/BuffA
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
 import { EntityId } from "./EntityConfig";
+import { KiteSkinIDs } from "./KiteSkinDef";
 
 export const KiteConfigs = {
   shu: {
@@ -71,8 +72,8 @@ export const WuBuff: IBuffConfig = {
 };
 
 export const KiteBuffs = {
-  none: null,
-  shu: ShuBuff,
+  [KiteSkinIDs.DefaultYellow]: null,
+  [KiteSkinIDs.Green]: ShuBuff,
   wei: WeiBuff,
-  wu: WuBuff
+  [KiteSkinIDs.Red]: WuBuff
 };

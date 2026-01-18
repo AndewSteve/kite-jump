@@ -6,7 +6,8 @@ import BuffManager from '../managers/BuffManager';
 import { ModifierType, StatType } from '../mechanics/StatDefinitions';
 import DataManager from '../managers/DataManager';
 import { DashConfig, DashLv1Buff, DashLv2Buff, DashLv3Buff, TransitionDashConfig } from '../config/BuffConfig';
-import { KiteBuffs, KiteConfigs } from '../config/KiteConfig';
+import { KiteBuffs, KiteConfigs } from '../config/KiteBuffConfig';
+import { KiteSkinIDs } from '../config/KiteSkinDef';
 
 export default class PlayerState {
   private player: Player;
@@ -62,7 +63,7 @@ export default class PlayerState {
     this.stats.initStat(StatType.EnvironmentWindY, 0);
 
     // ✅ 应用风筝被动 (三国改装)
-    const kiteId = DataManager.data.selectedKiteId || 'none'; // 默认无风筝
+    const kiteId = DataManager.data.selectedKiteId || KiteSkinIDs.DefaultYellow; // 默认无风筝
     const buffConfig = KiteBuffs[kiteId];
     if (buffConfig) {
         this.buffs.addBuff(buffConfig);

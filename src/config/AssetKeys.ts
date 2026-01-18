@@ -5,6 +5,9 @@ export const TextureKeys = {
   // --- 角色 ---
   PlayerKite: 'kite',
   BlueKite: 'kite_blue',
+  RedKite: 'kite_red',
+  GreenKite: 'kite_green',
+  DefaultYellowKite: 'kite_default_yellow',
   
   // --- 环境/背景 ---
   BgFrost: 'bg_frost',
