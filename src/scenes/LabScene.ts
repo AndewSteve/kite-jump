@@ -60,12 +60,12 @@ export default class LabScene extends GameScene {
 
     // ✅ 1. 注册 Pipeline（仅 WebGL 支持）
     // 检查是否已经存在，防止热重载或切场景报错
-    this.magicPipeline = this.renderManager.getPipeline<MagicFieldPipeline>(PipelineID.MagicField) || undefined;
-    if (this.magicPipeline) {
-      this.createVFXTest();
-    } else {
-      console.warn("⚠️ MagicFieldPipeline not found!");
-    }
+    // this.magicPipeline = this.renderManager.getPipeline<MagicFieldPipeline>(PipelineID.MagicField) || undefined;
+    // if (this.magicPipeline) {
+    //   this.createVFXTest();
+    // } else {
+    //   console.warn("⚠️ MagicFieldPipeline not found!");
+    // }
     
     this.scene.launch(SceneKeys.UI); // 确保 UI 场景启动
   }

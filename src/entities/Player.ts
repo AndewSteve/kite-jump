@@ -37,7 +37,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(false);      // 隐藏物理体
     // 创建表现层
     const kiteId = DataManager.data.selectedKiteId || KiteSkinIDs.DefaultYellow;
-    this.visual = new KiteVisual(scene, KiteSkinIDs.Green);
+    this.visual = new KiteVisual(scene, KiteSkinIDs.Blue);
     scene.add.existing(this.visual);
 
     // 计算实际活动宽度：720 * 1.5 = 1080

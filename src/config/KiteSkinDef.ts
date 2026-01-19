@@ -6,6 +6,7 @@ export const KiteSkinIDs = {
   DefaultYellow: "kite_default_yellow",
   Red: "kite_red",
   Green: "kite_green",
+  Blue: "kite_blue",
 } as const;
 export type KiteSkinID = typeof KiteSkinIDs[keyof typeof KiteSkinIDs];
 
@@ -86,6 +87,24 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
   },
 
 
+  [KiteSkinIDs.Blue]: {
+    id: KiteSkinIDs.Blue,
+    bodyTexture: `${TextureKeys.BlueKite}_body_main`,
+    stringTexture: `${TextureKeys.BlueKite}_string`,
+    knotTexture: `${TextureKeys.BlueKite}_knot`,
+    scale: 0.25,
+    bridleLeftOffset: { x: -180, y: 100 },
+    bridleRightOffset: { x: 180, y: 100 },
+    bridleScale: 6.0,
+    stringScale: 0.125,
+    knotOffset: { x: 0, y: 800 },
+    knotScale: 0.8,
+    tails: [
+      // { textureKey: `${TextureKeys.BlueKite}_body_tail`, offsetX: 0, offsetY: 330, length: 15, scale: 0.7 }, // 左尾
+      { textureKey: `${TextureKeys.BlueKite}_left_tail`, offsetX: -200, offsetY: 120, length: 10 }, // 左尾
+      { textureKey: `${TextureKeys.BlueKite}_right_tail`, offsetX: 200, offsetY: 120, length: 10 }   // 右尾
+    ]
+  },
   [KiteSkinIDs.Red]: {
     id: KiteSkinIDs.Red,
     bodyTexture: `${TextureKeys.RedKite}_body_main`,
@@ -96,10 +115,10 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
     bridleRightOffset: { x: 180, y: 100 },
     bridleScale: 6.0,
     stringScale: 0.25,
-    knotOffset: { x: 0, y: 500 },
+    knotOffset: { x: 0, y: 800 },
     knotScale: 0.8,
     tails: [
-      // { textureKey: `${TextureKeys.RedKite}_body_tail`, offsetX: -80, offsetY: 180, length: 15 }, // 左尾
+      { textureKey: `${TextureKeys.RedKite}_body_tail`, offsetX: 0, offsetY: 330, length: 15, scale: 0.7 }, // 左尾
       { textureKey: `${TextureKeys.RedKite}_left_tail`, offsetX: -190, offsetY: 140, length: 10 }, // 左尾
       { textureKey: `${TextureKeys.RedKite}_right_tail`, offsetX: 190, offsetY: 140, length: 10 }   // 右尾
     ]

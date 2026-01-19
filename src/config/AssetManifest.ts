@@ -12,36 +12,6 @@ export interface IAssetDefinition {
 export const AssetManifest: IAssetDefinition[] = [
   // --- 角色 ---
   { key: TextureKeys.PlayerKite, path: 'assets/items/kite.png', type: 'image' },
-  { 
-    key: `${TextureKeys.BlueKite}_body_main`, 
-    path: 'assets/items/kite_blue_body_main.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.BlueKite}_body_tail`, 
-    path: 'assets/items/kite_blue_body_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.BlueKite}_left`, 
-    path: 'assets/items/kite_blue_left.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.BlueKite}_right`, 
-    path: 'assets/items/kite_blue_right.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.BlueKite}_string`, 
-    path: 'assets/items/kite_blue_string.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.BlueKite}_knot`, 
-    path: 'assets/items/kite_blue_knot.png', 
-    type: 'image' 
-  },
 
   { 
     key: `${TextureKeys.DefaultYellowKite}_body_main`, 
@@ -63,17 +33,49 @@ export const AssetManifest: IAssetDefinition[] = [
     path: 'assets/items/kite_default_yellow_knot.png', 
     type: 'image' 
   },
+  { 
+    key: `${TextureKeys.BlueKite}_body_main`, 
+    path: 'assets/items/kite_blue_body_main.png', 
+    type: 'image' 
+  },
+  // { 
+  //   key: `${TextureKeys.BlueKite}_body_tail`, 
+  //   path: 'assets/items/kite_blue_body_tail.png', 
+  //   type: 'image' 
+  // },
+  { 
+    key: `${TextureKeys.BlueKite}_left_tail`, 
+    path: 'assets/items/kite_blue_left_tail.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.BlueKite}_right_tail`, 
+    path: 'assets/items/kite_blue_right_tail.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.BlueKite}_string`, 
+    path: 'assets/items/kite_blue_string.png', 
+    type: 'image' 
+  },
+  { 
+    key: `${TextureKeys.BlueKite}_knot`, 
+    path: 'assets/items/kite_blue_knot.png', 
+    type: 'image' 
+  },
+
+  
 
   { 
     key: `${TextureKeys.RedKite}_body_main`, 
     path: 'assets/items/kite_red_body_main.png', 
     type: 'image' 
   },
-  // { 
-  //   key: `${TextureKeys.RedKite}_body_tail`, 
-  //   path: 'assets/items/kite_red_body_tail.png', 
-  //   type: 'image' 
-  // },
+  { 
+    key: `${TextureKeys.RedKite}_body_tail`, 
+    path: 'assets/items/kite_red_body_tail.png', 
+    type: 'image' 
+  },
   { 
     key: `${TextureKeys.RedKite}_left_tail`, 
     path: 'assets/items/kite_red_left_tail.png', 
