@@ -1,6 +1,9 @@
 import type { IPlayerConfig, IPlayerStateConfig } from "../types/GameTypes";
 
 export const PlayerConfig: IPlayerConfig = {
+  startY: 1200,         // 玩家初始高度
+
+
   startForce: -1200,      // 游戏开始时的初始向上冲量
   jumpForce: -800,       // 吃到云朵后的向上冲量
   moveSpeed: 400,        // 左右移动的最大速度

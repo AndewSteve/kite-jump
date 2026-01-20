@@ -8,6 +8,14 @@ import { EntityConfig, EntityId } from '../config/EntityConfig';
 import { WeightStat } from '../mechanics/WeightStat';
 import type { IModifier } from '../mechanics/StatDefinitions';
 
+export const GroupSpawnPatterns = {
+  line_vertical: 'line_vertical',
+  line_horizontal: 'line_horizontal',
+  sine: 'sine',
+  v_shape: 'v_shape',
+  arch: 'arch'
+} as const;
+export type GroupSpawnPattern = typeof GroupSpawnPatterns[keyof typeof GroupSpawnPatterns];
 
 export default class SpawnManager {
   private scene: GameScene;
@@ -242,6 +250,21 @@ export default class SpawnManager {
         }
     }
 
+    const coinCheck = initFactory();
+    if (coinCheck.type === EntityType.Coin) {
+      const patterns: GroupSpawnPattern[] = [
+        GroupSpawnPatterns.line_vertical,
+        GroupSpawnPatterns.line_horizontal,
+        GroupSpawnPatterns.sine,
+        GroupSpawnPatterns.v_shape,
+        GroupSpawnPatterns.arch
+      ];
+      const pattern = Phaser.Math.RND.pick(patterns);
+      const count = Phaser.Math.Between(3, 8);
+      this.spawnGroup(EntityId.Coin, x, y, pattern, count);
+      return;
+    }
+
     // D. 实例化
     const entity = this.interactables.get(x, y) as InteractableEntity;
     if (entity) {
@@ -260,7 +283,7 @@ export default class SpawnManager {
    * @param pattern 'line' | 'sine' | 'arch' | 'v_shape'
    * @param count 数量
    */
-  public spawnGroup(entityId: EntityId, startX: number, startY: number, pattern: string, count: number = 5) {
+  public spawnGroup(entityId: EntityId, startX: number, startY: number, pattern: GroupSpawnPattern, count: number = 5) {
     const gap = 60; // 间距
     const configFactory = EntityConfig[entityId];
     if (!configFactory) return;
@@ -271,25 +294,32 @@ export default class SpawnManager {
 
       // --- 简单的阵型数学计算 ---
       switch (pattern) {
-        case 'line_vertical': // 竖排 (经典吃金币)
+        case GroupSpawnPatterns.line_vertical: // 竖排 (经典吃金币)
           y = startY - i * gap; 
           break;
           
-        case 'line_horizontal': // 横排
+        case GroupSpawnPatterns.line_horizontal: // 横排
            // 居中偏移
            const totalWidth = (count - 1) * gap;
            x = startX - totalWidth / 2 + i * gap;
            break;
 
-        case 'sine': // 正弦波 (蛇形)
+        case GroupSpawnPatterns.sine: // 正弦波 (蛇形)
           y = startY - i * gap;
           x = startX + Math.sin(i * 0.5) * 100; // 100是摆动幅度
           break;
           
-        case 'v_shape': // V字形 (雁阵)
+        case GroupSpawnPatterns.v_shape: // V字形 (雁阵)
           const offset = Math.abs(i - Math.floor(count / 2));
           x = startX + (i - Math.floor(count / 2)) * gap;
           y = startY - offset * gap * 0.5;
+          break;
+
+        case GroupSpawnPatterns.arch: // 拱形
+          const t = count <= 1 ? 0 : i / (count - 1); // 0..1
+          const archTotalWidth = (count - 1) * gap;
+          x = startX - archTotalWidth / 2 + i * gap;
+          y = startY - Math.sin(t * Math.PI) * 120;
           break;
       }
 

@@ -6,8 +6,7 @@ import BuffManager from '../managers/BuffManager';
 import { ModifierType, StatType } from '../mechanics/StatDefinitions';
 import DataManager from '../managers/DataManager';
 import { DashConfig, DashLv1Buff, DashLv2Buff, DashLv3Buff, TransitionDashConfig } from '../config/BuffConfig';
-import { KiteBuffs, KiteConfigs } from '../config/KiteBuffConfig';
-import { KiteSkinIDs } from '../config/KiteSkinDef';
+import { KiteConfigs } from '../config/KiteBuffConfig';
 
 export default class PlayerState {
   private player: Player;
@@ -61,14 +60,6 @@ export default class PlayerState {
     // ✅ 新增：初始化风力为 0
     this.stats.initStat(StatType.EnvironmentWindX, 0);
     this.stats.initStat(StatType.EnvironmentWindY, 0);
-
-    // ✅ 应用风筝被动 (三国改装)
-    const kiteId = DataManager.data.selectedKiteId || KiteSkinIDs.DefaultYellow; // 默认无风筝
-    const buffConfig = KiteBuffs[kiteId];
-    if (buffConfig) {
-        this.buffs.addBuff(buffConfig);
-    }
-    
     // ✅ 注入局外成长 (Meta Progression)
     // 也可以做成 Modifier，这里直接改 Base 比较方便
     // 比如：StatType.MagnetRange 的 Base += 局外加成
@@ -79,6 +70,16 @@ export default class PlayerState {
     const currentMaxHealth = this.stats.get(StatType.MaxHealth);
     this.maxHealth = currentMaxHealth;
     this.health = currentMaxHealth;
+  }
+
+  public initBuffs() {
+    // ✅ 应用风筝被动 (三国改装)
+    const kiteSelection = DataManager.data.selectedKite; // 默认无风筝
+    const kiteConfig = KiteConfigs[kiteSelection.kiteId];
+    if (kiteConfig && kiteConfig.buffFactory) {
+      const buffConfig = kiteConfig.buffFactory();
+      this.buffs.addBuff(buffConfig);
+    }
   }
 
   update(dt: number) {

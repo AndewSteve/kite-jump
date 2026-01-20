@@ -2,20 +2,34 @@ import { DashEnergyIncrementAction, SpawnModifierAction } from "../actions/BuffA
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
 import { EntityId } from "./EntityConfig";
-import { KiteSkinIDs } from "./KiteSkinDef";
+import { KiteIds } from "./KiteConfig";
+
+
 
 export const KiteConfigs = {
-  shu: {
+  [KiteIds.Default]: {
+    tag: 'Passive.None',
+    name: '基础风筝',
+    description: '基础风筝: 无特殊能力。',
+    buffFactory: null
+  },
+  [KiteIds.Shu]: {
     tag: 'Passive.ShuCoin',
-    description: 'Shu Han: Lower gravity, faster speed, longer dash, double coins while dashing.'
+    name: '蜀汉·天工系',
+    description: '蜀汉·天工系: 重力低，速度更快，冲刺时间更长，冲刺时金币翻倍。',
+    buffFactory: () => ShuBuff
   },
-  wei: {
+  [KiteIds.Wei]: {
     tag: 'Passive.WeiMechanic',
-    description: 'Cao Wei: Higher gravity, enemies become buffs on collision.'
+    name: '曹魏·玄铁系',
+    description: '曹魏·玄铁系: 重力高，怪物碰撞时变为增益。',
+    buffFactory: () => WeiBuff
   },
-  wu: {
+  [KiteIds.Wu]: {
     tag: 'Passive.WuSpawn',
-    description: 'Eastern Wu: Cold resistance, more wind talismans, start with dash.',
+    name: '东吴·烽火系',
+    description: '东吴·烽火系: 抗寒，唤风符变多，开局冲刺。',
+    buffFactory: () => WuBuff,
     coldnessMultiplier: 0.9, // 东吴寒冷增长减半
     windSpawnMultiplier: 2.0,  // 东吴唤风符生成概率翻倍
   }
@@ -60,7 +74,7 @@ export const WuBuff: IBuffConfig = {
   onAdd: [ 
     new DashEnergyIncrementAction(100),
     new SpawnModifierAction({
-      entityId: EntityId.NormalCloud,
+      entityId: EntityId.WindRune,
       modifier: { type: ModifierType.Multiplier, value: 2.0, sourceId: 'Passive.WuSpawn' },
       isAdding: true
     })
@@ -69,11 +83,4 @@ export const WuBuff: IBuffConfig = {
     { stat: StatType.ColdGrowthRate, type: ModifierType.PercentAdd, value: -0.1 } // 寒冷增长 -10%
   ]
   // 注意：寒冷惩罚降低 10% 的逻辑比较复杂，可以在 PlayerState 里读 Tag 单独处理
-};
-
-export const KiteBuffs = {
-  [KiteSkinIDs.DefaultYellow]: null,
-  [KiteSkinIDs.Green]: ShuBuff,
-  wei: WeiBuff,
-  [KiteSkinIDs.Red]: WuBuff
 };

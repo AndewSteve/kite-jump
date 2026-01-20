@@ -15,6 +15,7 @@ import ScoreManager from "../managers/ScoreManager";
 import SummonManager from "../managers/SummonManager";
 import RenderManager from "../managers/RenderManager";
 import WeatherManager from "../managers/WeatherManager";
+import AudioManager from "../managers/AudioManager";
 
 export default class GameScene extends Phaser.Scene {
   // ✅ 1. 类型改为 Player 类
@@ -27,11 +28,13 @@ export default class GameScene extends Phaser.Scene {
   public spawnManager!: SpawnManager;
   public phaseManager!: PhaseManager; // 公开，给其他系统调用
   public summonManager!: SummonManager;
-  private isGameRunning: boolean = false;
   public renderManager!: RenderManager; // ✅ 新增
   public weatherManager!: WeatherManager;
   // 新增：缓存世界宽度
   private worldWidth!: number;
+
+  private isGameRunning: boolean = false;
+  private isPaused: boolean = false;
 
   constructor(key: string = "GameScene") {
     super(key);
@@ -42,21 +45,15 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.scene.launch(SceneKeys.UI); // 启动 UI 场景
-    const { width, height } = this.scale;
+    const { width } = this.scale;
+    this.isGameRunning = false;
+    this.isPaused = false;
     // 计算世界宽度
     this.worldWidth = width * GameConfig.level.worldWidthRatio;
 
-    // ✅ 移交给 Manager
-    // ✅ 初始化渲染管理器 (自动注册 Shader)
-    // ✅ 预热 Alpha 纹理
     this.renderManager = new RenderManager(this);
     this.backgroundManager = new BackgroundManager(this);
 
-    // --- 云朵组 ---
-    // 👹 强制预热黑魔法
-    // 创建一个不可见的图片，强迫 Phaser 把 'cloud_alpha' 上传到 GPU
-    // ✅ 关键：指定 classType 为 Cloud，这样 create 出来的就是 Cloud 实例
     this.interactables = this.physics.add.group({
       classType: InteractableEntity,
       maxSize: 50,
@@ -65,7 +62,8 @@ export default class GameScene extends Phaser.Scene {
     
     // --- 玩家 ---
     // ✅ 使用 Player 类创建
-    this.player = new Player(this, this.worldWidth / 2, height - 200);
+    const startY = GameConfig.player.startY;
+    this.player = new Player(this, this.worldWidth / 2, startY);
     this.scoreManager = new ScoreManager(this, this.player.y); // ✅ 传入初始 Y
     this.spawnManager = new SpawnManager(this, this.interactables, this.player);
     this.phaseManager = new PhaseManager(this);
@@ -111,18 +109,43 @@ export default class GameScene extends Phaser.Scene {
         this
     );
 
+    this.scene.launch(SceneKeys.UI); // 启动 UI 场景
+
     // --- 事件 ---
     this.setupEvents();
     this.enterReadyPhase();
+    this.cameras.main.scrollY = startY - GameConfig.camera.startOffsetY;
   }
 
   private setupEvents() {
     gameEvents.off(EVENTS.GAME_START);
-    gameEvents.off(EVENTS.GAME_OVER);
+    gameEvents.off(EVENTS.GAME_PAUSE);
+    gameEvents.off(EVENTS.GAME_RESUME);
     gameEvents.off(EVENTS.GAME_RESTART);
+    gameEvents.off(EVENTS.GAME_QUIT);
+    gameEvents.off(EVENTS.GAME_OVER);
 
     // ✅ 修改：不再写匿名函数，而是绑定到方法
     gameEvents.on(EVENTS.GAME_START, this.onGameStart, this);
+
+    // 暂停
+    gameEvents.on(EVENTS.GAME_PAUSE, () => {
+      this.isPaused = true;
+      // ✅ 新增：清理音效队列 (如风声、冲刺声等持续音效)
+      AudioManager.stopAllSfx();
+      this.physics.world.pause();
+      this.anims.pauseAll();
+      // 停止 update 循环 (除了渲染)
+      this.scene.pause(); 
+    });
+
+    // 恢复
+    gameEvents.on(EVENTS.GAME_RESUME, () => {
+      this.isPaused = false;
+      this.physics.world.resume();
+      this.anims.resumeAll();
+      this.scene.resume();
+    });
 
     gameEvents.on(
       EVENTS.GAME_OVER,
@@ -135,10 +158,18 @@ export default class GameScene extends Phaser.Scene {
     gameEvents.on(
       EVENTS.GAME_RESTART,
       () => {
+        gameEvents.removeAllListeners(); // 清理所有事件
         this.scene.restart();
       },
       this
     );
+
+    // 退出
+    gameEvents.on(EVENTS.GAME_QUIT, () => {
+      gameEvents.removeAllListeners();
+      this.scene.stop(SceneKeys.UI);
+      this.scene.start(SceneKeys.MainMenu);
+    });
   }
 
   // ✅ 新增：提取出来的启动逻辑
@@ -150,6 +181,7 @@ export default class GameScene extends Phaser.Scene {
     // 标准流程：进入 L1 正常阶段
     this.phaseManager.startFirstPhase(); 
     this.spawnManager.initClouds(this.worldWidth, 0);
+    this.player.playerState.initBuffs();
   }
 
   private enterReadyPhase() {
@@ -159,6 +191,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
+    if (this.isPaused) return;
     if (!this.isGameRunning) return;
 
     // ✅ 驱动渲染更新 (如果有 uTime 需求)

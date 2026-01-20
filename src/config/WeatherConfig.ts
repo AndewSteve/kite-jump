@@ -6,6 +6,7 @@ import {
   WeatherAuroraBuff 
 } from './BuffConfig';
 import { EntityId } from './EntityConfig';
+import { AudioKeys, type AudioKey } from './AssetKeys';
 
 export interface IWeatherSpawnModifier {
   entityId: EntityId;
@@ -21,6 +22,8 @@ export interface IWeatherConfig {
   
   buffs?: IBuffConfig[]; // 关联的全局 Buff
   spawnModifiers?: IWeatherSpawnModifier[]; // 关联的生成修正
+
+  sfxAudioKey?: AudioKey; // 天气音效 Key
   
   visualTag: string; // 视觉特效 Key
   visualTint?: number; // 简单的全屏色调 (测试用)
@@ -32,6 +35,7 @@ export const WeatherConfig: Record<string, IWeatherConfig> = {
     id: 'thunder',
     name: '雷暴',
     duration: 25,
+    sfxAudioKey: AudioKeys.SfxThunderstorm,
     weight: 40,
     visualTag: 'rain_storm',
     visualTint: 0xaaaaaa, // 变暗
@@ -47,6 +51,7 @@ export const WeatherConfig: Record<string, IWeatherConfig> = {
   blizzard: {
     id: 'blizzard',
     name: '凛冬暴雪',
+    sfxAudioKey: AudioKeys.SfxBlizzard,
     duration: 25,
     weight: 40,
     visualTag: 'snow_storm',
@@ -63,7 +68,7 @@ export const WeatherConfig: Record<string, IWeatherConfig> = {
         value: 0.25 
       },
       {
-        entityId: EntityId.ColdCloud,
+        entityId: EntityId.ColdFlue,
         type: ModifierType.PercentAdd,
         value: 0.15
       }
@@ -75,6 +80,7 @@ export const WeatherConfig: Record<string, IWeatherConfig> = {
     id: 'aurora',
     name: '极光磁暴',
     duration: 15,
+    sfxAudioKey: AudioKeys.SfxAurora,
     weight: 20,
     visualTag: 'aurora_lights',
     visualTint: 0xff00ff, // 紫色氛围
@@ -92,7 +98,7 @@ export const WeatherConfig: Record<string, IWeatherConfig> = {
       },
       // 2. 唤风令 +0.2
       {
-        entityId: EntityId.RedCloud,
+        entityId: EntityId.WindKey,
         type: ModifierType.PercentAdd,
         value: 0.2
       },
@@ -103,13 +109,13 @@ export const WeatherConfig: Record<string, IWeatherConfig> = {
         value: 0
       },
       {
-        entityId: EntityId.ColdCloud,
+        entityId: EntityId.ColdFlue,
         type: ModifierType.Multiplier,
         value: 0
       },
       // 也可以屏蔽普通云，让玩家专心吃钱
       {
-        entityId: EntityId.NormalCloud,
+        entityId: EntityId.WindRune,
         type: ModifierType.Multiplier,
         value: 0 
       }

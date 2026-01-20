@@ -4,6 +4,8 @@ import { ModifierType, StatType } from "../mechanics/StatDefinitions";
 import type GameScene from "../scenes/GameScene";
 import type { IBuffAction, IBuffContext } from "./ActionInterfaces";
 import type { EntityId } from "../config/EntityConfig";
+import type { AudioKey } from "../config/AssetKeys";
+import AudioManager from "../managers/AudioManager";
 
 export class ColdnessIncrementAction implements IBuffAction {
   private coldIncrease: number;
@@ -17,9 +19,8 @@ export class ColdnessIncrementAction implements IBuffAction {
     this.coldIncrease = coldIncrease;
   }
   execute(ctx: IBuffContext): void {
-    const player = ctx.player;
-    if (player.playerState.isDashing) return;
-    player.playerState.addColdness(this.coldIncrease);
+    if (ctx.player.playerState.isDashing) return;
+    ctx.player.playerState.addColdness(this.coldIncrease);
   }
 }
 
@@ -153,5 +154,16 @@ export class SpawnModifierAction implements IBuffAction {
     } else if (!this.isAdding && this.modifier) {
       scene.spawnManager.removeWeightModifier(this.entityId, this.modifier.sourceId);
     }
+  }
+}
+
+
+export class SfxAction implements IBuffAction {
+  private sfxAudioKey: AudioKey;
+  constructor(sfxAudioKey: AudioKey) {
+    this.sfxAudioKey = sfxAudioKey;
+  }
+  execute(_ctx: IBuffContext): void {
+    AudioManager.playSfx(this.sfxAudioKey);
   }
 }

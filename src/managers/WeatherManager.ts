@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import GameScene from '../scenes/GameScene';
 import { WeatherConfig, type IWeatherConfig } from '../config/WeatherConfig';
+import AudioManager from './AudioManager';
 
 export const WeatherState = {
   Idle: 'idle',     // 空闲 (等待触发)
@@ -114,6 +115,10 @@ export default class WeatherManager {
     // 简单的背景色调模拟
     if (config.visualTint) {
         // this.scene.cameras.main.setTint(config.visualTint);
+    }
+
+    if (config.sfxAudioKey) {
+      AudioManager.playSfx(config.sfxAudioKey);
     }
   }
 

@@ -1,134 +1,39 @@
 // src/config/AssetManifest.ts
 
-import { TextureKeys, UITextureKeys, VFXTextureKeys } from "./AssetKeys";
+import { AudioKeys, TextureKeys, UITextureKeys, VFXTextureKeys } from "./AssetKeys";
 
 export interface IAssetDefinition {
   key: string;
   path: string;
-  type: 'image' | 'spritesheet';
+  type: 'image' | 'spritesheet' | 'audio'; // ✅ 新增 audio 类型
   frameConfig?: Phaser.Types.Loader.FileTypes.ImageFrameConfig; // 用于精灵表
 }
 
+const SkinConfigs = [
+  { baseKey: TextureKeys.DefaultYellowKite, prefix: 'kite_default_yellow',
+    parts: ['body_main',                                          'string', 'knot'] },
+  { baseKey: TextureKeys.BlueKite, prefix: 'kite_blue',
+    parts: ['body_main',               'left_tail', 'right_tail', 'string', 'knot'] },
+  { baseKey: TextureKeys.RedKite,  prefix: 'kite_red',
+     parts: ['body_main', 'body_tail', 'left_tail', 'right_tail', 'string', 'knot'] },
+  { baseKey: TextureKeys.GreenKite, prefix: 'kite_green',
+     parts: ['body_main', 'body_tail', 'left_tail', 'right_tail', 'string', 'knot'] },
+];
+
+const SkinAssets: IAssetDefinition[] = SkinConfigs.flatMap(cfg => 
+  cfg.parts.map(part => ({
+    key: `${cfg.baseKey}_${part}`,         // 例如: kite_blue_body_main
+    path: `assets/items/${cfg.prefix}_${part}.png`, // 例如: assets/items/kite_blue_body_main.png
+    type: 'image'
+  }))
+);
+
 export const AssetManifest: IAssetDefinition[] = [
-  // --- 角色 ---
   { key: TextureKeys.PlayerKite, path: 'assets/items/kite.png', type: 'image' },
-
-  { 
-    key: `${TextureKeys.DefaultYellowKite}_body_main`, 
-    path: 'assets/items/kite_default_yellow_body_main.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.DefaultYellowKite}_body_tail`, 
-    path: 'assets/items/kite_default_yellow_body_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.DefaultYellowKite}_string`, 
-    path: 'assets/items/kite_default_yellow_string.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.DefaultYellowKite}_knot`, 
-    path: 'assets/items/kite_default_yellow_knot.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.BlueKite}_body_main`, 
-    path: 'assets/items/kite_blue_body_main.png', 
-    type: 'image' 
-  },
-  // { 
-  //   key: `${TextureKeys.BlueKite}_body_tail`, 
-  //   path: 'assets/items/kite_blue_body_tail.png', 
-  //   type: 'image' 
-  // },
-  { 
-    key: `${TextureKeys.BlueKite}_left_tail`, 
-    path: 'assets/items/kite_blue_left_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.BlueKite}_right_tail`, 
-    path: 'assets/items/kite_blue_right_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.BlueKite}_string`, 
-    path: 'assets/items/kite_blue_string.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.BlueKite}_knot`, 
-    path: 'assets/items/kite_blue_knot.png', 
-    type: 'image' 
-  },
-
-  
-
-  { 
-    key: `${TextureKeys.RedKite}_body_main`, 
-    path: 'assets/items/kite_red_body_main.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.RedKite}_body_tail`, 
-    path: 'assets/items/kite_red_body_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.RedKite}_left_tail`, 
-    path: 'assets/items/kite_red_left_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.RedKite}_right_tail`, 
-    path: 'assets/items/kite_red_right_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.RedKite}_string`, 
-    path: 'assets/items/kite_red_string.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.RedKite}_knot`, 
-    path: 'assets/items/kite_red_knot.png', 
-    type: 'image' 
-  },
-
-  { 
-    key: `${TextureKeys.GreenKite}_body_main`, 
-    path: 'assets/items/kite_green_body_main.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.GreenKite}_body_tail`, 
-    path: 'assets/items/kite_green_body_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.GreenKite}_left_tail`, 
-    path: 'assets/items/kite_green_left_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.GreenKite}_right_tail`, 
-    path: 'assets/items/kite_green_right_tail.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.GreenKite}_string`, 
-    path: 'assets/items/kite_green_string.png', 
-    type: 'image' 
-  },
-  { 
-    key: `${TextureKeys.GreenKite}_knot`, 
-    path: 'assets/items/kite_green_knot.png', 
-    type: 'image' 
-  },
+  ...SkinAssets,
   
   // --- 环境/背景 ---
+  { key: TextureKeys.BgMainMenu, path: 'assets/bg/bg_main_menu.png', type: 'image' },
   { key: TextureKeys.BgFrost, path: 'assets/bg/bg_frost.png', type: 'image' },
   { key: TextureKeys.BgRedCliff, path: 'assets/bg/bg_redcliff.png', type: 'image' },
   { key: TextureKeys.BgMarsh, path: 'assets/bg/bg_marsh.png', type: 'image' },
@@ -136,9 +41,16 @@ export const AssetManifest: IAssetDefinition[] = [
   
   // --- 云朵/道具 ---
   { key: TextureKeys.Cloud, path: 'assets/items/cloud.png', type: 'image' },
-  { key: TextureKeys.CloudRed, path: 'assets/items/cloud_red.png', type: 'image' },
+  { key: TextureKeys.Baozi, path: 'assets/items/baozi.png', type: 'image' },
+  { key: TextureKeys.Gourd, path: 'assets/items/gourd.png', type: 'image' },
+  { key: TextureKeys.WindRune, path: 'assets/items/wind_rune.png', type: 'image' },
+  { key: TextureKeys.WindKey, path: 'assets/items/wind_key.png', type: 'image' },
   { key: TextureKeys.SkyLantern, path: 'assets/items/sky_lantern.png', type: 'image' },
+  { key: TextureKeys.TacticsShild, path: 'assets/items/tactics_shild.png', type: 'image' },
+  { key: TextureKeys.Bamboo, path: 'assets/items/bamboo.png', type: 'image' },
   { key: TextureKeys.Vulture, path: 'assets/items/vulture.png', type: 'image' },
+  { key: TextureKeys.IceCrystals, path: 'assets/items/ice_crystals.png', type: 'image' },
+  { key: TextureKeys.ChaoticRune, path: 'assets/items/chaotic_rune.png', type: 'image' },
   { key: TextureKeys.WindArrow, path: 'assets/items/arrow_indicator.png', type: 'image' },
   
   // --- 特效/遮罩 ---
@@ -149,13 +61,45 @@ export const AssetManifest: IAssetDefinition[] = [
   
   // UI 资产
   { key: UITextureKeys.UITopFrame, path: 'assets/ui/ui_top_frame.png', type: 'image' },
+  { key: UITextureKeys.UIHUDFrame, path: 'assets/ui/ui_hud_frame.png', type: 'image' },
   { key: UITextureKeys.UIHourglassIcon, path: 'assets/ui/ui_hourglass_icon.png', type: 'image' },
   { key: UITextureKeys.UIMountainIcon, path: 'assets/ui/ui_mountain_icon.png', type: 'image' },
   { key: UITextureKeys.UICoinIcon, path: 'assets/ui/ui_coin_icon.png', type: 'image' },
+
+  { key: UITextureKeys.UIEnergyFrame, path: 'assets/ui/ui_energy_frame_empty.png', type: 'image' },
+  { key: UITextureKeys.UIEnergyFrameBack, path: 'assets/ui/ui_energy_frame_back_empty.png', type: 'image' },
+  { key: UITextureKeys.UIEnergyFill, path: 'assets/ui/ui_energy_fill.png', type: 'image' },
+  { key: UITextureKeys.UIEnergyPointer, path: 'assets/ui/ui_energy_pointer.png', type: 'image' },
 
   // --- 新增 VFX ---
   // 请将截图里的 "FX_TEX_Gra_Water_Wave_01.png" 改名为 noise_bar.png
   { key: VFXTextureKeys.VfxNoiseBar, path: 'assets/vfx/noise_bar.png', type: 'image' },
   // 请将截图里的 "FX_TEX_Circle_Ring_Wave_01.png" 改名为 ring.png
   { key: VFXTextureKeys.VfxRing, path: 'assets/vfx/ring.png', type: 'image' },
-];
+
+
+
+  // ✅ 新增：音频资源
+  // BGM
+  // { key: AudioKeys.BgmMainMenu, path: 'assets/audio/bgm_main_menu.mp3', type: 'audio' },
+  // { key: AudioKeys.BgmGame, path: 'assets/audio/bgm_game.mp3', type: 'audio' },
+
+  // SFX
+  { key: AudioKeys.SfxBtnClick, path: 'assets/audio/sfx_btn_click.wav', type: 'audio' },
+  // { key: AudioKeys.SfxGameStart, path: 'assets/audio/sfx_game_start.mp3', type: 'audio' },
+  { key: AudioKeys.SfxBtnLevelUp, path: 'assets/audio/sfx_btn_level_up.wav', type: 'audio' },
+
+  { key: AudioKeys.SfxJump, path: 'assets/audio/sfx_jump.mp3', type: 'audio' },
+  { key: AudioKeys.SfxDash, path: 'assets/audio/sfx_dash.MP3', type: 'audio' },
+  { key: AudioKeys.SfxCollect, path: 'assets/audio/sfx_collect.wav', type: 'audio' },
+  { key: AudioKeys.SfxNegativeCollect, path: 'assets/audio/sfx_negative_collect.wav', type: 'audio' },
+  { key: AudioKeys.SfxHit, path: 'assets/audio/sfx_hit.mp3', type: 'audio' },
+  { key: AudioKeys.SfxHeal, path: 'assets/audio/sfx_heal.wav', type: 'audio' },
+  { key: AudioKeys.SfxCrash, path: 'assets/audio/sfx_crash.mp3', type: 'audio' },
+  { key: AudioKeys.SfxThunderbolt, path: 'assets/audio/sfx_thunderbolt.mp3', type: 'audio' },
+
+  // { key: AudioKeys.SfxWind, path: 'assets/audio/sfx_wind.mp3', type: 'audio' },
+  { key: AudioKeys.SfxBlizzard, path: 'assets/audio/sfx_blizzard.mp3', type: 'audio' },
+  { key: AudioKeys.SfxThunderstorm, path: 'assets/audio/sfx_thunderstorm.wav', type: 'audio' },
+  { key: AudioKeys.SfxAurora, path: 'assets/audio/sfx_aurora.mp3', type: 'audio' },
+]

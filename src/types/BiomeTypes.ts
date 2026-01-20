@@ -1,3 +1,4 @@
+import type { AudioKey } from "../config/AssetKeys";
 import type { EntityId } from "../config/EntityConfig";
 import type { IBuffConfig } from "../mechanics/BuffTypes";
 import type { ModifierType, StatType } from "../mechanics/StatDefinitions";
@@ -24,6 +25,7 @@ export interface IBiomeData {
   // 视觉配置
   backgroundTexture: string;
   foregroundEffect?: string;
+  sfxAudioKey?: AudioKey;
 
   // 核心玩法配置
   spawnTable: Partial<Record<EntityId, ISpawnDefinition>>;

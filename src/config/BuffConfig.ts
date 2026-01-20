@@ -1,7 +1,8 @@
-import { ChangeWindAction, ColdnessIncrementAction, DashEnergyIncrementAction, ResetWindAction, SpawnMode, SummonAction } from "../actions/BuffActions";
+import { ChangeWindAction, ColdnessIncrementAction, DashEnergyIncrementAction, ResetWindAction, SfxAction, SpawnMode, SummonAction } from "../actions/BuffActions";
 import { LightningStrikeAction } from "../actions/MechanicActions";
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
+import { AudioKeys } from "./AssetKeys";
 import { SummonId } from "./SummonConfig";
 
 // --- 公共的操控性修正 (模拟之前的 2.0x 乘数) ---
@@ -39,7 +40,10 @@ export const DashLv1Buff: IBuffConfig = {
   duration: DashConfig.Lv1.duration, 
   maxStack: 1,
   tags: ['State.Dash', DashConfig.Lv1.tag, 'State.Invincible'], // 状态标签
-  modifiers: [...DashControlMods]
+  modifiers: [...DashControlMods],
+  onAdd:[
+    new SfxAction(AudioKeys.SfxDash),
+  ],
 };
 
 // Lv2: 凌空飞燕
@@ -49,7 +53,10 @@ export const DashLv2Buff: IBuffConfig = {
   duration: DashConfig.Lv2.duration,
   maxStack: 1,
   tags: ['State.Dash', DashConfig.Lv2.tag, 'State.Invincible'],
-  modifiers: [...DashControlMods]
+  modifiers: [...DashControlMods],
+  onAdd: [
+    new SfxAction(AudioKeys.SfxDash),
+  ],
 };
 
 // Lv3: 风神降临
@@ -59,7 +66,10 @@ export const DashLv3Buff: IBuffConfig = {
   duration: DashConfig.Lv3.duration,
   maxStack: 1,
   tags: ['State.Dash', DashConfig.Lv3.tag, 'State.Invincible', 'State.GoldMode'], // 金币模式标签
-  modifiers: [...DashControlMods]
+  modifiers: [...DashControlMods],
+  onAdd: [
+    new SfxAction(AudioKeys.SfxDash),
+  ],
 };
 
 export const TransitionDashConfig = {
@@ -81,7 +91,10 @@ export const TransitionBuff: IBuffConfig = {
   ],
   modifiers: [
     // 可以加一些视觉上的 Modifier，比如拖尾宽度
-  ]
+  ],
+  onAdd: [
+    new SfxAction(AudioKeys.SfxDash),
+  ],
 };
 
 export const SkyLaternBuff: IBuffConfig = {

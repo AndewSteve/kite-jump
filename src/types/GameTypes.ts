@@ -41,6 +41,8 @@ export interface IBiomeConfig {
 
 // ✅ 新增：详细的子配置接口
 export interface IPlayerConfig {
+  startY: number;         // 玩家初始高度
+
   jumpForce: number;
   startForce: number;
   moveSpeed: number;
@@ -79,6 +81,8 @@ export interface IPlayerStateConfig {
 }
 
 export interface ICameraConfig {
+  startOffsetY: number;
+
   lerpX: number;
   lerpY: number;
   deadzoneX: number;

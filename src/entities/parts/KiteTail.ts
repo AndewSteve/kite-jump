@@ -23,9 +23,15 @@ export class KiteTail extends Phaser.GameObjects.Rope {
   // 3. 系数：静止时风力乘数 (0.1 表示静止时只受 10% 的风，避免乱飘)
   private idleWindScale: number = 0.1; 
 
-  constructor(scene: Phaser.Scene, x: number, y: number, texture: string, length: number = 20) {
+  constructor(
+    scene: Phaser.Scene, 
+    x: number, y: number, 
+    texture: string, 
+    length: number = 20,
+    idleMoveEps?: number,
+  ) {
     super(scene, x, y, texture, undefined, length);
-    
+    this.idleMoveEps = idleMoveEps ?? this.idleMoveEps;
     // 初始化点
     for (let i = 0; i < length; i++) {
       this.pointsList.push(new Phaser.Math.Vector2(0, i * this.segmentLength));

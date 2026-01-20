@@ -29,7 +29,10 @@ export default class BuffManager {
         while (buff.tickAccumulator >= buff.config.tickInterval) {
           // 触发 Tick 行为
           if (buff.config.onTick) {
-            const context = { player: this.player, contextCancelled: false };
+            const context = { 
+              contextCancelled: false, 
+              player: this.player, 
+            };
             buff.config.onTick.forEach(action => {
               action.execute(context);
             });
@@ -44,7 +47,10 @@ export default class BuffManager {
         }
       }
       if (buff.config.onUpdate) {
-        const context = { player: this.player, contextCancelled: false };
+        const context = { 
+          contextCancelled: false, 
+          player: this.player, 
+        };
         buff.config.onUpdate.forEach(action => {
           action.execute(context);
         });
@@ -99,7 +105,10 @@ export default class BuffManager {
     }
 
     if (buff.config.onAdd) {
-      const context = { player: this.player, contextCancelled: false };
+      const context = { 
+        player: this.player, 
+        contextCancelled: false, 
+      };
       buff.config.onAdd.forEach(action => {
         action.execute(context);
       });
@@ -120,7 +129,10 @@ export default class BuffManager {
     }
 
     if (buff.config.onRemove) {
-      const context = { player: this.player, contextCancelled: false };
+      const context = { 
+        player: this.player, 
+        contextCancelled: false,
+      };
       buff.config.onRemove.forEach(action => {
         action.execute(context);
       });

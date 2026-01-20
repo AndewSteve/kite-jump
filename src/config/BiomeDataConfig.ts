@@ -6,17 +6,17 @@ import { TextureKeys } from "./AssetKeys";
 import type { ISpawnDefinition } from "../types/GameTypes";
 
 const StandardSpawnTable = {
-  [EntityId.NormalCloud]: {
+  [EntityId.WindRune]: {
     weight: 70,
-    init: EntityConfig[EntityId.NormalCloud],
+    init: EntityConfig[EntityId.WindRune],
   },
   [EntityId.UnbrokenFire]: {
     weight: 20,
     init: EntityConfig[EntityId.UnbrokenFire],
   },
-  [EntityId.RedCloud]: {
+  [EntityId.WindKey]: {
     weight: 1,
-    init: EntityConfig[EntityId.RedCloud],
+    init: EntityConfig[EntityId.WindKey],
   },
   [EntityId.Coin]: {
     weight: 10,
@@ -34,7 +34,7 @@ const StandardSpawnTable = {
 
 const RedCliffSpawnTable = {
   // L2 特有刷怪配置
-  [EntityId.NormalCloud]: { weight: 30, init: EntityConfig[EntityId.NormalCloud] }, 
+  [EntityId.WindRune]: { weight: 30, init: EntityConfig[EntityId.WindRune] }, 
   // 假设有热气流道具
   // thermal_vent: { weight: 50, init: EntityConfig.thermal_vent },
 } satisfies Partial<Record<EntityId, ISpawnDefinition>>

@@ -2,6 +2,7 @@
 import { BaseSummon, type ISummonInitData } from './BaseSummon';
 import { StatType, ModifierType } from '../../mechanics/StatDefinitions';
 import { TextureKeys } from '../../config/AssetKeys';
+import { EntityTextureScale } from '../../config/EntityConfig';
 
 export class FrostVortex extends BaseSummon {
   private readonly RADIUS = 250; // 吸力半径
@@ -16,7 +17,7 @@ export class FrostVortex extends BaseSummon {
     this.ensureSummonId();
     // 只有视觉和位置，不负责判定死亡
     this.setAlpha(0.8);
-    this.setScale(1.5);
+    this.setScale(EntityTextureScale);
     // this.play('vortex_anim'); 
   }
 

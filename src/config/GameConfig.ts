@@ -18,6 +18,7 @@ export const GameConfig: IGameConfig = {
 
   // --- 相机设置 (独立配置) ---
   camera: {
+    startOffsetY: -900,   // 相机初始偏移Y
     lerpX: 0.1,        // X轴不跟随
     lerpY: 0.08,     // Y轴跟随平滑度：数值越小越平滑，但也越滞后。0.08 比 0.1 更柔和
     deadzoneX: 0.2,  // 死区倍率

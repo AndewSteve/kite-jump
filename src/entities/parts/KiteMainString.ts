@@ -20,12 +20,12 @@ export class KiteMainString extends Phaser.GameObjects.Rope {
   private constraintIters = 2;
 
   // --- 静止抑制（避免 knot 不动时一直抖）---
-  private idleMoveEps = 0.2; // world px / frame
+  private idleMoveEps = 10; // world px / frame
   private idleWindScale = 0.0; // 静止时风力缩放
   private sleepVelEps = 0.03; // local px / frame
 
   // --- 末端锚点模式（X 跟随、Y 弹簧）---
-  private tailAnchorEnabled = false;
+  private tailAnchorEnabled = true;
   private tailAnchorWorldX = 0;
   private tailAnchorWorldY = 0;
   private tailAnchorVelY = 0;
@@ -42,9 +42,10 @@ export class KiteMainString extends Phaser.GameObjects.Rope {
   private lastHeadWorldY = 0;
   private hasLastHead = false;
 
-  constructor(scene: Phaser.Scene, texture: string, segments = 22) {
+  constructor(scene: Phaser.Scene, texture: string, segments = 22, segmentLength = 40) {
     super(scene, 0, 0, texture, undefined, segments);
 
+    this.segmentLength = segmentLength;
     for (let i = 0; i < segments; i++) {
       const p = new Phaser.Math.Vector2(0, i * this.segmentLength);
       this.pointsList.push(p.clone());

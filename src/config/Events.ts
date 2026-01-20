@@ -4,9 +4,12 @@ export const gameEvents = new Phaser.Events.EventEmitter();
 
 export const EVENTS = {
   GAME_START: 'game-start',       // UI -> Game: 玩家点击开始
+  GAME_PAUSE: 'game-pause',       // UI -> Game: 暂停
+  GAME_RESUME: 'game-resume',     // UI -> Game: 恢复
   GAME_OVER: 'game-over',         // Logic -> Game: 玩家死亡
   SHOW_GAME_OVER: 'show-game-over',// Game -> UI: 玩家死亡
   GAME_RESTART: 'game-restart',   // UI -> Game: 玩家点击重开
+  GAME_QUIT: 'game-quit',         // UI -> Game: 返回主菜单
 
   UPDATE_HEIGHT: 'update-height',   // Game -> UI: 更新高度
   UPDATE_SCORE: 'update-score',   // Game -> UI: 更新分数

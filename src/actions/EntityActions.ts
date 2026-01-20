@@ -4,6 +4,8 @@ import type { IBuffConfig } from '../mechanics/BuffTypes';
 import { StatType } from '../mechanics/StatDefinitions';
 import type { IEntityAction, InteractionContext } from './ActionInterfaces';
 import type { BaseSummon } from '../entities/summons/BaseSummon';
+import type { AudioKey } from '../config/AssetKeys';
+import AudioManager from '../managers/AudioManager';
 
 /**
  * 行为：减速 + 增加寒冷
@@ -142,9 +144,13 @@ export class HasBuffTagOrVanishAction implements IEntityAction {
  */
 export class VanishAction implements IEntityAction {
   private duration: number;
+  private sfxAudioKey: AudioKey | null = null;
+  private pushScale: number;
 
-  constructor(duration: number = 150) {
+  constructor(duration: number = 150, sfxAudioKey: AudioKey | null = null, pushScale: number = 1.2) {
     this.duration = duration;
+    this.sfxAudioKey = sfxAudioKey;
+    this.pushScale = pushScale;
   }
 
   execute(ctx: InteractionContext): void {
@@ -155,12 +161,18 @@ export class VanishAction implements IEntityAction {
         target.body.enable = false;
     }
 
+    // 可选：播放消失音效
+    if (this.sfxAudioKey) {
+      // ctx.scene.sound.play(this.sfxAudioKey);
+      AudioManager.playSfx(this.sfxAudioKey);
+    }
+
     // 播放动画
     ctx.scene.tweens.add({
       targets: target,
       alpha: 0,
-      scaleX: 1.2,
-      scaleY: 1.2,
+      scaleX: this.pushScale,
+      scaleY: this.pushScale,
       duration: this.duration,
       onComplete: () => {
         // 动画播完，彻底回收

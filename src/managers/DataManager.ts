@@ -1,12 +1,18 @@
 // src/managers/DataManager.ts
 
 import { GameConfig } from "../config/GameConfig";
+import { KiteIds, type KiteId } from "../config/KiteConfig";
 import { KiteSkinIDs, type KiteSkinID } from "../config/KiteSkinDef";
 
 export interface GameRecord {
   date: string;
   score: number;
   height: number;
+}
+
+export interface KiteSelection {
+  skinId: KiteSkinID;
+  kiteId: KiteId;
 }
 
 export interface UserSaveData {
@@ -18,7 +24,14 @@ export interface UserSaveData {
     windMastery: number; // 御风值等级
     auraRange: number;   // 灵韵磁场等级
   };
-  selectedKiteId: KiteSkinID; // 当前选中的风筝
+  selectedKite: KiteSelection;
+
+  // ✅ 新增：音频设置
+  settings: {
+    bgmVolume: number; // 0.0 - 1.0
+    sfxVolume: number; // 0.0 - 1.0
+    muted: boolean;
+  };
 }
 
 const DEFAULT_SAVE: UserSaveData = {
@@ -26,18 +39,32 @@ const DEFAULT_SAVE: UserSaveData = {
   highScore: 0,
   history: [],
   upgrades: { lightness: 0, windMastery: 0, auraRange: 0 },
-  selectedKiteId: KiteSkinIDs.DefaultYellow
+  selectedKite: {
+    skinId: KiteSkinIDs.DefaultYellow,
+    kiteId: KiteIds.Default
+  },
+  settings: {
+    bgmVolume: 0.5,
+    sfxVolume: 0.8,
+    muted: false
+  }
 };
 
 export default class DataManager {
   private static _data: UserSaveData;
-  private static readonly SAVE_KEY = 'kite_jump_save_v1';
+  private static readonly SAVE_KEY = 'kite_jump_save_v2';
 
   // --- 基础读写 ---
   static load() {
     const raw = localStorage.getItem(this.SAVE_KEY);
     if (raw) {
-      this._data = JSON.parse(raw);
+      try {
+        const parsed = JSON.parse(raw);
+        // 合并默认值，防止旧存档缺字段
+        this._data = { ...DEFAULT_SAVE, ...parsed, settings: { ...DEFAULT_SAVE.settings, ...parsed.settings } };
+      } catch (e) {
+        this._data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
+      }
     } else {
       this._data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
     }

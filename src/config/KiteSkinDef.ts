@@ -40,6 +40,8 @@ export interface IKiteSkin {
   knotScale?: number;      // 绳结缩放 (默认 1.0)
 
   stringScale?: number;    // 主垂线粗细缩放 (默认 0.5)
+  stringSegments?: number; // 主垂线节数 (默认 22)
+  stringSegmentLength?: number; // 主垂线每节长度 (默认 40)
 
   // 尾巴列表 (支持多个)
   tails?: ITailDef[];
@@ -61,6 +63,8 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
     bridleScale: 5.0,
 
     stringScale: 0.2,
+    stringSegments: 360,
+    stringSegmentLength: 120,
     
     knotOffset: { x: 0, y: 200 }, // 绳结在身体下方一点点
     knotScale: 0.3,
@@ -76,8 +80,12 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
     bridleLeftOffset: { x: -220, y: 100 },
     bridleRightOffset: { x: 220, y: 100 },
     bridleScale: 6.0,
+
     stringScale: 0.2,
-    knotOffset: { x: 0, y: 600 },
+    stringSegments: 360,
+    stringSegmentLength: 120,
+
+    knotOffset: { x: 0, y: 160 },
     knotScale: 0.4,
     tails: [
       { textureKey: `${TextureKeys.GreenKite}_body_tail`, offsetX: 0, offsetY: 260, length: 10 }, // 左尾
@@ -96,8 +104,12 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
     bridleLeftOffset: { x: -180, y: 100 },
     bridleRightOffset: { x: 180, y: 100 },
     bridleScale: 6.0,
+
     stringScale: 0.125,
-    knotOffset: { x: 0, y: 800 },
+    stringSegments: 240,
+    stringSegmentLength: 120,
+
+    knotOffset: { x: 0, y: 150 },
     knotScale: 0.8,
     tails: [
       // { textureKey: `${TextureKeys.BlueKite}_body_tail`, offsetX: 0, offsetY: 330, length: 15, scale: 0.7 }, // 左尾
@@ -114,8 +126,12 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
     bridleLeftOffset: { x: -180, y: 100 },
     bridleRightOffset: { x: 180, y: 100 },
     bridleScale: 6.0,
+
     stringScale: 0.25,
-    knotOffset: { x: 0, y: 800 },
+    stringSegments: 360,
+    stringSegmentLength: 120,
+
+    knotOffset: { x: 0, y: 170 },
     knotScale: 0.8,
     tails: [
       { textureKey: `${TextureKeys.RedKite}_body_tail`, offsetX: 0, offsetY: 330, length: 15, scale: 0.7 }, // 左尾

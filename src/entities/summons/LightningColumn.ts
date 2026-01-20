@@ -1,5 +1,7 @@
 import { BaseSummon, type ISummonInitData } from './BaseSummon';
 import { GameConfig } from '../../config/GameConfig';
+import AudioManager from '../../managers/AudioManager';
+import { AudioKeys } from '../../config/AssetKeys';
 
 export class LightningColumn extends BaseSummon {
   private isStriking: boolean = false; // 是否处于伤害阶段
@@ -72,6 +74,8 @@ export class LightningColumn extends BaseSummon {
     )
         .setScrollFactor(0)
         .setDepth(100); // 最上层
+
+    AudioManager.playSfx(AudioKeys.SfxThunderbolt);
     
     // 闪电冲击动画 (0.2秒瞬间)
     this.scene.tweens.add({

@@ -5,7 +5,6 @@ import PlayerState from './PlayerState';
 import PlayerStatusUI from '../ui/PlayerStatusUI'; // ✅ 引入新类
 import DataManager from '../managers/DataManager';
 import { KiteVisual } from './KiteVisual';
-import { KiteSkinIDs } from '../config/KiteSkinDef';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -36,8 +35,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'pixel');
     this.setVisible(false);      // 隐藏物理体
     // 创建表现层
-    const kiteId = DataManager.data.selectedKiteId || KiteSkinIDs.DefaultYellow;
-    this.visual = new KiteVisual(scene, KiteSkinIDs.Blue);
+    const skinId = DataManager.data.selectedKite.skinId;
+    this.visual = new KiteVisual(scene, skinId);
     scene.add.existing(this.visual);
 
     // 计算实际活动宽度：720 * 1.5 = 1080

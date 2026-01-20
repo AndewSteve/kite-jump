@@ -2,6 +2,7 @@
 import Phaser from 'phaser';
 import { AssetManifest } from '../config/AssetManifest';
 import { SceneKeys } from '../config/GameConfig';
+import AudioManager from '../managers/AudioManager';
 
 export default class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -50,6 +51,8 @@ export default class PreloadScene extends Phaser.Scene {
          this.load.image(asset.key, asset.path);
        } else if (asset.type === 'spritesheet' && asset.frameConfig) {
          this.load.spritesheet(asset.key, asset.path, asset.frameConfig);
+       } else if (asset.type === 'audio') { // ✅ 处理音频
+         this.load.audio(asset.key, asset.path);
        }
        // 还可以扩展 audio, json 等
     });
@@ -57,8 +60,10 @@ export default class PreloadScene extends Phaser.Scene {
 
   create() {
     // 资源加载完毕，准备进入游戏
+    AudioManager.init(this.game);
     
     this.scene.start(SceneKeys.Lab);
+    // this.scene.start(SceneKeys.MainMenu);
     // // 🧪 检查 URL 参数，决定是进实验室还是进游戏
     // const urlParams = new URLSearchParams(window.location.search);
     // if (urlParams.has('lab')) {
