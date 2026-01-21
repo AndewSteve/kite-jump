@@ -15,7 +15,7 @@ export const createHistoryBar = (
 
   const historyBg = scene.add.rectangle(0, 0, 400, 50, 0x333344, 0.8)
     .setStrokeStyle(1, 0x555566);
-  const highScoreText = scene.add.text(0, 0, `👑 最高记录: ${DataManager.data.highScore}m`, {
+  const highScoreText = scene.add.text(0, 0, `👑 最高记录: ${DataManager.data.highestHeight}m`, {
     fontSize: '24px',
     color: '#ffd700',
     stroke: '#000000',

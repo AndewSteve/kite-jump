@@ -19,7 +19,7 @@ export interface KiteSelection {
 
 export interface UserSaveData {
   currency: number;
-  highScore: number;
+  highestHeight: number;
   history: GameRecord[]; // 游玩历史
   upgrades: {
     lightness: number;   // 轻盈度等级
@@ -38,7 +38,7 @@ export interface UserSaveData {
 
 const DEFAULT_SAVE: UserSaveData = {
   currency: 1000, // 初始给点钱方便测试
-  highScore: 0,
+  highestHeight: 0,
   history: [],
   upgrades: { lightness: 0, windMastery: 0, auraRange: 0 },
   selectedKite: {
@@ -54,7 +54,7 @@ const DEFAULT_SAVE: UserSaveData = {
 
 export default class DataManager {
   private static _data: UserSaveData;
-  private static readonly SAVE_KEY = 'kite_jump_save_v2';
+  private static readonly SAVE_KEY = 'kite_jump_save_v3';
 
   // --- 基础读写 ---
   static load() {
@@ -95,8 +95,8 @@ export default class DataManager {
     if (this.data.history.length > 20) this.data.history.pop();
     
     // 更新最高分
-    if (score > this.data.highScore) {
-        this.data.highScore = score;
+    if (height > this.data.highestHeight) {
+        this.data.highestHeight = height;
     }
     
     // 累加金币 (假设分数 1:1 转金币，或者你可以定义转换率)
