@@ -5,41 +5,56 @@ import { ModifierType, StatType } from "../mechanics/StatDefinitions";
 import { TextureKeys } from "./AssetKeys";
 import type { ISpawnDefinition } from "../types/GameTypes";
 
+// ✅ 1. 标准表 (L1): 借风符, 血包, 金币, 乱流 , 孔明灯
 const StandardSpawnTable = {
-  [EntityId.WindRune]: {
-    weight: 70,
-    init: EntityConfig[EntityId.WindRune],
-  },
-  [EntityId.UnbrokenFire]: {
-    weight: 20,
-    init: EntityConfig[EntityId.UnbrokenFire],
-  },
-  [EntityId.WindKey]: {
-    weight: 1,
-    init: EntityConfig[EntityId.WindKey],
-  },
-  [EntityId.Coin]: {
-    weight: 10,
-    init: EntityConfig[EntityId.Coin],
-  },
-  // cold_cloud: {
-  //   weight: 10,
-  //   init: EntityConfig.cold_cloud,
-  // },
-  // iron_vulture: {
-  //   weight: 20,
-  //   init: EntityConfig.iron_vulture,
-  // },
+  [EntityId.WindRune]:    { weight: 70, init: EntityConfig[EntityId.WindRune] }, // 基础极高，保证新手体验
+  [EntityId.Coin]:        { weight: 8,  init: EntityConfig[EntityId.Coin] },
+  [EntityId.ChaoticRune]: { weight: 15,  init: EntityConfig[EntityId.ChaoticRune] },
+  [EntityId.HealBag]:     { weight: 2,  init: EntityConfig[EntityId.HealBag] }, // 稀有掉落
+  [EntityId.SkyLantern]:      { weight: 5, init: EntityConfig[EntityId.SkyLantern] },
 } satisfies Partial<Record<EntityId, ISpawnDefinition>>
 
+// ✅ 2. L2 表: 标准表基础 + 新增 霹雳火, 唤风令, 八卦盾, 寒流, 机关秃鹫
 const RedCliffSpawnTable = {
-  // L2 特有刷怪配置
-  [EntityId.WindRune]: { weight: 30, init: EntityConfig[EntityId.WindRune] }, 
-  // 假设有热气流道具
-  // thermal_vent: { weight: 50, init: EntityConfig.thermal_vent },
+  [EntityId.WindRune]:    { weight: 63, init: EntityConfig[EntityId.WindRune] }, // 基础极高，保证新手体验
+  [EntityId.Coin]:        { weight: 8,  init: EntityConfig[EntityId.Coin] },
+  [EntityId.ChaoticRune]: { weight: 8,  init: EntityConfig[EntityId.ChaoticRune] },
+  [EntityId.HealBag]:     { weight: 2,  init: EntityConfig[EntityId.HealBag] }, // 稀有掉落
+  //80
+
+  // --- 新增 L2 特有 ---
+  [EntityId.UnbrokenFire]: { weight: 5, init: EntityConfig[EntityId.UnbrokenFire] },
+  [EntityId.WindKey]:      { weight: 2, init: EntityConfig[EntityId.WindKey] }, // 较稀有
+  [EntityId.TacticsShild]: { weight: 5, init: EntityConfig[EntityId.TacticsShild] },
+  [EntityId.ColdFlue]:     { weight: 4, init: EntityConfig[EntityId.ColdFlue] }, // 危险
+  [EntityId.IronVulture]:  { weight: 3, init: EntityConfig[EntityId.IronVulture] }, // 危险
+
 } satisfies Partial<Record<EntityId, ISpawnDefinition>>
 
+// ✅ 3. L3 表: L2基础 + 孔明灯, 漩涡核心
+const CloudMarshSpawnTable = {
+  [EntityId.WindRune]:    { weight: 60, init: EntityConfig[EntityId.WindRune] }, 
+  [EntityId.Coin]:        { weight: 8,  init: EntityConfig[EntityId.Coin] },
+  [EntityId.ChaoticRune]: { weight: 5,  init: EntityConfig[EntityId.ChaoticRune] },
+  [EntityId.HealBag]:     { weight: 2,  init: EntityConfig[EntityId.HealBag] }, // 稀有掉落
+  //68
+  [EntityId.UnbrokenFire]: { weight: 5, init: EntityConfig[EntityId.UnbrokenFire] },
+  [EntityId.WindKey]:      { weight: 2, init: EntityConfig[EntityId.WindKey] }, // 较稀有
+  [EntityId.TacticsShild]: { weight: 5, init: EntityConfig[EntityId.TacticsShild] },
+  [EntityId.ColdFlue]:     { weight: 4, init: EntityConfig[EntityId.ColdFlue] }, // 危险
+  [EntityId.IronVulture]:  { weight: 4, init: EntityConfig[EntityId.IronVulture] }, // 危险
+  //27
+  // --- 新增 L3 特有 ---
+  [EntityId.SkyLantern]:      { weight: 3, init: EntityConfig[EntityId.SkyLantern] },
+  [EntityId.FrostVortexCore]: { weight: 2, init: EntityConfig[EntityId.FrostVortexCore] }, // 核心较少，因为它是BOSS级机制
+} satisfies Partial<Record<EntityId, ISpawnDefinition>>
 
+// ✅ 4. L4 表: 同 L3 (直接复用)
+const WindCaveSpawnTable = {
+  ...CloudMarshSpawnTable
+} satisfies Partial<Record<EntityId, ISpawnDefinition>>
+
+ 
 // ✅ 静态数据表：这里是“导演”的剧本库
 export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
   [BiomeId.L1_Frost]: {
@@ -69,7 +84,7 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     name: "云梦泽",
     durationMeters: 400,
     backgroundTexture: TextureKeys.BgMarsh,
-    spawnTable: StandardSpawnTable,
+    spawnTable: CloudMarshSpawnTable,
     envModifiers: [
       {
         stat: StatType.Drag,
@@ -85,7 +100,7 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     name: "墨家风洞",
     durationMeters: 400,
     backgroundTexture: TextureKeys.BgWindCave,
-    spawnTable: StandardSpawnTable,
+    spawnTable: WindCaveSpawnTable,
     // ✅ 挂载机制
     buffs: [ WindCaveMechanicBuff ]
   }

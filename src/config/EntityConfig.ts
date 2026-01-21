@@ -28,7 +28,7 @@ export const EntityId = {
 
 export type EntityId = typeof EntityId[keyof typeof EntityId];
 
-export const EntityTextureScale = 0.07; // 针对 2048*2048
+export const EntityTextureScale = 0.14; // 针对 2048*2048
 
 // ✅ 工厂形式：每次调用都返回全新配置对象（尤其是 actions / Action 实例）
 export const EntityConfig = {
@@ -38,10 +38,10 @@ export const EntityConfig = {
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
     comment: "借风符",
-    color: 0xffffff,
+    // color: 0xffffff,
     onHit: [
-      new BoostAction(-900), // 普通力度
-      new DashEnergyIncrementAction(5), // 增加冲刺能量
+      new BoostAction(-750), // 普通力度
+      new DashEnergyIncrementAction(2), // 增加冲刺能量
       new VanishAction(150, AudioKeys.SfxJump, 0.09)     // 踩了消失
     ]
   }),
@@ -51,10 +51,10 @@ export const EntityConfig = {
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
     onHit: [
-      new BoostAction(-800), // 力度适中
+      new BoostAction(-750), // 力度适中
       new ColdnessIncrementAction(-15), // 增加体温
       new ApplyBuffAction(SkyLaternBuff),
-      new DashEnergyIncrementAction(8), // 增加冲刺能量
+      new DashEnergyIncrementAction(6), // 增加冲刺能量
       new VanishAction(150, AudioKeys.SfxCollectCoin2, EntityTextureScale * 1.2)
     ]
   }),
@@ -63,11 +63,11 @@ export const EntityConfig = {
     texture: TextureKeys.Gourd, 
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
-    color: 0xbd00ff,
+    // color: 0xbd00ff,
     onHit: [
-      new BoostAction(-1500), // 大力度
-      new ColdnessIncrementAction(-30), // 增加体温
-      new DashEnergyIncrementAction(15), // 增加冲刺能量
+      new BoostAction(-1000), // 大力度
+      new ColdnessIncrementAction(-25), // 增加体温
+      new DashEnergyIncrementAction(10), // 增加冲刺能量
       new VanishAction(150, AudioKeys.SfxCollectCoin3, EntityTextureScale * 1.2)
     ]
   }),
@@ -76,7 +76,7 @@ export const EntityConfig = {
     texture: TextureKeys.WindKey, 
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
-    color: 0xff0000,
+    // color: 0xff0000,
     onHit: [
       new DashEnergyIncrementAction(100), // 增加冲刺能量
       new VanishAction(150, AudioKeys.SfxCollectCoin1, EntityTextureScale * 1.2)
@@ -87,8 +87,9 @@ export const EntityConfig = {
     texture: TextureKeys.TacticsShild, 
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
-    color: 0x00ff00,
+    // color: 0x00ff00,
     onHit: [
+      new BoostAction(-600), 
       new ApplyBuffAction(TacticsBuff),
       new VanishAction(150, AudioKeys.SfxCollectCoin2, EntityTextureScale * 1.2)
     ]
@@ -96,12 +97,12 @@ export const EntityConfig = {
   // 金币
   [EntityId.Coin]: () => ({
     texture: TextureKeys.Bamboo, 
-    scale: EntityTextureScale,
+    scale: EntityTextureScale * 0.6,
     type: EntityType.Coin,
-    color: 0xffd700,
+    // color: 0xffd700,
     onHit: [
-      new CoinAction(2),
-      new VanishAction(150, null, EntityTextureScale * 1.2)
+      new CoinAction(200),
+      new VanishAction(150, null, EntityTextureScale * 0.6)
     ]
   }),
   // 急救包
@@ -109,8 +110,9 @@ export const EntityConfig = {
     texture: TextureKeys.Baozi,
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
-    color: 0x00ffdd,
+    // color: 0x00ffdd,
     onHit: [
+      new BoostAction(-600), 
       new HealAction(1), // 恢复1点生命值
       new VanishAction(150, AudioKeys.SfxHeal, EntityTextureScale * 1.2)
     ]
@@ -122,10 +124,10 @@ export const EntityConfig = {
     texture: TextureKeys.ChaoticRune, 
     scale: EntityTextureScale,
     type: EntityType.Hazard, // ✅ 危险
-    color: 0x00ffff,
+    // color: 0x00ffff,
     onHit: [
-      new SlowDownAction(-900+400),     // 强制减速
-      new DashEnergyIncrementAction(-2), // 减少冲刺能量
+      new SlowDownAction(-900+300),     // 强制减速
+      new DashEnergyIncrementAction(-1), // 减少冲刺能量
       new VanishAction(150, AudioKeys.SfxNegativeCollect, EntityTextureScale * 1.2)
     ]
   }),
@@ -134,7 +136,7 @@ export const EntityConfig = {
     texture: TextureKeys.IceCrystals, 
     scale: EntityTextureScale,
     type: EntityType.Hazard, // ✅ 危险
-    color: 0x00ffff,
+    // color: 0x00ffff,
     onHit: [
       new HasBuffTagOrVanishAction({
         tag: TacticsConfig.tag,
@@ -142,7 +144,7 @@ export const EntityConfig = {
       }),
       new SlowDownAction(-900+300),     // 强制减速
       new ColdnessIncrementAction(15), // 增加寒冷值
-      new DashEnergyIncrementAction(-5), // 减少冲刺能量
+      new DashEnergyIncrementAction(-4), // 减少冲刺能量
       new VanishAction(150, AudioKeys.SfxNegativeCollect, EntityTextureScale * 1.2)
     ]
   }),

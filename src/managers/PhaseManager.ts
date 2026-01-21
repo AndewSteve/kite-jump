@@ -9,7 +9,8 @@ import { EVENTS, gameEvents } from '../config/Events';
 export default class PhaseManager {
   private scene: GameScene;
   private currentPhase: IGamePhase;
-  private biomeQueue: BiomeId[] = []; // 待播放列表
+  // ✅ 新增：记录当前的生态 ID，用于去重逻辑
+  private currentBiomeId: BiomeId = BiomeId.L1_Frost;
 
   constructor(scene: GameScene) {
     this.scene = scene;
@@ -18,12 +19,8 @@ export default class PhaseManager {
 
   public startFirstPhase() {
     // 根据策划案：L1 是固定的
+    this.currentBiomeId = BiomeId.L1_Frost;
     this.switchPhase(new NormalPhase(), BiomeLibrary[BiomeId.L1_Frost]);
-    
-    // 预设接下来的顺序 (或者动态生成)
-    // 示例：L1 -> L3 -> L2/L4 随机
-    // this.biomeQueue = [BiomeId.L2_RedCliff];
-    this.biomeQueue = [BiomeId.L3_CloudMarsh];
   }
 
   public update(dt: number) {
@@ -54,7 +51,7 @@ export default class PhaseManager {
       // 正常关卡结束 -> 进过渡 (固定2000米过渡，或读取配置)
       this.switchPhase(
         new TransitionPhase(GameConfig.level.transitionHeigth), 
-        BiomeLibrary[BiomeId.L3_CloudMarsh]
+        BiomeLibrary[this.currentBiomeId]
       );
     } 
     else if (this.currentPhase instanceof TransitionPhase) {
@@ -65,12 +62,20 @@ export default class PhaseManager {
   }
 
   private getNextBiomeId(): BiomeId {
-    // 1. 如果队列里有，优先取队列 (实现策划说的 L1 -> L3 固定流程)
-    if (this.biomeQueue.length > 0) {
-      return this.biomeQueue.shift()!;
-    }
+    // 1. 定义随机池 (排除 L1，只在 L2, L3, L4 中循环)
+    const pool = [BiomeId.L2_RedCliff, BiomeId.L3_CloudMarsh, BiomeId.L4_WindCave];
 
-    // 2. 队列空了，随机 L2 或 L4
-    return Math.random() > 0.5 ? BiomeId.L3_CloudMarsh : BiomeId.L3_CloudMarsh;
+    // 2. 过滤掉上一次的场景 (实现"不能连续出现两次同一场景")
+    // 如果当前是 L1，candidates 就是 [L2, L3, L4]
+    // 如果当前是 L2，candidates 就是 [L3, L4]
+    const candidates = pool.filter(id => id !== this.currentBiomeId);
+
+    // 3. 随机取一个
+    const nextId = candidates[Math.floor(Math.random() * candidates.length)];
+
+    // 4. 更新记录
+    this.currentBiomeId = nextId;
+
+    return nextId;
   }
 }

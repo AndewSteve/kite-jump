@@ -21,7 +21,7 @@ export default class GameOverMenu extends Phaser.GameObjects.Container {
     const overlay = scene.add.rectangle(width/2, height/2, width, height, 0x000000, 0.85).setInteractive();
     
     // 2. 标题
-    const title = scene.add.text(width/2, height/2 - 200, "MAN", {
+    const title = scene.add.text(width/2, height/2 - 200, "游戏结束", {
         fontSize: '40px', color: '#ff4444', fontStyle: 'bold', stroke: '#fff', strokeThickness: 2
     }).setOrigin(0.5);
 
@@ -34,10 +34,10 @@ export default class GameOverMenu extends Phaser.GameObjects.Container {
     this.add([overlay, title, this.causeText, this.scoreText, this.heightText, this.currencyText, this.timeText]);
 
     // 4. 按钮
-    const btnRestart = new UIButton(scene, width/2, height/2 + 20, "TRY AGAIN", () => {
+    const btnRestart = new UIButton(scene, width/2, height/2 + 60, "TRY AGAIN", () => {
         if (this.onRestart) this.onRestart();
     });
-    const btnMenu = new UIButton(scene, width/2, height/2 + 100, "MAIN MENU", () => {
+    const btnMenu = new UIButton(scene, width/2, height/2 + 140, "MAIN MENU", () => {
         if (this.onQuit) this.onQuit();
     }, 0x666666);
 

@@ -38,8 +38,8 @@ export const GameConfig: IGameConfig = {
 
   // --- 关卡生成 ---
   level: {
-    cloudGap: 250,         // 云朵生成的垂直间距
-    cloudCount: 10,        // 初始生成的云朵数量
+    cloudGap: 350,         // 云朵生成的垂直间距
+    cloudCount: 8,        // 初始生成的云朵数量
     cleanupThreshold: 1280 * 0.8, // 离开屏幕下方多少像素后销毁物体
     // ✅ 新增：允许坠落的最大深度
     // 例如：1.5 倍屏幕高度。意味着你可以掉下来一整屏多还能救回来，再多就死

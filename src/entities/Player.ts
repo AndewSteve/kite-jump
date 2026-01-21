@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GameConfig } from '../config/GameConfig';
 import { EVENTS, gameEvents } from '../config/Events';
 import PlayerState from './PlayerState';
-import PlayerStatusUI from '../ui/PlayerStatusUI'; // ✅ 引入新类
+// import PlayerStatusUI from '../ui/PlayerStatusUI'; // ✅ 引入新类
 import DataManager from '../managers/DataManager';
 import { KiteVisual } from './KiteVisual';
 
@@ -13,7 +13,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
   // ✅ 新增
   public playerState: PlayerState;
-  private statusUI: PlayerStatusUI; // ✅ 替换 uiGraphics
+  // private statusUI: PlayerStatusUI; // ✅ 替换 uiGraphics
 
 
   // ✅ 新增：磁场传感器 (不可见，但有物理判定)
@@ -50,7 +50,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.playerState = new PlayerState(this);
     
     // ✅ 实例化 UI 类
-    this.statusUI = new PlayerStatusUI(scene, this);
+    // this.statusUI = new PlayerStatusUI(scene, this);
     // 启用物理平滑插值 (Phaser 3.60+ 新特性)
     // 即使物理只有 60fps，渲染时会自动补间
     // this.arcadeBody.setDamping(true); // 配合阻力更加丝滑
@@ -120,7 +120,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.playerState.update(delta);
     // this.updateDashVisuals(); // ✅ 更新冲刺视觉效果
     // ✅ 调用 UI 更新
-    this.statusUI.update();
+    // this.statusUI.update();
 
 
     // A. 重力变化
@@ -298,7 +298,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   // 销毁时记得清空 Graphics
   destroy(fromScene?: boolean) {
     this.magnetZone.destroy();
-    this.statusUI.destroy();
+    // this.statusUI.destroy();
     super.destroy(fromScene);
   }
 }

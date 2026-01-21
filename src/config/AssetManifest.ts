@@ -38,6 +38,10 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: TextureKeys.BgRedCliff, path: 'assets/bg/bg_redcliff.png', type: 'image' },
   { key: TextureKeys.BgMarsh, path: 'assets/bg/bg_marsh.png', type: 'image' },
   { key: TextureKeys.BgWindCave, path: 'assets/bg/bg_wind_cave.png', type: 'image' },
+
+  { key: TextureKeys.BgL1Land, path: 'assets/bg/bg_L1_land.png', type: 'image' },
+  { key: TextureKeys.BgL1Sky, path: 'assets/bg/bg_L1_sky.png', type: 'image' },
+  { key: TextureKeys.BgL2Smoke, path: 'assets/bg/bg_L2_smoke.png', type: 'image' },
   
   // --- 云朵/道具 ---
   { key: TextureKeys.Cloud, path: 'assets/items/cloud.png', type: 'image' },

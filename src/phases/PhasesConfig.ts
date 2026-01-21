@@ -1,11 +1,12 @@
 // src/phases/ConcretePhases.ts
 import { type IGamePhase } from './PhaseSystem';
 import GameScene from '../scenes/GameScene';
-import { TransitionBuff, TransitionDashConfig } from '../config/BuffConfig';
+import { TransitionBuff, TransitionDashConfig, TransitionEndDashBuff } from '../config/BuffConfig';
 import { BiomeId, type IBiomeData } from '../types/BiomeTypes';
 import { GameConfig } from '../config/GameConfig';
 import { EntityId } from '../config/EntityConfig';
 import { ModifierType } from '../mechanics/StatDefinitions';
+import { TextureKeys } from '../config/AssetKeys';
 
 
 /**
@@ -44,6 +45,13 @@ export class NormalPhase implements IGamePhase {
     scene.spawnManager.setBaseSpawnTable(data.spawnTable);
     scene.spawnManager.isSpawningEnabled = true;
     if (data.id === BiomeId.L1_Frost) {
+      // 1. 先把开头必须播放的塞进队列
+      scene.backgroundManager.enqueue(TextureKeys.BgL1Land); // 必须先出地面
+      scene.backgroundManager.enqueue(TextureKeys.BgL1Sky);  // 紧接着出过渡天空
+      
+      // 2. 设置后续无限循环的背景
+      scene.backgroundManager.setFallback(TextureKeys.BgL1Sky); // 之后全是烟雾
+
       // 1. 激活玩家 (解决"无速度"的关键)
       scene.player.setEnabled(true);
   
@@ -51,6 +59,8 @@ export class NormalPhase implements IGamePhase {
       const boostForce = scene.player.playerState.getStartBoostForce();
       console.log(`Applying Boost: ${boostForce}`);
       scene.player.boost(boostForce);
+    } else {
+      scene.backgroundManager.setFallback(data.backgroundTexture);
     }
     // 2. 应用环境物理 (GAS)
     this.applyEnvStats(scene, true);
@@ -63,7 +73,9 @@ export class NormalPhase implements IGamePhase {
     }
 
     // 1. ✅ 视觉层：在云层掩护下，瞬间切换背景
-    scene.backgroundManager.switchTexture(data.backgroundTexture);
+    // scene.backgroundManager.switchTexture(data.backgroundTexture);
+
+    
 
     // 2. ✅ 视觉层：开始淡出云层，露出新世界
     // 稍微延迟一点点再淡出(比如100ms)，防止纹理切换瞬间的闪烁
@@ -210,6 +222,7 @@ export class TransitionPhase implements IGamePhase {
     console.log("离开过渡区");
     // 1. 恢复物理
     scene.player.playerState.buffs.removeByTag(TransitionDashConfig.tag);
+    scene.player.playerState.buffs.addBuff(TransitionEndDashBuff);
 
     // ✅ 双重保险：离开过渡区时也清理一次
     // 防止有什么东西是在过渡区意外生成的 (虽然目前没有)

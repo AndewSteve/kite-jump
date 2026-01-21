@@ -63,7 +63,7 @@ export default class ColdnessBar extends Phaser.GameObjects.Container {
         const clamped = Phaser.Math.Clamp(value, 0, this.maxColdness);
         this.currentColdness = clamped;
         const percent = clamped / this.maxColdness; // 0.0 - 1.0
-        console.log(`ColdnessBar: Setting coldness to ${clamped} (${(percent*100).toFixed(1)}%)`);
+        // console.log(`ColdnessBar: Setting coldness to ${clamped} (${(percent*100).toFixed(1)}%)`);
 
         // --- A. 更新 Shader (内部填充) ---
         if (this.pipeline) {

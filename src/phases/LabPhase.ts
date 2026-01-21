@@ -15,7 +15,13 @@ export class LabPhase implements IGamePhase {
     scene.spawnManager.isSpawningEnabled = false;
     
     // 2. 切换到一个干净的背景 (或者网格图)
-    scene.backgroundManager.switchTexture(TextureKeys.BgFrost); 
+    // scene.backgroundManager.switchTexture(TextureKeys.BgL1Sky); 
+
+    // 1. 设置回落背景为 L2 (烟雾)
+    scene.backgroundManager.setFallback(TextureKeys.BgL2Smoke);
+    
+    // 2. 清空可能存在的队列 (防止之前的关卡残留)
+    scene.backgroundManager.resetFlow(TextureKeys.BgL2Smoke);
     
     // 3. 玩家给予初始速度，保证能跑起来看特效
     scene.player.setEnabled(true);

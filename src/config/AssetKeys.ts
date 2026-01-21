@@ -15,6 +15,10 @@ export const TextureKeys = {
   BgRedCliff: 'bg_redcliff',
   BgMarsh: 'bg_marsh',
   BgWindCave: 'bg_wind_cave',
+
+  BgL1Land: 'bg_L1_land',
+  BgL1Sky: 'bg_L1_sky',
+  BgL2Smoke: 'bg_L2_smoke',
   
   // --- 云朵/道具 ---
   Cloud: 'cloud', // 普通云

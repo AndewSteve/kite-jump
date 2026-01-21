@@ -4,13 +4,13 @@ export const PlayerConfig: IPlayerConfig = {
   startY: 1200,         // 玩家初始高度
 
 
-  startForce: -1200,      // 游戏开始时的初始向上冲量
+  startForce: -900,      // 游戏开始时的初始向上冲量
   jumpForce: -800,       // 吃到云朵后的向上冲量
   moveSpeed: 400,        // 左右移动的最大速度
   acceleration: 1200,     // 左右移动的加速度（反应灵敏度）
   dragX: 800,            // 水平空气阻力（松手后停下的快慢）
   maxFallSpeed: 800,     // 最大下落速度（防止下落过快看不清）
-  maxFlySpeed: 10000,     // 最大上升速度（防止上升过快看不清）
+  maxFlySpeed: 8000,     // 最大上升速度（防止上升过快看不清）
   baseRadius: 50, // 基础吸附范围 (像素)
   magnetForce: 600, // 磁力强度 / 吸附速度
   hitRadius: 15, // 受击判定半径

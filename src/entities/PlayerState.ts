@@ -23,6 +23,10 @@ export default class PlayerState {
   public coldness: number = 0;      // 0 - 100
   public dashEnergy: number = 0;    // 0 - 100
 
+  public get isInvincible(): boolean {
+    return this.buffs.hasTag('State.Invincible');
+  }
+
   // ✅ 快捷 getter
   public get isTransitioning(): boolean {
     return this.buffs.hasTag('State.Transition');
@@ -195,6 +199,10 @@ export default class PlayerState {
   }
 
   public applyDamage(amount: number) {
+    if (this.isDashing || this.isInvincible) {
+      console.log("Player is invincible, no damage taken.");
+      return;
+    }
     this.health -= amount;
     this.health = Phaser.Math.Clamp(this.health, 0, this.maxHealth);
     console.log(`Player took ${amount} damage. Health is now ${this.health}.`);

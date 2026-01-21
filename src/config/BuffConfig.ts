@@ -18,17 +18,17 @@ export const DashConfig = {
   Lv1 :{
     tag: 'State.Dash.Lv1',
     duration: 4,
-    speed: -1800,
+    speed: -1200,
   },
   Lv2: {
     tag: 'State.Dash.Lv2',
     duration: 5,
-    speed: -2200,
+    speed: -1400,
   },
   Lv3: {
     tag: 'State.Dash.Lv3',
     duration: 6,
-    speed: -2500,
+    speed: -1800,
   },
   universalTag: 'State.Dash',
 }
@@ -74,8 +74,8 @@ export const DashLv3Buff: IBuffConfig = {
 
 export const TransitionDashConfig = {
   tag: 'State.Transition',
-  duration: 6,
-  speed: -2000,
+  endDashDuration: 2,
+  speed: -1500,
 };
 
 // 过渡冲刺 Buff
@@ -94,6 +94,24 @@ export const TransitionBuff: IBuffConfig = {
   ],
   onAdd: [
     new SfxAction(AudioKeys.SfxDash),
+  ],
+};
+// 过渡冲刺 Buff
+export const TransitionEndDashBuff: IBuffConfig = {
+  id: 'biome_transition_end',
+  name: 'Biome Transition End Dash',
+  duration: TransitionDashConfig.endDashDuration,
+  maxStack: 1,
+  tags: [
+    'State.Dash',       // ✅ 复用：让 getFinalGravityY 返回 0
+    'State.Invincible', // ✅ 复用：无敌
+    TransitionDashConfig.tag  // 🆕 新增：用于区分普通冲刺，锁定输入
+  ],
+  modifiers: [
+    // 可以加一些视觉上的 Modifier，比如拖尾宽度
+  ],
+  onAdd: [
+    // new SfxAction(AudioKeys.SfxDash),
   ],
 };
 
