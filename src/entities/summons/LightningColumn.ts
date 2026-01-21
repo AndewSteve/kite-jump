@@ -1,12 +1,17 @@
 import { BaseSummon, type ISummonInitData } from './BaseSummon';
 import { GameConfig } from '../../config/GameConfig';
 import AudioManager from '../../managers/AudioManager';
-import { AudioKeys } from '../../config/AssetKeys';
+import { AudioKeys, VFXTextureKeys } from '../../config/AssetKeys';
+import { PipelineID } from '../../managers/RenderManager';
+import type LightningFadePipeline from '../../pipelines/LightningFadePipeline';
 
 export class LightningColumn extends BaseSummon {
   private isStriking: boolean = false; // 是否处于伤害阶段
   private warningRect?: Phaser.GameObjects.Rectangle; // 预警线
-  private strikeRect?: Phaser.GameObjects.Rectangle;  // 正式闪电
+  private alertIcon?: Phaser.GameObjects.Image; // 预警图标
+  private alertBg?: Phaser.GameObjects.Sprite; // 预警背景动效
+  private strikeSprite?: Phaser.GameObjects.Sprite;  // 正式闪电
+  private strikeProgress: number = 0;
   
   // 伤害配置
   private readonly WARNING_WIDTH = 200;   // 预警线宽度
@@ -24,31 +29,61 @@ export class LightningColumn extends BaseSummon {
     const screenHeight = this.scene.scale.height;
     // const screenWidth = this.scene.scale.width;
     this.isStriking = false;
+    this.strikeProgress = 0;
 
-    // 1. 创建预警线 (淡淡的细线)
+    // 1. 创建预警线 (红色闪烁)
     // 随机 X 位置已经在 Spawn 时决定了 (this.x)
     this.warningRect = this.scene.add.rectangle(
-      this.x, 
-      screenHeight / 2, 
-      this.WARNING_WIDTH, 
-      screenHeight / minZoom, 
-      0xFFFFFF, 0.3
+      this.x,
+      screenHeight / 2,
+      this.WARNING_WIDTH,
+      screenHeight / minZoom,
+      0xFF3333, 0.3
     )
         .setScrollFactor(0)
         .setDepth(40); // 在玩家下面一点
 
+    const alertAnimKey = 'alert_lightning_bg';
+    if (!this.scene.anims.exists(alertAnimKey)) {
+      this.scene.anims.create({
+        key: alertAnimKey,
+        frames: this.scene.anims.generateFrameNumbers(VFXTextureKeys.VfxAlertBg, { start: 0, end: 8 }),
+        frameRate: 12,
+        repeat: -1
+      });
+    }
+
+    this.alertBg = this.scene.add.sprite(this.x, screenHeight / 2, VFXTextureKeys.VfxAlertBg)
+      .setScrollFactor(0)
+      .setDepth(41)
+      .setScale(2.5);
+    this.alertBg.play(alertAnimKey);
+
+    this.alertIcon = this.scene.add.image(this.x, screenHeight / 2, VFXTextureKeys.VfxAlertIcon)
+      .setScrollFactor(0)
+      .setDepth(42)
+      .setScale(0.5);
+
     // 2. 预警动画 (1.5秒后劈下)
     this.scene.tweens.add({
         targets: this.warningRect,
-        alpha: { from: 0.1, to: 0.5 },
+        alpha: { from: 0.1, to: 0.7 },
         yoyo: true,
-        repeat: 3,
+        repeat: 4,
         duration: 200,
         onComplete: () => {
             this.strike();
         }
     });
-    
+
+    this.scene.tweens.add({
+        targets: this.alertIcon,
+        alpha: { from: 0.2, to: 1 },
+        yoyo: true,
+        repeat: 4,
+        duration: 200
+    });
+
     // 3. 禁用物理 (手动判定)
     if (this.body) this.body.enable = false;
   }
@@ -62,45 +97,71 @@ export class LightningColumn extends BaseSummon {
 
     // 移除预警
     this.warningRect?.destroy();
+    this.alertIcon?.destroy();
+    this.alertBg?.destroy();
     
-    // 创建闪电 (高亮粗柱子)
-    // 颜色：雷电紫/白
-    this.strikeRect = this.scene.add.rectangle(
-      this.x, 
-      screenHeight / 2, 
-      this.DAMAGE_WIDTH, 
-      screenHeight / minZoom, 
-      0x8844FF
+    const frameIndex = Phaser.Math.Between(0, 5);
+    this.strikeSprite = this.scene.add.sprite(
+      this.x,
+      screenHeight / 2,
+      VFXTextureKeys.VfxLightningLine,
+      frameIndex
     )
         .setScrollFactor(0)
         .setDepth(100); // 最上层
+    this.strikeSprite.setRotation(Math.PI / 2);
+    this.strikeSprite.setDisplaySize(screenHeight / minZoom, this.DAMAGE_WIDTH);
 
     AudioManager.playSfx(AudioKeys.SfxThunderbolt);
+
+    let pipeline: LightningFadePipeline | undefined;
+    if (this.scene.game.renderer instanceof Phaser.Renderer.WebGL.WebGLRenderer) {
+      this.strikeSprite.setPipeline(PipelineID.LightningFade);
+      pipeline = this.strikeSprite.pipeline as LightningFadePipeline;
+      pipeline?.setProgress(0);
+      // pipeline?.setColor(0x3aa0ff);
+    }
     
-    // 闪电冲击动画 (0.2秒瞬间)
+    // 闪电冲击动画 (0.5秒进度 + 0.5秒淡出)
     this.scene.tweens.add({
-        targets: this.strikeRect,
-        alpha: { from: 1, to: 0 },
-        width: { from: this.DAMAGE_WIDTH, to: 0 },
-        duration: 300,
+        targets: this,
+        strikeProgress: 1,
+        duration: 500,
         ease: 'Sine.easeOut',
-        onComplete: () => {
-            // ✅ 1. 视觉上：彻底移除闪电，让玩家以为结束了
-            if (this.strikeRect) {
-                this.strikeRect.destroy();
-                this.strikeRect = undefined;
+        onUpdate: () => {
+            if (pipeline) {
+              pipeline.setProgress(this.strikeProgress);
             }
+        },
+        onComplete: () => {
+            if (!this.strikeSprite) {
+                this.isStriking = false;
+                return;
+            }
+            this.scene.tweens.add({
+                targets: this.strikeSprite,
+                alpha: 0,
+                duration: 500,
+                ease: 'Sine.easeOut',
+                onComplete: () => {
+                    // ? 1. 视觉上：彻底移除闪电，让玩家以为结束了
+                    if (this.strikeSprite) {
+                        this.strikeSprite.destroy();
+                        this.strikeSprite = undefined;
+                    }
 
-            // ✅ 2. 逻辑上：强制关闭伤害判定 (防止隐形电人)
-            this.isStriking = false;
+                    // ? 2. 逻辑上：强制关闭伤害判定 (防止隐形电人)
+                    this.isStriking = false;
 
-            // ✅ 3. 核心修改：延迟 2秒 再真正回收
-            // 这 2秒 期间，getActiveCount() 依然是 1，
-            // 所以 LightningStrikeAction 会一直返回，不会生成新雷
-            const COOLDOWN_TIME = 2000; 
+                    // ? 3. 核心修改：延迟 2秒 再真正回收
+                    // 这 2秒 期间，getActiveCount() 依然是 1，
+                    // 所以 LightningStrikeAction 会一直返回，不会生成新雷
+                    const COOLDOWN_TIME = 2000; 
 
-            this.scene.time.delayedCall(COOLDOWN_TIME, () => {
-                 this.despawn(); 
+                    this.scene.time.delayedCall(COOLDOWN_TIME, () => {
+                         this.despawn(); 
+                    });
+                }
             });
         }
     });
@@ -111,8 +172,8 @@ export class LightningColumn extends BaseSummon {
 
   protected onUpdate(_dt: number): void {
     // 只有在劈下的一瞬间 (isStriking) 且 闪电还没完全消失时判定
-    // ✅ 增加 check：如果 strikeRect 已经被销毁了 (处于幽灵冷却期)，直接返回
-    if (!this.isStriking || !this.strikeRect || this.strikeRect.alpha < 0.5) return;
+    // ✅ 增加 check：如果 strikeSprite 已经被销毁了 (处于幽灵冷却期)，直接返回
+    if (!this.isStriking || !this.strikeSprite || this.strikeProgress >= 1) return;
     if (!this.target || !this.target.active) return;
 
     // --- 碰撞判定 (屏幕空间) ---
@@ -154,7 +215,10 @@ export class LightningColumn extends BaseSummon {
 
   protected override onDespawn(): void {
     this.warningRect?.destroy();
-    this.strikeRect?.destroy();
+    this.strikeSprite?.destroy();
     this.kill();
   }
 }
+
+
+

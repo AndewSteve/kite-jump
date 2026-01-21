@@ -21,7 +21,7 @@ export default class BackgroundManager {
   private readonly PARALLAX_X = 0.5;
   private readonly CLOUD_SPEED_MULT = 2.0;
   // ✅ 新增：缝隙修复像素 (让图片产生微小重叠，消除接缝闪烁)
-  private readonly OVERLAP_FIX = 2;
+  private readonly OVERLAP_FIX = 4;
 
   // --- 尺寸与定位 ---
   private scaleRatio: number = 1;

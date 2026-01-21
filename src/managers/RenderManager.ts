@@ -3,11 +3,13 @@ import FogPipeline from '../pipelines/FogPipeline';
 import MagicFieldPipeline from '../pipelines/MagicFieldPipeline';
 import DissolvePipeline from '../pipelines/DissolvePipeline';
 import ColdnessPipeline from '../pipelines/ColdnessPipeline';
+import LightningFadePipeline from '../pipelines/LightningFadePipeline';
 
 export const PipelineID = {
   Fog: 'FogPipeline',
   MagicField: 'MagicField',
   Dissolve: 'Dissolve',
+  LightningFade: 'LightningFade',
   Coldness: 'Coldness', // ✅ Add ID
 } as const;
 export type PipelineKey = typeof PipelineID[keyof typeof PipelineID];
@@ -50,6 +52,12 @@ export default class RenderManager {
       this.renderer.pipelines.add(PipelineID.Coldness, new ColdnessPipeline(this.scene.game));
       console.log(`[RenderManager] Pipeline Registered: ${PipelineID.Coldness}`);
     }
+
+    // ✅ 注册 LightningFade Pipeline
+    if (!this.renderer.pipelines.has(PipelineID.LightningFade)) {
+      this.renderer.pipelines.add(PipelineID.LightningFade, new LightningFadePipeline(this.scene.game));
+      console.log(`[RenderManager] Pipeline Registered: ${PipelineID.LightningFade}`);
+    }
   }
 
   // ✅ 3. 公开获取 Pipeline 的方法
@@ -71,3 +79,4 @@ export default class RenderManager {
     // 预留 update 接口
   }
 }
+

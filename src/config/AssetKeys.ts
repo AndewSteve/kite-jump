@@ -82,6 +82,9 @@ export const VFXTextureKeys = {
   VfxNoiseBar: 'vfx_noise_bar', 
   // 对应截图上方的圆环图 (用来做冲击波)
   VfxRing: 'vfx_ring',
+  VfxLightningLine: 'vfx_lightning_line',
+  VfxAlertIcon: 'vfx_alert_icon',
+  VfxAlertBg: 'vfx_alert_bg',
 } as const;
 export type VFXTextureKey = typeof VFXTextureKeys[keyof typeof VFXTextureKeys];
 

@@ -9,6 +9,26 @@ export interface IAssetDefinition {
   frameConfig?: Phaser.Types.Loader.FileTypes.ImageFrameConfig; // 用于精灵表
 }
 
+const createSpriteSheet = (
+  key: string,
+  path: string,
+  frameWidth: number,
+  frameHeight: number,
+  _frameMax?: number,
+  margin: number = 0,
+  spacing: number = 0
+): IAssetDefinition => ({
+  key,
+  path,
+  type: 'spritesheet',
+  frameConfig: {
+    frameWidth,
+    frameHeight,
+    // frameMax,
+    margin,
+    spacing
+  }
+});
 const SkinConfigs = [
   { baseKey: TextureKeys.DefaultYellowKite, prefix: 'kite_default_yellow',
     parts: ['body_main',                                          'string', 'knot'] },
@@ -95,6 +115,10 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: VFXTextureKeys.VfxNoiseBar, path: 'assets/vfx/noise_bar.png', type: 'image' },
   // 请将截图里的 "FX_TEX_Circle_Ring_Wave_01.png" 改名为 ring.png
   { key: VFXTextureKeys.VfxRing, path: 'assets/vfx/ring.png', type: 'image' },
+  createSpriteSheet(VFXTextureKeys.VfxLightningLine, 'assets/vfx/FX_TEX_Lightning_Line_03a.png', 256, 64, 4),
+  { key: VFXTextureKeys.VfxAlertIcon, path: 'assets/vfx/FX_TEX_Alert_01.png', type: 'image' },
+  // 3x3 网格，256 / 3 = 85.33，向下取整为 85
+  createSpriteSheet(VFXTextureKeys.VfxAlertBg, 'assets/vfx/FX_TEX_Lightning_04.png', 85, 85, 9),
 
 
 
@@ -124,3 +148,7 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: AudioKeys.SfxThunderstorm, path: 'assets/audio/sfx_thunderstorm.wav', type: 'audio' },
   { key: AudioKeys.SfxAurora, path: 'assets/audio/sfx_aurora.mp3', type: 'audio' },
 ]
+
+
+
+
