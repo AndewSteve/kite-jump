@@ -38,6 +38,16 @@ export class DashEnergyIncrementAction implements IBuffAction {
   }
 }
 
+export class ScoreAction implements IBuffAction {
+  private score: number;
+  constructor(score: number) {
+    this.score = score;
+  }
+  execute(_ctx: IBuffContext): void {
+     gameEvents.emit(EVENTS.ADD_SCORE, { amount: this.score, source: 'buff' });
+  }
+}
+
 export const SpawnMode = {
   RandomX: 'random_x',
   PlayerPos: 'player_pos',

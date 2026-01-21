@@ -7,6 +7,10 @@ export default class ScoreManager {
   
   // 核心数据
   private _currentScore: number = 0;
+  private _heightScore: number = 0;
+  private _itemScore: number = 0;
+  private _buffScore: number = 0;
+  private _currentCurrency: number = 0;
   private _highestY: number = 0; // 记录玩家到达过的最高像素位置 (Y越小越高)
   private startY: number = 0;
 
@@ -32,20 +36,23 @@ export default class ScoreManager {
     gameEvents.on(EVENTS.ADD_COIN, this.handleAddCoin, this);
   }
 
-  private handleAddScore(amount: number) {
+  private handleAddScore(payload: number | { amount: number; source: 'item' | 'buff' }) {
     if (!this.isTracking) return;
-    this._currentScore += amount;
-    // 立即通知 UI 更新
-    gameEvents.emit(EVENTS.UPDATE_SCORE, Math.floor(this._currentScore));
+    const amount = typeof payload === 'number' ? payload : payload.amount;
+    const source = typeof payload === 'number' ? 'item' : payload.source;
+
+    if (source === 'buff') {
+      this._buffScore += amount;
+    } else {
+      this._itemScore += amount;
+    }
+
+    this.updateTotalScore();
   }
   
   private handleAddCoin(amount: number) {
-      // 金币逻辑可能包含：加分 + 加钱
-      // 这里假设金币直接加到当前局分数，或者你有独立的金币计数器
-      // DataManager.data.currency += amount; // 实时存钱还是结算存钱？通常是结算存
-      // 这里我们只处理局内表现
-      gameEvents.emit(EVENTS.UPDATE_COIN, Math.floor(this._currentScore));
-      this.handleAddScore(amount); // 假设金币也算分
+      this._currentCurrency += amount;
+      gameEvents.emit(EVENTS.UPDATE_COIN, Math.floor(this._currentCurrency));
   }
 
   /**
@@ -54,6 +61,10 @@ export default class ScoreManager {
   public startTracking() {
     this.isTracking = true;
     this._currentScore = 0;
+    this._heightScore = 0;
+    this._itemScore = 0;
+    this._buffScore = 0;
+    this._currentCurrency = 0;
     this._highestY = this.startY;
 
     // ✅ 新增：重置时间
@@ -63,6 +74,8 @@ export default class ScoreManager {
 
     // 立即刷新一次 UI 时间为 00:00
     this.emitTimeUpdate();
+    gameEvents.emit(EVENTS.UPDATE_SCORE, 0);
+    gameEvents.emit(EVENTS.UPDATE_COIN, 0);
   }
 
   /**
@@ -86,7 +99,12 @@ export default class ScoreManager {
       
       // 通知 UI 更新高度显示
       const logicHeight = this.getCurrentHeightMeters();
-      gameEvents.emit(EVENTS.UPDATE_HEIGHT, Math.floor(logicHeight));
+      const heightScore = Math.floor(logicHeight);
+      gameEvents.emit(EVENTS.UPDATE_HEIGHT, heightScore);
+      if (heightScore > this._heightScore) {
+        this._heightScore = heightScore;
+        this.updateTotalScore();
+      }
     }
 
     // ✅ 2. 新增：时间逻辑
@@ -150,13 +168,18 @@ export default class ScoreManager {
   public getFinalStats() {
     return {
       score: Math.floor(this._currentScore),
-      currency: Math.floor(this._currentScore), // 如果金币和分数相同
+      currency: Math.floor(this._currentCurrency),
       height: Math.floor(this.getCurrentHeightMeters()),
       // ✅ 新增：结算时带上存活时间字符串
       timeStr: this.formatTime(this._elapsedTime),
       // ✅ 新增：如果需要存数据库，也可以带上原始毫秒数
       timeMs: this._elapsedTime
     };
+  }
+
+  private updateTotalScore() {
+    this._currentScore = this._heightScore + this._itemScore + this._buffScore;
+    gameEvents.emit(EVENTS.UPDATE_SCORE, Math.floor(this._currentScore));
   }
   
   /**

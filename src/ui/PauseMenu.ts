@@ -27,9 +27,9 @@ export default class PauseMenu extends Phaser.GameObjects.Container {
     this.add([overlay, panel, title]);
 
     // 4. 按钮组
-    const btnResume = new UIButton(scene, width/2, height/2 - 30, "RESUME", () => this.handleResume());
-    const btnRestart = new UIButton(scene, width/2, height/2 + 50, "RESTART", () => this.handleRestart());
-    const btnMenu = new UIButton(scene, width/2, height/2 + 130, "MAIN MENU", () => this.handleQuit(), 0xaa3333);
+    const btnResume = new UIButton(scene, width/2, height/2 - 30, "继续", () => this.handleResume());
+    const btnRestart = new UIButton(scene, width/2, height/2 + 50, "重新开始", () => this.handleRestart());
+    const btnMenu = new UIButton(scene, width/2, height/2 + 130, "主菜单", () => this.handleQuit(), 0xaa3333);
 
     this.add([btnResume, btnRestart, btnMenu]);
     scene.add.existing(this);

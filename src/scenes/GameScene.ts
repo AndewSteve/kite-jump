@@ -32,6 +32,10 @@ export default class GameScene extends Phaser.Scene {
   public weatherManager!: WeatherManager;
   // 新增：缓存世界宽度
   private worldWidth!: number;
+  private inputHintLeft?: Phaser.GameObjects.Text;
+  private inputHintRight?: Phaser.GameObjects.Text;
+  private inputHintLeftCircle?: Phaser.GameObjects.Arc;
+  private inputHintRightCircle?: Phaser.GameObjects.Arc;
 
   private isGameRunning: boolean = false;
   public isPaused: boolean = false;
@@ -115,6 +119,7 @@ export default class GameScene extends Phaser.Scene {
     this.setupEvents();
     this.enterReadyPhase();
     this.cameras.main.scrollY = startY - GameConfig.camera.startOffsetY;
+    this.createInputHints();
   }
 
   private setupEvents() {
@@ -192,6 +197,7 @@ export default class GameScene extends Phaser.Scene {
 
   update(time: number, delta: number) {
     if (this.isPaused) return;
+    this.backgroundManager.update(this.cameras.main);
     if (!this.isGameRunning) return;
 
     // ✅ 驱动渲染更新 (如果有 uTime 需求)
@@ -206,13 +212,25 @@ export default class GameScene extends Phaser.Scene {
 
     // 3. 视差滚动
     this.cameraManager.update(delta);
-    this.backgroundManager.update(this.cameras.main);
     this.weatherManager.update(delta);
+
+    if (this.inputHintLeft || this.inputHintRight) {
+      if (this.scoreManager.getCurrentHeightMeters() >= 300) {
+        this.inputHintLeft?.destroy();
+        this.inputHintRight?.destroy();
+        this.inputHintLeftCircle?.destroy();
+        this.inputHintRightCircle?.destroy();
+        this.inputHintLeft = undefined;
+        this.inputHintRight = undefined;
+        this.inputHintLeftCircle = undefined;
+        this.inputHintRightCircle = undefined;
+      }
+    }
 
 
     // 6. 死亡判定
     if (this.player.y > this.scoreManager.getDeathThresholdY()) {
-      this.handleGameOver(`Fell too low`);
+      this.handleGameOver(`高度太低`);
     }
   }
 
@@ -316,5 +334,41 @@ export default class GameScene extends Phaser.Scene {
     // 注意：这里我们只是让它飞过来。
     // 等它真的撞到 this.player (物理身体) 时，会触发上面的 handlePhysicalCollision，
     // 从而执行吃金币/加冲刺的逻辑。
+  }
+
+  private createInputHints() {
+    // const y = this.cameras.main.scrollY + this.scale.height * 0.45;
+    const y = GameConfig.player.startY - 300;
+    const leftX = this.worldWidth / 2 - this.worldWidth * 0.15;
+    const rightX = this.worldWidth / 2 + this.worldWidth * 0.15;
+    const circleOffsetY = 28;
+
+    this.inputHintLeft = this.add.text(leftX, y, '点击区域移动', {
+      fontSize: '22px',
+      color: '#66ff66',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setDepth(10);
+
+    this.inputHintLeftCircle = this.add.circle(leftX, y + circleOffsetY, 6, 0x66ff66, 0.8)
+      .setDepth(10);
+
+    this.inputHintRight = this.add.text(rightX, y, '点击区域移动', {
+      fontSize: '22px',
+      color: '#ff6666',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setDepth(10);
+
+    this.inputHintRightCircle = this.add.circle(rightX, y + circleOffsetY, 6, 0xff6666, 0.8)
+      .setDepth(10);
+
+    this.tweens.add({
+      targets: [this.inputHintLeftCircle, this.inputHintRightCircle],
+      scale: 1.5,
+      duration: 700,
+      yoyo: true,
+      repeat: -1
+    });
   }
 }

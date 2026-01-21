@@ -10,6 +10,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   // 计算出世界的实际宽度
   private worldWidth: number;
+  private inputDir = 0;
 
   // ✅ 新增
   public playerState: PlayerState;
@@ -107,6 +108,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // 3. 初始化输入
     // 注意：这里假设键盘必然存在。如果是移动端触摸，可以在这里扩展触摸逻辑
     this.cursors = scene.input.keyboard!.createCursorKeys();
+    gameEvents.on(EVENTS.INPUT_DIR, this.handleInputDir, this);
   }
   
 
@@ -160,16 +162,17 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     const windY = 0;
 
     // inputX: -1, 0, 1
-    const inputX = this.cursors.left.isDown ? -1 : (this.cursors.right.isDown ? 1 : 0);
+    const keyboardDir = this.cursors.left.isDown ? -1 : (this.cursors.right.isDown ? 1 : 0);
+    const inputX = this.inputDir !== 0 ? this.inputDir : keyboardDir;
     
     // 更新视觉
     this.visual.updateVisuals(inputX, windX, windY);
     const accel = this.playerState.getFinalAcceleration();
     // D. 水平移动输入
-    if (this.cursors.left.isDown) {
+    if (inputX < 0) {
       this.setAccelerationX(-accel);
       // this.setFlipX(true);
-    } else if (this.cursors.right.isDown) {
+    } else if (inputX > 0) {
       this.setAccelerationX(accel);
       // this.setFlipX(false);
     } else {
@@ -179,6 +182,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.checkScreenWrap();
 
     gameEvents.emit(EVENTS.UPDATE_SPEED, Math.abs(this.arcadeBody.velocity.y));
+  }
+
+  private handleInputDir(dir: number) {
+    this.inputDir = Math.sign(dir);
   }
 
 
@@ -298,6 +305,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   // 销毁时记得清空 Graphics
   destroy(fromScene?: boolean) {
     this.magnetZone.destroy();
+    gameEvents.off(EVENTS.INPUT_DIR, this.handleInputDir, this);
     // this.statusUI.destroy();
     super.destroy(fromScene);
   }

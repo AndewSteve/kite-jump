@@ -11,14 +11,16 @@ export const TextureKeys = {
   
   // --- 环境/背景 ---
   BgMainMenu: 'bg_main_menu',
-  BgFrost: 'bg_frost',
-  BgRedCliff: 'bg_redcliff',
-  BgMarsh: 'bg_marsh',
-  BgWindCave: 'bg_wind_cave',
+  // BgFrost: 'bg_frost',
+  // BgRedCliff: 'bg_redcliff',
+  // BgMarsh: 'bg_marsh',
+  // BgWindCave: 'bg_wind_cave',
 
   BgL1Land: 'bg_L1_land',
   BgL1Sky: 'bg_L1_sky',
-  BgL2Smoke: 'bg_L2_smoke',
+  BgL2: 'bg_L2_smoke',
+  BgL3: 'bg_L3',
+  BgL4: 'bg_L4',
   
   // --- 云朵/道具 ---
   Cloud: 'cloud', // 普通云

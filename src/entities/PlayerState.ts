@@ -123,7 +123,7 @@ export default class PlayerState {
 
     // 3. 检查即死判定 (冰封)
     if (this.coldness >= GameConfig.playerState.thresholds.icebound) {
-        this.player.die("frozen");
+        this.player.die("冰封");
     }
 
     gameEvents.emit(EVENTS.UPDATE_COLDNESS, this.coldness);
@@ -208,7 +208,7 @@ export default class PlayerState {
     console.log(`Player took ${amount} damage. Health is now ${this.health}.`);
     gameEvents.emit(EVENTS.UPDATE_LIFE, this.health);
     if (this.health <= 0) {
-        this.player.die("health_depleted");
+        this.player.die("损毁");
     }
   }
 

@@ -46,7 +46,7 @@ export class NormalPhase implements IGamePhase {
     scene.spawnManager.isSpawningEnabled = true;
     if (data.id === BiomeId.L1_Frost) {
       // 1. 先把开头必须播放的塞进队列
-      scene.backgroundManager.enqueue(TextureKeys.BgL1Land); // 必须先出地面
+      // scene.backgroundManager.enqueue(TextureKeys.BgL1Land); // 必须先出地面
       scene.backgroundManager.enqueue(TextureKeys.BgL1Sky);  // 紧接着出过渡天空
       
       // 2. 设置后续无限循环的背景

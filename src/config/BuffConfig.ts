@@ -1,4 +1,4 @@
-import { ChangeWindAction, ColdnessIncrementAction, DashEnergyIncrementAction, ResetWindAction, SfxAction, SpawnMode, SummonAction } from "../actions/BuffActions";
+import { ChangeWindAction, ColdnessIncrementAction, DashEnergyIncrementAction, ResetWindAction, ScoreAction, SfxAction, SpawnMode, SummonAction } from "../actions/BuffActions";
 import { LightningStrikeAction } from "../actions/MechanicActions";
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
@@ -43,6 +43,7 @@ export const DashLv1Buff: IBuffConfig = {
   modifiers: [...DashControlMods],
   onAdd:[
     new SfxAction(AudioKeys.SfxDash),
+    new ScoreAction(100),
   ],
 };
 
@@ -56,6 +57,7 @@ export const DashLv2Buff: IBuffConfig = {
   modifiers: [...DashControlMods],
   onAdd: [
     new SfxAction(AudioKeys.SfxDash),
+    new ScoreAction(200),
   ],
 };
 
@@ -69,6 +71,7 @@ export const DashLv3Buff: IBuffConfig = {
   modifiers: [...DashControlMods],
   onAdd: [
     new SfxAction(AudioKeys.SfxDash),
+    new ScoreAction(400),
   ],
 };
 

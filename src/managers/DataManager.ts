@@ -27,8 +27,9 @@ export interface UserSaveData {
     auraRange: number;   // 灵韵磁场等级
   };
   selectedKite: KiteSelection;
+  unlockedKites: KiteId[];
 
-  // ✅ 新增：音频设置
+// ✅ 新增：音频设置
   settings: {
     bgmVolume: number; // 0.0 - 1.0
     sfxVolume: number; // 0.0 - 1.0
@@ -45,6 +46,7 @@ const DEFAULT_SAVE: UserSaveData = {
     skinId: KiteSkinIDs.DefaultYellow,
     kiteId: KiteIds.Default
   },
+  unlockedKites: [KiteIds.Default],
   settings: {
     bgmVolume: 0.5,
     sfxVolume: 0.8,
@@ -107,15 +109,12 @@ export default class DataManager {
 
   // --- 升级系统核心逻辑 ---
 
-  // 1. 获取升级消耗 (公式：基础价 * (等级+1))
+  // 1. 获取升级消耗 (首次25，Lv2=35，后续每级+10)
   static getUpgradeCost(type: keyof UserSaveData['upgrades']): number {
     const level = this.data.upgrades[type];
-    const basePrices = {
-      lightness: 100,
-      windMastery: 100,
-      auraRange: 150
-    };
-    return basePrices[type] * (level + 1);
+    const basePrice = 25;
+    const stepPrice = 10;
+    return basePrice + (level * stepPrice);
   }
 
   // 2. 执行升级
@@ -128,6 +127,26 @@ export default class DataManager {
       return true;
     }
     return false;
+  }
+
+  // --- 改造系统 ---
+
+  static getUnlockCost(): number {
+    return 333;
+  }
+
+  static isKiteUnlocked(kiteId: KiteId): boolean {
+    return this.data.unlockedKites.includes(kiteId);
+  }
+
+  static unlockKite(kiteId: KiteId): boolean {
+    if (this.isKiteUnlocked(kiteId)) return true;
+    const cost = this.getUnlockCost();
+    if (this.data.currency < cost) return false;
+    this.data.currency -= cost;
+    this.data.unlockedKites.push(kiteId);
+    this.save();
+    return true;
   }
 
   // --- 属性加成计算 (提供给游戏内的数值) ---
@@ -149,3 +168,11 @@ export default class DataManager {
     return this.data.upgrades.auraRange * 0.01 * GameConfig.player.baseRadius; // 转为像素
   }
 }
+
+
+
+
+
+
+
+

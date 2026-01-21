@@ -5,6 +5,7 @@ import AudioManager from '../../managers/AudioManager';
 export interface KiteSelectorUI {
   kitePreview: Phaser.GameObjects.Image;
   kiteNameText: Phaser.GameObjects.Text;
+  kiteLockIcon: Phaser.GameObjects.Text;
 }
 
 export const createKiteSelector = (
@@ -42,7 +43,14 @@ export const createKiteSelector = (
     shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 2, fill: true }
   }).setOrigin(0.5);
 
-  return { kitePreview, kiteNameText };
+  const kiteLockIcon = scene.add.text(centerX, centerY - 20, '🔒', {
+    fontSize: '64px',
+    color: '#ffffff',
+    stroke: '#000000',
+    strokeThickness: 4
+  }).setOrigin(0.5).setVisible(false);
+
+  return { kitePreview, kiteNameText, kiteLockIcon };
 };
 
 const createArrowButton = (

@@ -34,10 +34,10 @@ export default class GameOverMenu extends Phaser.GameObjects.Container {
     this.add([overlay, title, this.causeText, this.scoreText, this.heightText, this.currencyText, this.timeText]);
 
     // 4. 按钮
-    const btnRestart = new UIButton(scene, width/2, height/2 + 60, "TRY AGAIN", () => {
+    const btnRestart = new UIButton(scene, width/2, height/2 + 60, "重新开始", () => {
         if (this.onRestart) this.onRestart();
     });
-    const btnMenu = new UIButton(scene, width/2, height/2 + 140, "MAIN MENU", () => {
+    const btnMenu = new UIButton(scene, width/2, height/2 + 140, "返回主菜单", () => {
         if (this.onQuit) this.onQuit();
     }, 0x666666);
 

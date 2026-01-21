@@ -9,6 +9,7 @@ import InfoBar from "../ui/InfoBar";
 import LifeBar from "../ui/LifeBar";
 import ColdnessBar from "../ui/ColdnessBar";
 import RenderManager from "../managers/RenderManager";
+import InputZones from "../ui/InputZones";
 
 export default class UIScene extends Phaser.Scene {
   private renderManager!: RenderManager;
@@ -22,6 +23,7 @@ export default class UIScene extends Phaser.Scene {
   private gauge!: SciFiGauge;
 
   private coldnessBar!: ColdnessBar;
+  private inputZones!: InputZones;
 
   constructor() {
     super(SceneKeys.UI);
@@ -51,6 +53,8 @@ export default class UIScene extends Phaser.Scene {
     // 2. 传递给 ColdnessBar
     this.coldnessBar = new ColdnessBar(this, 50, 400, this.renderManager);
     this.coldnessBar.setColdness(0);
+    this.inputZones = new InputZones(this);
+    // new InputZones(this);
         
 
     // 2. 绑定组件内部交互回调 (View -> Scene -> GameEvents)
@@ -151,6 +155,9 @@ export default class UIScene extends Phaser.Scene {
     this.lifeBar.updateEffect(delta);
     if (this.coldnessBar) {
       this.coldnessBar.update(time, delta);
+    }
+    if (this.inputZones) {
+      this.inputZones.update();
     }
   }
 }

@@ -212,7 +212,7 @@ export class ScoreAction implements IEntityAction {
     this.score = score;
   }
   execute(_ctx: InteractionContext): void {
-     gameEvents.emit(EVENTS.ADD_SCORE, this.score);
+     gameEvents.emit(EVENTS.ADD_SCORE, { amount: this.score, source: 'item' });
   }
 }
 

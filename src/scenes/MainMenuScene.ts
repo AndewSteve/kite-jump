@@ -10,7 +10,7 @@ import { createHistoryBar } from '../ui/MainMenu/HistoryBar';
 import { createKiteSelector } from '../ui/MainMenu/KiteSelector';
 import { createUpgradePanel, UPGRADE_BAR_WIDTH } from '../ui/MainMenu/UpgradePanel';
 import { createDescriptionPanel } from '../ui/MainMenu/DescriptionPanel';
-import { createStartButton } from '../ui/MainMenu/StartButton';
+import { createStartButton, type StartButtonUI } from '../ui/MainMenu/StartButton';
 import { showHistoryDialog } from '../ui/MainMenu/HistoryDialog';
 
 // 定义风筝选项结构：将皮肤ID映射到数据存档ID
@@ -23,8 +23,12 @@ export default class MainMenuScene extends Phaser.Scene {
   private currencyText!: Phaser.GameObjects.Text;
   private kitePreview!: Phaser.GameObjects.Image;
   private kiteNameText!: Phaser.GameObjects.Text;
+  private kiteLockIcon!: Phaser.GameObjects.Text;
   private kiteTitleText!: Phaser.GameObjects.Text;
   private kiteDescText!: Phaser.GameObjects.Text;
+  private startButton!: StartButtonUI;
+  private unlockButton!: Phaser.GameObjects.Container;
+  private unlockButtonText!: Phaser.GameObjects.Text;
   private readonly upgradePanelRightMargin = 10;
   private readonly upgradeIconWidth = 64;
   
@@ -87,6 +91,7 @@ export default class MainMenuScene extends Phaser.Scene {
     );
     this.kitePreview = kiteSelector.kitePreview;
     this.kiteNameText = kiteSelector.kiteNameText;
+    this.kiteLockIcon = kiteSelector.kiteLockIcon;
 
     // --- 3B. 右侧：升级面板 (占宽 60%) ---
     const rightStartX = width - this.upgradePanelRightMargin - UPGRADE_BAR_WIDTH;
@@ -112,7 +117,12 @@ export default class MainMenuScene extends Phaser.Scene {
     // 5. 底部：开始游戏
     // =========================================
     const startBtnY = height - 120;
-    createStartButton(this, width / 2, startBtnY, () => this.scene.start(SceneKeys.Game));
+    this.startButton = createStartButton(this, width / 2, startBtnY, () => {
+      if (!this.isCurrentKiteUnlocked()) return;
+      this.scene.start(SceneKeys.Game);
+    });
+
+    this.unlockButton = this.createUnlockButton(width / 2, startBtnY + 70);
 
     // 初始化显示
     this.updateKiteDisplay();
@@ -138,11 +148,19 @@ export default class MainMenuScene extends Phaser.Scene {
   private updateKiteDisplay() {
     const opt = this.kiteOptions[this.currentOptionIndex];
     const skinConfig = KiteSkins[opt.skinId];
+    const isUnlocked = DataManager.isKiteUnlocked(opt.kiteId);
     
     // 1. 更新图片 (只显示 Body，因为 Menu 里不方便模拟 Rope)
     // 注意：skinConfig.bodyTexture 是 key
     this.kitePreview.setTexture(skinConfig.bodyTexture);
     this.kitePreview.setScale(skinConfig.scale * 1.5); // 适当缩放显示
+    if (isUnlocked) {
+      this.kitePreview.clearTint();
+      this.kiteLockIcon.setVisible(false);
+    } else {
+      this.kitePreview.setTint(0x666666);
+      this.kiteLockIcon.setVisible(true);
+    }
     
     // 2. 更新名字
     this.kiteNameText.setText(KiteConfigs[opt.kiteId].name);
@@ -152,9 +170,53 @@ export default class MainMenuScene extends Phaser.Scene {
     const config = KiteConfigs[opt.kiteId];
     this.kiteTitleText.setText(config.title);
     this.kiteDescText.setText(config.description);
+
+    this.startButton.setEnabled(isUnlocked);
+    this.updateUnlockButton(isUnlocked);
   }
 
   private updateCurrencyUI() {
       this.currencyText.setText(`${DataManager.data.currency}`);
+  }
+
+  private isCurrentKiteUnlocked(): boolean {
+    const opt = this.kiteOptions[this.currentOptionIndex];
+    return DataManager.isKiteUnlocked(opt.kiteId);
+  }
+
+  private createUnlockButton(centerX: number, y: number): Phaser.GameObjects.Container {
+    const container = this.add.container(centerX, y);
+    const bg = this.add.rectangle(0, 0, 200, 60, 0x555555)
+      .setStrokeStyle(3, 0xffffff);
+    this.unlockButtonText = this.add.text(0, 0, '', {
+      fontSize: '24px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 2
+    }).setOrigin(0.5);
+
+    container.add([bg, this.unlockButtonText]);
+
+    bg.setInteractive({ useHandCursor: true }).on('pointerdown', () => {
+      const opt = this.kiteOptions[this.currentOptionIndex];
+      if (DataManager.unlockKite(opt.kiteId)) {
+        this.updateCurrencyUI();
+        this.updateKiteDisplay();
+      }
+    });
+
+    return container;
+  }
+
+  private updateUnlockButton(isUnlocked: boolean) {
+    if (isUnlocked) {
+      this.unlockButton.setVisible(false);
+      return;
+    }
+
+    const cost = DataManager.getUnlockCost();
+    this.unlockButtonText.setText(`解锁 ${cost}`);
+    this.unlockButton.setVisible(true);
   }
 }

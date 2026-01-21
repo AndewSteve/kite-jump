@@ -14,7 +14,7 @@ export default class BackgroundManager {
   // --- 核心队列 ---
   private chunks: BackgroundChunk[] = []; 
   private spawnQueue: string[] = [];      
-  private fallbackTexture: string = TextureKeys.BgL2Smoke; 
+  private fallbackTexture: string = TextureKeys.BgL1Land; 
 
   // --- 视差配置 (复刻原版参数) ---
   private readonly PARALLAX_Y = 0.5; 

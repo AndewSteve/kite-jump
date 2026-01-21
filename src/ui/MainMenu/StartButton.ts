@@ -2,13 +2,19 @@ import Phaser from 'phaser';
 import { AudioKeys } from '../../config/AssetKeys';
 import AudioManager from '../../managers/AudioManager';
 
+export interface StartButtonUI {
+  container: Phaser.GameObjects.Container;
+  setEnabled: (enabled: boolean) => void;
+}
+
 export const createStartButton = (
   scene: Phaser.Scene,
   centerX: number,
   y: number,
   onStart: () => void
-) => {
+): StartButtonUI => {
   const startBtn = scene.add.container(centerX, y);
+  let isEnabled = true;
 
   const btnBg = scene.add.rectangle(0, 0, 240, 80, 0xffaa00)
     .setStrokeStyle(4, 0xffffff);
@@ -24,6 +30,7 @@ export const createStartButton = (
   startBtn.add([btnBg, btnText]);
   btnBg.setInteractive({ useHandCursor: true })
     .on('pointerdown', () => {
+      if (!isEnabled) return;
       AudioManager.playSfx(AudioKeys.SfxBtnClick);
       scene.tweens.add({
         targets: startBtn,
@@ -35,5 +42,16 @@ export const createStartButton = (
       });
     });
 
-  return startBtn;
+  const setEnabled = (enabled: boolean) => {
+    isEnabled = enabled;
+    if (enabled) {
+      btnBg.setInteractive({ useHandCursor: true });
+      startBtn.setAlpha(1);
+    } else {
+      btnBg.disableInteractive();
+      startBtn.setAlpha(0.6);
+    }
+  };
+
+  return { container: startBtn, setEnabled };
 };

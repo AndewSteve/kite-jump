@@ -41,7 +41,9 @@ export const AssetManifest: IAssetDefinition[] = [
 
   { key: TextureKeys.BgL1Land, path: 'assets/bg/bg_L1_land.png', type: 'image' },
   { key: TextureKeys.BgL1Sky, path: 'assets/bg/bg_L1_sky.png', type: 'image' },
-  { key: TextureKeys.BgL2Smoke, path: 'assets/bg/bg_L2_smoke.png', type: 'image' },
+  { key: TextureKeys.BgL2, path: 'assets/bg/bg_L2_smoke_alternative.png', type: 'image' },
+  { key: TextureKeys.BgL3, path: 'assets/bg/bg_L3.png', type: 'image' },
+  { key: TextureKeys.BgL4, path: 'assets/bg/bg_L4_aurora.png', type: 'image' },
   
   // --- 云朵/道具 ---
   { key: TextureKeys.Cloud, path: 'assets/items/cloud.png', type: 'image' },
@@ -58,14 +60,15 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: TextureKeys.WindArrow, path: 'assets/items/arrow_indicator.png', type: 'image' },
   
   // --- 特效/遮罩 ---
-  { key: TextureKeys.TransiOverlay, path: 'assets/bg/transi_overlay.png', type: 'image' },
-  { key: TextureKeys.FogOverlay, path: 'assets/bg/fog_overlay.png', type: 'image' },
+  { key: TextureKeys.TransiOverlay, path: 'assets/bg/bg_transi_overlay.png', type: 'image' },
+  // { key: TextureKeys.FogOverlay, path: 'assets/bg/fog_overlay.png', type: 'image' },
+  { key: TextureKeys.FogOverlay, path: 'assets/bg/bg_transi_overlay.png', type: 'image' },
   { key: TextureKeys.ThermalVent, path: 'assets/bg/thermal_vent.png', type: 'image' },
 
   
   // UI 资产
   // { key: UITextureKeys.UITopFrame, path: 'assets/ui/ui_top_frame.png', type: 'image' },
-  // { key: UITextureKeys.UIHUDFrame, path: 'assets/ui/ui_hud_frame.png', type: 'image' },
+  { key: UITextureKeys.UIHUDFrame, path: 'assets/ui/ui_hud_frame.png', type: 'image' },
   // { key: UITextureKeys.UIHourglassIcon, path: 'assets/ui/ui_hourglass_icon.png', type: 'image' },
   // { key: UITextureKeys.UIMountainIcon, path: 'assets/ui/ui_mountain_icon.png', type: 'image' },
 

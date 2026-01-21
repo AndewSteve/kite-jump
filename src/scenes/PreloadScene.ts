@@ -11,7 +11,9 @@ export default class PreloadScene extends Phaser.Scene {
 
   preload() {
     const assetBaseUrl = (import.meta.env.VITE_ASSET_BASE_URL || '').trim();
-    const baseUrl = assetBaseUrl ? assetBaseUrl.replace(/\/?$/, '/') : '';
+    const isDev = import.meta.env.DEV;
+    const resolvedBaseUrl = isDev ? '' : assetBaseUrl;
+    const baseUrl = resolvedBaseUrl ? resolvedBaseUrl.replace(/\/?$/, '/') : '';
     // 1. 制作一个简易进度条
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;

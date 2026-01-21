@@ -8,13 +8,14 @@ export default class StartOverlay extends Phaser.GameObjects.Container {
 
     // 1. 全屏透明点击区域 (Hit Area)
     const hitArea = scene.add.rectangle(width/2, height/2, width, height, 0x000000, 0.01)
-        .setInteractive();
+        .setInteractive()
+        .setDepth(2000);
     
     // 2. 提示文本
-    const hintText = scene.add.text(width / 2, height * 0.7, "TAP TO LAUNCH", {
+    const hintText = scene.add.text(width / 2, height * 0.7, "点击开始游戏", {
         fontSize: '32px', color: '#ffffff', fontStyle: 'bold',
         stroke: '#000000', strokeThickness: 4
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(2000);
 
     // 3. 呼吸动画
     scene.tweens.add({
@@ -27,7 +28,9 @@ export default class StartOverlay extends Phaser.GameObjects.Container {
     });
 
     // 4. 手指图标
-    const hand = scene.add.text(width/2, height * 0.7 + 50, "👆", { fontSize: '40px' }).setOrigin(0.5);
+    const hand = scene.add.text(width/2, height * 0.7 + 50, "👆", { fontSize: '40px' })
+      .setOrigin(0.5)
+      .setDepth(2000);
     scene.tweens.add({
         targets: hand,
         y: '+=20',
@@ -44,6 +47,7 @@ export default class StartOverlay extends Phaser.GameObjects.Container {
         this.setVisible(false); // 点击后自动隐藏
     });
 
+    this.setDepth(2000);
     scene.add.existing(this);
   }
   
@@ -53,3 +57,5 @@ export default class StartOverlay extends Phaser.GameObjects.Container {
       // 如果需要复用，可以在这里重新 setInteractive
   }
 }
+
+
