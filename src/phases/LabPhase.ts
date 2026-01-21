@@ -31,7 +31,7 @@ export class LabPhase implements IGamePhase {
     this.registerDebugKeys(scene);
   }
 
-  update(scene: GameScene, dt: number): void {
+  update(scene: GameScene, _dt: number): void {
     // 只需要维持跑动，不需要检测 Phase 结束
     // 可以在这里打印实时 log
     scene.player.setVelocityY(-900);

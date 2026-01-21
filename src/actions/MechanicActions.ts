@@ -18,7 +18,7 @@ export class WeiConversionAction implements IEntityAction {
   }
 
   execute(ctx: InteractionContext): void {
-    const { player, target, scene } = ctx;
+    const { player } = ctx;
 
     // 1. 检查玩家是否有“曹魏改装”
     if (player.playerState.buffs.hasTag(KiteConfigs.wei.tag)) {

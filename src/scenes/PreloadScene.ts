@@ -10,6 +10,8 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
+    const assetBaseUrl = (import.meta.env.VITE_ASSET_BASE_URL || '').trim();
+    const baseUrl = assetBaseUrl ? assetBaseUrl.replace(/\/?$/, '/') : '';
     // 1. 制作一个简易进度条
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
@@ -47,12 +49,13 @@ export default class PreloadScene extends Phaser.Scene {
     // }
 
     AssetManifest.forEach(asset => {
+       const url = baseUrl ? `${baseUrl}${asset.path}` : asset.path;
        if (asset.type === 'image') {
-         this.load.image(asset.key, asset.path);
+         this.load.image(asset.key, url);
        } else if (asset.type === 'spritesheet' && asset.frameConfig) {
-         this.load.spritesheet(asset.key, asset.path, asset.frameConfig);
+         this.load.spritesheet(asset.key, url, asset.frameConfig);
        } else if (asset.type === 'audio') { // ✅ 处理音频
-         this.load.audio(asset.key, asset.path);
+         this.load.audio(asset.key, url);
        }
        // 还可以扩展 audio, json 等
     });
@@ -74,3 +77,4 @@ export default class PreloadScene extends Phaser.Scene {
     // }
   }
 }
+

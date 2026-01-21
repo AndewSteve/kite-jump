@@ -18,7 +18,7 @@ export default class WeatherManager {
   private cooldownDuration: number = 20; // 冷却时间 (秒)
   
   private currentWeather: IWeatherConfig | null = null;
-  private hasTriggeredFirstTime: boolean = false; // 是否已触发过首次
+  // private hasTriggeredFirstTime: boolean = false; // 是否已触发过首次
 
   // 避免极光连续触发的记录
   private lastWeatherId: string | null = null;
@@ -89,7 +89,7 @@ export default class WeatherManager {
     this.state = WeatherState.Active;
     this.currentTimer = config.duration;
     this.lastWeatherId = config.id;
-    this.hasTriggeredFirstTime = true;
+    // this.hasTriggeredFirstTime = true;
 
     // 1. 应用 Buffs (重力、寒冷、回能等)
     if (config.buffs) {

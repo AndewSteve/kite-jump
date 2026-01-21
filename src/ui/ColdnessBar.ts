@@ -97,6 +97,10 @@ export default class ColdnessBar extends Phaser.GameObjects.Container {
         }
     }
 
+    public getColdness(): number {
+        return this.currentColdness;
+    }
+
     private triggerFreezeDeath() {
         // 防止重复触发
         if (this.scene.data.get('isGameOver')) return;
@@ -110,7 +114,7 @@ export default class ColdnessBar extends Phaser.GameObjects.Container {
      * 必须在 Scene update 中调用
      * 用于驱动 Shader 的波浪动画
      */
-    public update(time: number, delta: number) {
+    public update(time: number, _delta: number) {
         if (this.pipeline) {
             this.pipeline.updateTime(time);
         }

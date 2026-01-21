@@ -93,7 +93,7 @@ export default class UIEffectController {
             copy.setScale(baseScale * (this.config.glowSpread || 1.6));
 
             // 应用模糊
-            const blurFx = copy.postFX.addBlur(
+            copy.postFX.addBlur(
               this.config.glowBlurStrength, 
               this.config.glowBlurStrength, 
               1

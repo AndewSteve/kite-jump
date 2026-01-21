@@ -10,7 +10,7 @@ import MagicFieldPipeline from '../pipelines/MagicFieldPipeline';
  */
 export default class LabScene extends GameScene {
   // ✅ 新增：保存特效精灵的引用，以便在 update 中更新位置
-  private alphaTestSprite?: Phaser.GameObjects.Sprite;
+  // private alphaTestSprite?: Phaser.GameObjects.Sprite;
   // ✅ 新增：用于测试 Shader 的 Sprite
   private shieldSprite?: Phaser.GameObjects.Sprite;
   // 保存 Pipeline 引用以便 update

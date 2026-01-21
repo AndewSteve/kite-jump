@@ -61,14 +61,14 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L1_Frost,
     name: "寒霜荒原",
     durationMeters: 300, // 300米
-    backgroundTexture: TextureKeys.BgFrost,
+    backgroundTexture: TextureKeys.BgL1Sky,
     spawnTable: StandardSpawnTable,
   },
   [BiomeId.L2_RedCliff]: {
     id: BiomeId.L2_RedCliff,
     name: "赤壁余烬",
     durationMeters: 400,
-    backgroundTexture: TextureKeys.BgRedCliff,
+    backgroundTexture: TextureKeys.BgL2Smoke,
     spawnTable: RedCliffSpawnTable,
     buffs: [ RedCliffMechanicBuff ],
     envModifiers: [
@@ -83,7 +83,7 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L3_CloudMarsh,
     name: "云梦泽",
     durationMeters: 400,
-    backgroundTexture: TextureKeys.BgMarsh,
+    backgroundTexture: TextureKeys.BgL2Smoke,
     spawnTable: CloudMarshSpawnTable,
     envModifiers: [
       {
@@ -99,7 +99,7 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L4_WindCave,
     name: "墨家风洞",
     durationMeters: 400,
-    backgroundTexture: TextureKeys.BgWindCave,
+    backgroundTexture: TextureKeys.BgL2Smoke,
     spawnTable: WindCaveSpawnTable,
     // ✅ 挂载机制
     buffs: [ WindCaveMechanicBuff ]

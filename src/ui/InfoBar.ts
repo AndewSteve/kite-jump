@@ -58,7 +58,7 @@ export default class InfoBar extends Phaser.GameObjects.Container {
         // 第4格中心:  1.5 * sectionWidth
         // (这是基于容器中心为0点的数学推导)
         
-        const quarter = this.targetWidth / 4;
+        // const quarter = this.targetWidth / 4;
         // 稍微往上偏一点给 label，往下偏一点给数值
         const labelY = -this.targetHeight * 0.15; 
         const valueY = this.targetHeight * 0.15;

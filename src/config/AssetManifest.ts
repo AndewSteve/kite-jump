@@ -34,10 +34,10 @@ export const AssetManifest: IAssetDefinition[] = [
   
   // --- 环境/背景 ---
   { key: TextureKeys.BgMainMenu, path: 'assets/bg/bg_main_menu.png', type: 'image' },
-  { key: TextureKeys.BgFrost, path: 'assets/bg/bg_frost.png', type: 'image' },
-  { key: TextureKeys.BgRedCliff, path: 'assets/bg/bg_redcliff.png', type: 'image' },
-  { key: TextureKeys.BgMarsh, path: 'assets/bg/bg_marsh.png', type: 'image' },
-  { key: TextureKeys.BgWindCave, path: 'assets/bg/bg_wind_cave.png', type: 'image' },
+  // { key: TextureKeys.BgFrost, path: 'assets/bg/bg_frost.png', type: 'image' },
+  // { key: TextureKeys.BgRedCliff, path: 'assets/bg/bg_redcliff.png', type: 'image' },
+  // { key: TextureKeys.BgMarsh, path: 'assets/bg/bg_marsh.png', type: 'image' },
+  // { key: TextureKeys.BgWindCave, path: 'assets/bg/bg_wind_cave.png', type: 'image' },
 
   { key: TextureKeys.BgL1Land, path: 'assets/bg/bg_L1_land.png', type: 'image' },
   { key: TextureKeys.BgL1Sky, path: 'assets/bg/bg_L1_sky.png', type: 'image' },
@@ -64,10 +64,10 @@ export const AssetManifest: IAssetDefinition[] = [
 
   
   // UI 资产
-  { key: UITextureKeys.UITopFrame, path: 'assets/ui/ui_top_frame.png', type: 'image' },
-  { key: UITextureKeys.UIHUDFrame, path: 'assets/ui/ui_hud_frame.png', type: 'image' },
-  { key: UITextureKeys.UIHourglassIcon, path: 'assets/ui/ui_hourglass_icon.png', type: 'image' },
-  { key: UITextureKeys.UIMountainIcon, path: 'assets/ui/ui_mountain_icon.png', type: 'image' },
+  // { key: UITextureKeys.UITopFrame, path: 'assets/ui/ui_top_frame.png', type: 'image' },
+  // { key: UITextureKeys.UIHUDFrame, path: 'assets/ui/ui_hud_frame.png', type: 'image' },
+  // { key: UITextureKeys.UIHourglassIcon, path: 'assets/ui/ui_hourglass_icon.png', type: 'image' },
+  // { key: UITextureKeys.UIMountainIcon, path: 'assets/ui/ui_mountain_icon.png', type: 'image' },
 
   { key: UITextureKeys.UIEnergyFrame, path: 'assets/ui/ui_energy_frame_empty.png', type: 'image' },
   { key: UITextureKeys.UIEnergyFrameBack, path: 'assets/ui/ui_energy_frame_back_empty.png', type: 'image' },

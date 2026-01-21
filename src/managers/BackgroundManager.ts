@@ -163,7 +163,7 @@ export default class BackgroundManager {
     // --- B. 底部销毁逻辑 (检查是否飞出太远) ---
     const bottomChunk = this.chunks[0];
     const bottomVisualY = bottomChunk.initialY - (cameraScrollY * this.PARALLAX_Y);
-    const bottomVisualEdge = bottomVisualY - (this.chunkDisplayHeight / 2); 
+    // const bottomVisualEdge = bottomVisualY - (this.chunkDisplayHeight / 2); 
     // 注意：这里用上边缘判断或者中心判断都可以，只要足够远
 
     // 阈值：屏幕下方 3 倍高度
