@@ -10,25 +10,29 @@ export const KiteConfigs = {
   [KiteIds.Default]: {
     tag: 'Passive.None',
     name: '基础风筝',
-    description: '基础风筝: 无特殊能力。',
+    title: '基础风筝',
+    description: '无特殊能力。',
     buffFactory: null
   },
   [KiteIds.Shu]: {
     tag: 'Passive.ShuCoin',
     name: '蜀汉·天工系',
-    description: '蜀汉·天工系: 重力低，速度更快，冲刺时间更长，冲刺时金币翻倍。',
+    title: '蜀汉·天工系',
+    description: '重力低，速度更快，冲刺时间更长，冲刺时金币翻倍。',
     buffFactory: () => ShuBuff
   },
   [KiteIds.Wei]: {
     tag: 'Passive.WeiMechanic',
     name: '曹魏·玄铁系',
-    description: '曹魏·玄铁系: 重力高，怪物碰撞时变为增益。',
+    title: '曹魏·玄铁系',
+    description: '重力高，怪物碰撞时变为增益。',
     buffFactory: () => WeiBuff
   },
   [KiteIds.Wu]: {
     tag: 'Passive.WuSpawn',
     name: '东吴·烽火系',
-    description: '东吴·烽火系: 抗寒，唤风符变多，开局冲刺。',
+    title: '东吴·烽火系',
+    description: '抗寒，唤风符变多，开局冲刺。',
     buffFactory: () => WuBuff,
     coldnessMultiplier: 0.9, // 东吴寒冷增长减半
     windSpawnMultiplier: 2.0,  // 东吴唤风符生成概率翻倍

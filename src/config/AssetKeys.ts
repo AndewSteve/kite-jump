@@ -67,6 +67,10 @@ export const UITextureKeys = {
 
   UILiveUp: 'ui_live_up',
   UILiveOff: 'ui_live_off',
+
+  UIPluginWind: 'ui_plugin_wind',
+  UIPluginMagnet: 'ui_plugin_magnet',
+  UIPluginG: 'ui_plugin_g',
 } as const;
 export type UITextureKey = typeof UITextureKeys[keyof typeof UITextureKeys];
 

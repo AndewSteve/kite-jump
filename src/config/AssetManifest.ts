@@ -83,6 +83,9 @@ export const AssetManifest: IAssetDefinition[] = [
 
   { key: UITextureKeys.UILiveUp, path: 'assets/ui/ui_live_up.png', type: 'image' },
   { key: UITextureKeys.UILiveOff, path: 'assets/ui/ui_live_off.png', type: 'image' },
+  { key: UITextureKeys.UIPluginWind, path: 'assets/ui/ui_plugin_wind.png', type: 'image' },
+  { key: UITextureKeys.UIPluginMagnet, path: 'assets/ui/ui_plugin_magnet.png', type: 'image' },
+  { key: UITextureKeys.UIPluginG, path: 'assets/ui/ui_plugin_g.png', type: 'image' },
 
   // --- 新增 VFX ---
   // 请将截图里的 "FX_TEX_Gra_Water_Wave_01.png" 改名为 noise_bar.png
