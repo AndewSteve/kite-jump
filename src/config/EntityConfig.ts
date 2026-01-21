@@ -1,4 +1,6 @@
-import { ApplyBuffAction, ApplyDamageAction, BoostAction, ColdnessIncrementAction, DashEnergyIncrementAction, HasBuffTagOrVanishAction, HealAction, RemoveLinkedSummonAction, ScoreAction, SlowDownAction, SpawnLinkedSummonAction, VanishAction } from "../actions/EntityActions";
+import { ApplyBuffAction, ApplyDamageAction, BoostAction, CoinAction, ColdnessIncrementAction, 
+  DashEnergyIncrementAction, HasBuffTagOrVanishAction, HealAction, RemoveLinkedSummonAction, 
+  SlowDownAction, SpawnLinkedSummonAction, VanishAction } from "../actions/EntityActions";
 import { WeiConversionAction } from "../actions/MechanicActions";
 import { EntityType, type IEntityConfig} from "../types/GameTypes";
 import { AudioKeys, TextureKeys } from "./AssetKeys";
@@ -53,7 +55,7 @@ export const EntityConfig = {
       new ColdnessIncrementAction(-15), // 增加体温
       new ApplyBuffAction(SkyLaternBuff),
       new DashEnergyIncrementAction(8), // 增加冲刺能量
-      new VanishAction(150, AudioKeys.SfxCollect, EntityTextureScale * 1.2)
+      new VanishAction(150, AudioKeys.SfxCollectCoin2, EntityTextureScale * 1.2)
     ]
   }),
   // 霹雳火
@@ -66,7 +68,7 @@ export const EntityConfig = {
       new BoostAction(-1500), // 大力度
       new ColdnessIncrementAction(-30), // 增加体温
       new DashEnergyIncrementAction(15), // 增加冲刺能量
-      new VanishAction(150, AudioKeys.SfxJump, EntityTextureScale * 1.2)
+      new VanishAction(150, AudioKeys.SfxCollectCoin3, EntityTextureScale * 1.2)
     ]
   }),
   // 唤风令
@@ -77,7 +79,7 @@ export const EntityConfig = {
     color: 0xff0000,
     onHit: [
       new DashEnergyIncrementAction(100), // 增加冲刺能量
-      new VanishAction(150, AudioKeys.SfxCollect, EntityTextureScale * 1.2)
+      new VanishAction(150, AudioKeys.SfxCollectCoin1, EntityTextureScale * 1.2)
     ]
   }),
   // 八卦盾
@@ -88,7 +90,7 @@ export const EntityConfig = {
     color: 0x00ff00,
     onHit: [
       new ApplyBuffAction(TacticsBuff),
-      new VanishAction(150, AudioKeys.SfxCollect, EntityTextureScale * 1.2)
+      new VanishAction(150, AudioKeys.SfxCollectCoin2, EntityTextureScale * 1.2)
     ]
   }),
   // 金币
@@ -98,8 +100,8 @@ export const EntityConfig = {
     type: EntityType.Coin,
     color: 0xffd700,
     onHit: [
-      new ScoreAction(200),
-      new VanishAction(150, AudioKeys.SfxCollect, EntityTextureScale * 1.2)
+      new CoinAction(2),
+      new VanishAction(150, null, EntityTextureScale * 1.2)
     ]
   }),
   // 急救包

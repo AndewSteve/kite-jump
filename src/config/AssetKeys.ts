@@ -48,12 +48,21 @@ export const UITextureKeys = {
   UIHUDFrame: 'ui_hud_frame',
   UIHourglassIcon: 'ui_hourglass_icon',
   UIMountainIcon: 'ui_mountain_icon',
-  UICoinIcon: 'ui_coin_icon',
 
   UIEnergyFrame: 'ui_energy_frame',
   UIEnergyFrameBack: 'ui_energy_frame_back',
   UIEnergyFill: 'ui_energy_fill',
   UIEnergyPointer: 'ui_energy_pointer',
+
+  UIColdnessFrameEmpty: 'ui_coldness_frame_empty',          // 框-空 (0%)
+  UIColdnessFrameMid: 'ui_coldness_frame_empty_ice_mid',    // 框-半冰 (50%)
+  UIColdnessFrameFull: 'ui_coldness_frame_ice_full',        // 框-全冰 (100%)
+  UIColdnessBackWater: 'ui_coldness_frame_back_water',      // 底-水 (常驻背景)
+  UIColdnessBackIceFull: 'ui_coldness_frame_back_ice_full',      // 底-冰 (Shader控制)
+  UIColdnessBackIceMight: 'ui_coldness_frame_back_ice_might',      // 底-冰 (Shader控制)
+
+  UILiveUp: 'ui_live_up',
+  UILiveOff: 'ui_live_off',
 } as const;
 export type UITextureKey = typeof UITextureKeys[keyof typeof UITextureKeys];
 
@@ -80,7 +89,10 @@ export const AudioKeys = {
   // SFX (Player)
   SfxJump: 'sfx_jump',       // 吃云加速
   SfxDash: 'sfx_dash',       // 冲刺
-  SfxCollect: 'sfx_collect', // 吃金币
+  // SfxCollect: 'sfx_collect_coin1', // 吃金币
+  SfxCollectCoin1: 'sfx_collect_coin1', // 吃金币
+  SfxCollectCoin2: 'sfx_collect_coin2', // 吃金币
+  SfxCollectCoin3: 'sfx_collect_coin3', // 吃金币
   SfxNegativeCollect: 'sfx_negative_collect', // 吃负面道具
   SfxHit: 'sfx_hit',         // 撞击/受伤
   SfxHeal: 'sfx_heal',         // 治疗

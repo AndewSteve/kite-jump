@@ -7,6 +7,7 @@ import { ModifierType, StatType } from '../mechanics/StatDefinitions';
 import DataManager from '../managers/DataManager';
 import { DashConfig, DashLv1Buff, DashLv2Buff, DashLv3Buff, TransitionDashConfig } from '../config/BuffConfig';
 import { KiteConfigs } from '../config/KiteBuffConfig';
+import { EVENTS, gameEvents } from '../config/Events';
 
 export default class PlayerState {
   private player: Player;
@@ -120,6 +121,8 @@ export default class PlayerState {
     if (this.coldness >= GameConfig.playerState.thresholds.icebound) {
         this.player.die("frozen");
     }
+
+    gameEvents.emit(EVENTS.UPDATE_COLDNESS, this.coldness);
   }
 
   private syncColdnessToStats() {
@@ -176,6 +179,7 @@ export default class PlayerState {
   public addColdness(amount: number) {
     this.coldness += amount;
     this.coldness = Phaser.Math.Clamp(this.coldness, 0, 100);
+    gameEvents.emit(EVENTS.UPDATE_COLDNESS, this.coldness);
   }
 
   public addDashEnergy(amount: number) {
@@ -186,12 +190,15 @@ export default class PlayerState {
     if (this.dashEnergy >= 100) {
         this.activateDash();
     }
+
+    gameEvents.emit(EVENTS.UPDATE_DASH, this.dashEnergy);
   }
 
   public applyDamage(amount: number) {
     this.health -= amount;
     this.health = Phaser.Math.Clamp(this.health, 0, this.maxHealth);
     console.log(`Player took ${amount} damage. Health is now ${this.health}.`);
+    gameEvents.emit(EVENTS.UPDATE_LIFE, this.health);
     if (this.health <= 0) {
         this.player.die("health_depleted");
     }
@@ -200,6 +207,7 @@ export default class PlayerState {
   public heal(amount: number) {
     this.health += amount;
     this.health = Phaser.Math.Clamp(this.health, 0, this.maxHealth);
+    gameEvents.emit(EVENTS.UPDATE_LIFE, this.health);
     console.log(`Player healed ${amount}. Health is now ${this.health}.`);
   }
 

@@ -174,7 +174,7 @@ export default class InfoBar extends Phaser.GameObjects.Container {
         }
     }
 
-    public updateEffect(dt: number) {
+    public update(_time:number, dt: number) {
         this.heightEffect.update(dt);
         this.bambooEffect.update(dt);
     }

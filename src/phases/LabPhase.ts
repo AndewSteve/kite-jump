@@ -44,6 +44,7 @@ export class LabPhase implements IGamePhase {
     keyboard.off('keydown-SIX');
     keyboard.off('keydown-Q');
     keyboard.off('keydown-W');
+    keyboard.off('keydown-E');
     keyboard.off('keydown-C');
   }
 
@@ -96,6 +97,16 @@ export class LabPhase implements IGamePhase {
     keyboard.on('keydown-W', () => {
         console.log("🧪 Test: Summon Fog");
         scene.summonManager.summon(SummonId.FogOverlay, 0, 0);
+    });
+    // 测试 4: 召唤大雾
+    keyboard.on('keydown-E', () => {
+        console.log("🧪 Test: Summon Thunder");
+        scene.summonManager.summon(SummonId.LightningColumn, 0, 0, {
+            // 对于 screen space，y 实际上没用(代码里写死 height/2)，x 会由 spawnMode 覆盖或者在这里随机
+            // 这里我们可以手动随机一个屏幕 X
+            x: Phaser.Math.Between(50, scene.scale.width - 50), 
+            y: 0
+        });
     });
     
     // 测试 5: 清场

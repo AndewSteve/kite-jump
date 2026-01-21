@@ -4,7 +4,7 @@ import type { IBuffConfig } from '../mechanics/BuffTypes';
 import { StatType } from '../mechanics/StatDefinitions';
 import type { IEntityAction, InteractionContext } from './ActionInterfaces';
 import type { BaseSummon } from '../entities/summons/BaseSummon';
-import type { AudioKey } from '../config/AssetKeys';
+import { AudioKeys, type AudioKey } from '../config/AssetKeys';
 import AudioManager from '../managers/AudioManager';
 
 /**
@@ -184,6 +184,25 @@ export class VanishAction implements IEntityAction {
 
 
 
+/**
+ * (预留) 行为：加分
+ */
+const CoinSfxs = [
+  AudioKeys.SfxCollectCoin1,
+  AudioKeys.SfxCollectCoin2,
+  AudioKeys.SfxCollectCoin3
+]
+export class CoinAction implements IEntityAction {
+  private coin: number;
+  constructor(coin: number) {
+    this.coin = coin;
+  }
+  execute(_ctx: InteractionContext): void {
+    const pattern = Phaser.Math.RND.pick(CoinSfxs);
+    AudioManager.playSfx(pattern);
+    gameEvents.emit(EVENTS.ADD_COIN, this.coin);
+  }
+}
 /**
  * (预留) 行为：加分
  */

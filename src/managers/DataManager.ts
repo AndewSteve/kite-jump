@@ -7,7 +7,9 @@ import { KiteSkinIDs, type KiteSkinID } from "../config/KiteSkinDef";
 export interface GameRecord {
   date: string;
   score: number;
+  currency: number;
   height: number;
+  time: string;
 }
 
 export interface KiteSelection {
@@ -80,11 +82,13 @@ export default class DataManager {
   }
 
   // --- 游戏记录 ---
-  static addRecord(score: number, height: number) {
+  static addRecord(score: number, currency:number, height: number, time: string = '') {
     const record: GameRecord = {
       date: new Date().toLocaleDateString(),
       score,
-      height
+      currency,
+      height,
+      time
     };
     this.data.history.unshift(record); // 最新的在前面
     // 只保留最近 20 条

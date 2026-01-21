@@ -12,8 +12,10 @@ export interface GaugeConfig {
   pointerKey: string;
 
   // 布局微调参数
-  // 1. 能量条相对于 Frame 中心的位置
-  energyBarOffset: { x: number; y: number };
+  // 1. 能量条
+  energyBarOffset: { x: number, y: number }; // y 现在代表能量条【底部】的位置
+  // 缩放参数 (解决贴图偏小的问题)
+  energyBarScale: { x: number, y: number };
 
   // 2. 指针相对于 Frame 中心的位置
   pointerPosOffset: { x: number; y: number };
@@ -38,7 +40,8 @@ const DEFAULT_CONFIG: GaugeConfig = {
   energyBarKey: UITextureKeys.UIEnergyFill,
 
   // 默认放在容器中心
-  energyBarOffset: { x: 20, y: -25 },
+  energyBarOffset: { x: 20, y: 80 }, // y 现在代表能量条【底部】的位置
+  energyBarScale: { x: 1.2, y: 1.5 },
 
   // 指针安装位置 (比如表盘中心在背景的下方)
   pointerPosOffset: { x: 27, y: 150 },
@@ -48,7 +51,7 @@ const DEFAULT_CONFIG: GaugeConfig = {
 
   minAngle: -15, // 起始角度
   maxAngle: 165, // 结束角度
-  maxSpeed: 2000,
+  maxSpeed: 3000,
 };
 
 export class SciFiGauge extends Phaser.GameObjects.Container {
@@ -60,6 +63,14 @@ export class SciFiGauge extends Phaser.GameObjects.Container {
   private config: GaugeConfig;
   private currentSpeed: number = 0;
   private currentEnergy: number = 0;
+  // ✅ 视觉数值 (动画过程中的数值，用于作为下一次动画起点)
+  private displayedEnergy: number = 0;
+
+  // ✅ 新增：记录能量条的原始 Y 坐标，用于计算下沉偏移量
+  private baseBottomY: number = 0;
+
+  // ✅ 存储当前的能量动画对象，防止冲突
+  private energyTween?: Phaser.Tweens.Tween;
 
   constructor(
     scene: Phaser.Scene,
@@ -74,6 +85,9 @@ export class SciFiGauge extends Phaser.GameObjects.Container {
 
     this.createChildren();
     scene.add.existing(this);
+    // 初始化视觉状态 (0能量)
+    this.updateEnergyVisuals(0);
+    this.setSpeed(0, true); // 初始化速度为0
   }
 
   private createChildren() {
@@ -86,12 +100,13 @@ export class SciFiGauge extends Phaser.GameObjects.Container {
       this.config.energyBarOffset.y,
       this.config.energyBarKey,
     );
-    this.energyBar.setScale(1.0/0.8,1.0 / 0.7); // 如果图是 80px 高，拉伸到 100px 高
+    this.energyBar.setOrigin(0.5, 1);
+    this.energyBar.setScale(this.config.energyBarScale.x, this.config.energyBarScale.y);
+    // 记录一下初始设定的底部位置，作为后续计算的基准
+    this.baseBottomY = this.config.energyBarOffset.y;
     this.add(this.energyBar);
     this.frame = this.scene.add.image(0, 0, this.config.frameKey);
     this.add(this.frame);
-
-
     // 3. 指针
     this.pointer = this.scene.add.image(
       this.config.pointerPosOffset.x,
@@ -105,6 +120,7 @@ export class SciFiGauge extends Phaser.GameObjects.Container {
     );
     this.pointer.setAngle(this.config.minAngle); // 初始角度
     this.add(this.pointer);
+    
   }
 
   // ==========================================
@@ -139,25 +155,85 @@ export class SciFiGauge extends Phaser.GameObjects.Container {
   }
 
   /**
-   * 设置能量 (0.0 - 1.0)
-   * 从底部向上涨
-   */
-  public setEnergy(value: number) {
-    const clamped = Phaser.Math.Clamp(value, 0, 1);
-    this.currentEnergy = clamped;
+     * 设置能量 (0.0 - 1.0)
+     * 支持动画过渡
+     * @param value 目标能量值
+     * @param instant 是否瞬间设置 (无动画)
+     */
+    public setEnergy(value: number, instant: boolean = false) {
+        const targetValue = Phaser.Math.Clamp(value, 0, 1);
+        
+        // 更新逻辑数值 (立即生效，防止快速调用时逻辑出错)
+        this.currentEnergy = targetValue;
 
-    const w = this.energyBar.width;
-    const h = this.energyBar.height;
+        // 如果之前的动画还在跑，先停掉
+        if (this.energyTween) {
+            this.energyTween.stop();
+            this.energyTween = undefined;
+        }
 
-    // 计算可见高度
-    const visibleHeight = h * clamped;
+        if (instant) {
+            // 瞬间切换：直接计算并渲染
+            this.updateEnergyVisuals(targetValue);
+            this.displayedEnergy = targetValue;
+        } else {
+            // 动画切换：使用 Counter Tween 从【当前显示值】过渡到【目标值】
+            this.energyTween = this.scene.tweens.addCounter({
+                from: this.displayedEnergy,
+                to: targetValue,
+                duration: 500, // 液体流动通常比指针慢一点，显得有质感
+                ease: 'Cubic.easeOut', // 液体使用 Cubic 或 Quad 比较自然，不要用 Back (会溢出)
+                onUpdate: (tween) => {
+                    const val = tween.getValue();
+                    if (val) {
+                      this.updateEnergyVisuals(val);
+                      this.displayedEnergy = val; // 实时记录，以便半途打断时能接上
+                    }
+                }
+            });
+        }
+    }
 
-    // setCrop(x, y, width, height)
-    // x, y 是相对于纹理左上角的。
-    // 为了显示底部，我们需要裁剪掉顶部的区域。
-    // y = 总高度 - 可见高度 (这样裁剪框就落在了图片底部)
-    this.energyBar.setCrop(0, h - visibleHeight, w, visibleHeight);
-  }
+  /**
+     * ✅ 核心渲染逻辑提取
+     * 根据输入的能量百分比，计算 Y 轴下沉量和裁切区域
+     */
+    private updateEnergyVisuals(percent: number) {
+        // 获取原始尺寸
+        const texW = this.energyBar.width;
+        const texH = this.energyBar.height;
+        
+        // 获取缩放后的实际高度
+        const scaledTotalH = texH * this.config.energyBarScale.y;
+
+        // 1. 计算【可视高度】
+        const visibleDisplayH = scaledTotalH * percent;
+
+        // 2. 计算【下沉距离】(移动 offset)
+        const dropDistance = scaledTotalH - visibleDisplayH;
+
+        // 3. 应用位置下沉 (锚点在底部)
+        this.energyBar.y = this.baseBottomY + dropDistance;
+
+        // 4. 计算【裁切】(Crop 基于原始纹理坐标)
+        // 保留顶部 percent% 的区域
+        const cropH = texH * percent;
+        
+        // 防止 cropH 为 0 或负数导致报错 (虽然 Phaser 通常能处理)
+        if (cropH <= 0) {
+            this.energyBar.setVisible(false);
+        } else {
+            this.energyBar.setVisible(true);
+            this.energyBar.setCrop(0, 0, texW, cropH);
+        }
+        
+        // 5. 颜色反馈 (可选)：低能量闪烁或变色
+        if (percent < 0.2 && percent > 0) {
+            this.energyBar.setTint(0xff5555); // 红色预警
+        } else {
+            this.energyBar.clearTint();
+        }
+    }
 
   // ==========================================
   // 调试接口：运行时调整位置 (开发阶段使用)
@@ -179,5 +255,9 @@ export class SciFiGauge extends Phaser.GameObjects.Container {
   public debugSetPointerPosition(offsetX: number, offsetY: number) {
     this.pointer.setPosition(offsetX, offsetY);
     console.log(`Pointer Position Set: { x: ${offsetX}, y: ${offsetY} }`);
+  }
+
+  public getLogicEnergy(): number {
+    return this.currentEnergy;
   }
 }

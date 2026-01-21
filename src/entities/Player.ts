@@ -177,6 +177,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     this.checkScreenWrap();
+
+    gameEvents.emit(EVENTS.UPDATE_SPEED, Math.abs(this.arcadeBody.velocity.y));
   }
 
 

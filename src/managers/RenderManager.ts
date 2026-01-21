@@ -2,11 +2,13 @@ import Phaser from 'phaser';
 import FogPipeline from '../pipelines/FogPipeline';
 import MagicFieldPipeline from '../pipelines/MagicFieldPipeline';
 import DissolvePipeline from '../pipelines/DissolvePipeline';
+import ColdnessPipeline from '../pipelines/ColdnessPipeline';
 
 export const PipelineID = {
   Fog: 'FogPipeline',
   MagicField: 'MagicField',
   Dissolve: 'Dissolve',
+  Coldness: 'Coldness', // ✅ Add ID
 } as const;
 export type PipelineKey = typeof PipelineID[keyof typeof PipelineID];
 
@@ -41,6 +43,12 @@ export default class RenderManager {
     if (!this.renderer.pipelines.has(PipelineID.Dissolve)) {
       this.renderer.pipelines.add(PipelineID.Dissolve, new DissolvePipeline(this.scene.game));
       console.log(`[RenderManager] Pipeline Registered: ${PipelineID.Dissolve}`);
+    }
+
+    // ✅ 注册 Coldness Pipeline
+    if (!this.renderer.pipelines.has(PipelineID.Coldness)) {
+      this.renderer.pipelines.add(PipelineID.Coldness, new ColdnessPipeline(this.scene.game));
+      console.log(`[RenderManager] Pipeline Registered: ${PipelineID.Coldness}`);
     }
   }
 

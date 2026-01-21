@@ -64,12 +64,21 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: UITextureKeys.UIHUDFrame, path: 'assets/ui/ui_hud_frame.png', type: 'image' },
   { key: UITextureKeys.UIHourglassIcon, path: 'assets/ui/ui_hourglass_icon.png', type: 'image' },
   { key: UITextureKeys.UIMountainIcon, path: 'assets/ui/ui_mountain_icon.png', type: 'image' },
-  { key: UITextureKeys.UICoinIcon, path: 'assets/ui/ui_coin_icon.png', type: 'image' },
 
   { key: UITextureKeys.UIEnergyFrame, path: 'assets/ui/ui_energy_frame_empty.png', type: 'image' },
   { key: UITextureKeys.UIEnergyFrameBack, path: 'assets/ui/ui_energy_frame_back_empty.png', type: 'image' },
   { key: UITextureKeys.UIEnergyFill, path: 'assets/ui/ui_energy_fill.png', type: 'image' },
   { key: UITextureKeys.UIEnergyPointer, path: 'assets/ui/ui_energy_pointer.png', type: 'image' },
+
+  { key: UITextureKeys.UIColdnessFrameEmpty, path: 'assets/ui/ui_coldness_frame_empty.png', type: 'image' },
+  { key: UITextureKeys.UIColdnessFrameMid, path: 'assets/ui/ui_coldness_frame_empty_ice_mid.png', type: 'image' },
+  { key: UITextureKeys.UIColdnessFrameFull, path: 'assets/ui/ui_coldness_frame_ice_full.png', type: 'image' },
+  { key: UITextureKeys.UIColdnessBackWater, path: 'assets/ui/ui_coldness_frame_back_water.png', type: 'image' },
+  { key: UITextureKeys.UIColdnessBackIceFull, path: 'assets/ui/ui_coldness_frame_back_ice_full.png', type: 'image' },
+  { key: UITextureKeys.UIColdnessBackIceMight, path: 'assets/ui/ui_coldness_frame_back_ice_might.png', type: 'image' },
+
+  { key: UITextureKeys.UILiveUp, path: 'assets/ui/ui_live_up.png', type: 'image' },
+  { key: UITextureKeys.UILiveOff, path: 'assets/ui/ui_live_off.png', type: 'image' },
 
   // --- 新增 VFX ---
   // 请将截图里的 "FX_TEX_Gra_Water_Wave_01.png" 改名为 noise_bar.png
@@ -90,8 +99,10 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: AudioKeys.SfxBtnLevelUp, path: 'assets/audio/sfx_btn_level_up.wav', type: 'audio' },
 
   { key: AudioKeys.SfxJump, path: 'assets/audio/sfx_jump.mp3', type: 'audio' },
-  { key: AudioKeys.SfxDash, path: 'assets/audio/sfx_dash.MP3', type: 'audio' },
-  { key: AudioKeys.SfxCollect, path: 'assets/audio/sfx_collect.wav', type: 'audio' },
+  { key: AudioKeys.SfxDash, path: 'assets/audio/sfx_dash.mp3', type: 'audio' },
+  { key: AudioKeys.SfxCollectCoin1, path: 'assets/audio/sfx_collect_coin1.wav', type: 'audio' },
+  { key: AudioKeys.SfxCollectCoin2, path: 'assets/audio/sfx_collect_coin2.wav', type: 'audio' },
+  { key: AudioKeys.SfxCollectCoin3, path: 'assets/audio/sfx_collect_coin3.wav', type: 'audio' },
   { key: AudioKeys.SfxNegativeCollect, path: 'assets/audio/sfx_negative_collect.wav', type: 'audio' },
   { key: AudioKeys.SfxHit, path: 'assets/audio/sfx_hit.mp3', type: 'audio' },
   { key: AudioKeys.SfxHeal, path: 'assets/audio/sfx_heal.wav', type: 'audio' },

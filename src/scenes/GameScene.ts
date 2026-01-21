@@ -34,7 +34,7 @@ export default class GameScene extends Phaser.Scene {
   private worldWidth!: number;
 
   private isGameRunning: boolean = false;
-  private isPaused: boolean = false;
+  public isPaused: boolean = false;
 
   constructor(key: string = "GameScene") {
     super(key);
@@ -229,16 +229,16 @@ export default class GameScene extends Phaser.Scene {
 
     // ✅ 保存记录 (存入历史，更新金币)
     // 注意：这里我们用 Score 作为金币基准，你可以根据需要调整
-    DataManager.addRecord(stats.score, stats.height);
+    DataManager.addRecord(stats.score, stats.currency, stats.height, stats.timeStr);
 
     gameEvents.emit(EVENTS.SHOW_GAME_OVER, {
-      finalHeight: stats.height,
       finalScore: stats.score,
+      finalCurrency: stats.currency,
+      finalHeight: stats.height,
+      finalTime: stats.timeStr,
       cause: cause
     });
   }
-
-  
 
   private hitInteractable(player: any, target: any) {
     const entity = target as InteractableEntity;
