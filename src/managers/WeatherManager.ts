@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import GameScene from '../scenes/GameScene';
 import { WeatherConfig, type IWeatherConfig } from '../config/WeatherConfig';
+import { EVENTS, gameEvents } from '../config/Events';
 import AudioManager from './AudioManager';
 
 export const WeatherState = {
@@ -120,6 +121,8 @@ export default class WeatherManager {
     if (config.sfxAudioKey) {
       AudioManager.playSfx(config.sfxAudioKey);
     }
+
+    gameEvents.emit(EVENTS.WEATHER_START, config.id);
   }
 
   public stopWeather() {
@@ -145,6 +148,7 @@ export default class WeatherManager {
     // this.scene.cameras.main.clearTint();
 
     // 4. 进入冷却
+    gameEvents.emit(EVENTS.WEATHER_END, config.id);
     this.currentWeather = null;
     this.state = WeatherState.Cooldown;
     this.currentTimer = this.cooldownDuration;

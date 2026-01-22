@@ -4,9 +4,9 @@ import GameScene from '../scenes/GameScene';
 import { TransitionBuff, TransitionDashConfig, TransitionEndDashBuff } from '../config/BuffConfig';
 import { BiomeId, type IBiomeData } from '../types/BiomeTypes';
 import { GameConfig } from '../config/GameConfig';
-import { EntityId } from '../config/EntityConfig';
 import { ModifierType } from '../mechanics/StatDefinitions';
 import { TextureKeys } from '../config/AssetKeys';
+import { EntityIds } from '../config/EntityIds';
 
 
 /**
@@ -169,8 +169,8 @@ export class TransitionPhase implements IGamePhase {
     // 这里的 sourceId 用于方便管理，虽然 NormalPhase 会 resetAll，但指定 sourceId 是好习惯
 
     // 遍历所有 ID，除了 Coin 以外全部“乘零”
-    Object.values(EntityId).forEach((id) => {
-      if (id !== EntityId.Coin) {
+    Object.values(EntityIds).forEach((id) => {
+      if (id !== EntityIds.Coin) {
         // ⛔️ 绝对禁止：使用 Multiplier = 0
         // 无论天气系统加多少 PercentAdd，乘以 0 之后都是 0
         scene.spawnManager.addWeightModifier(id, {
@@ -225,7 +225,7 @@ export class TransitionPhase implements IGamePhase {
     // 3. 生成规则重置
     // 虽然 NormalPhase.onEnter 也会 reset，但双重保险
     scene.spawnManager.removeModifiersBySource(this.filterSourceId);
-    scene.spawnManager.removeWeightModifier(EntityId.Coin, this.coinBoostSourceId);
+    scene.spawnManager.removeWeightModifier(EntityIds.Coin, this.coinBoostSourceId);
     scene.spawnManager.isSpawningEnabled = false;
   }
 

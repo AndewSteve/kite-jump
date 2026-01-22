@@ -1,6 +1,7 @@
 // src/managers/DataManager.ts
 
 import { GameConfig } from "../config/GameConfig";
+import { type EntityId, EntityIds } from "../config/EntityIds";
 import { KiteIds, type KiteId } from "../config/KiteConfig";
 import { KiteSkinIDs, type KiteSkinID } from "../config/KiteSkinDef";
 
@@ -28,6 +29,7 @@ export interface UserSaveData {
   };
   selectedKite: KiteSelection;
   unlockedKites: KiteId[];
+  seenEntities: EntityId[];
 
 // ✅ 新增：音频设置
   settings: {
@@ -36,6 +38,9 @@ export interface UserSaveData {
     muted: boolean;
   };
 }
+
+const ALL_ENTITY_IDS = Object.values(EntityIds) as EntityId[];
+const DEV_UNLOCK_ALL_ENTITIES = true;
 
 const DEFAULT_SAVE: UserSaveData = {
   currency: 1000, // 初始给点钱方便测试
@@ -47,6 +52,7 @@ const DEFAULT_SAVE: UserSaveData = {
     kiteId: KiteIds.Default
   },
   unlockedKites: [KiteIds.Default],
+  seenEntities: [...ALL_ENTITY_IDS],
   settings: {
     bgmVolume: 0.5,
     sfxVolume: 0.8,
@@ -65,12 +71,21 @@ export default class DataManager {
       try {
         const parsed = JSON.parse(raw);
         // 合并默认值，防止旧存档缺字段
-        this._data = { ...DEFAULT_SAVE, ...parsed, settings: { ...DEFAULT_SAVE.settings, ...parsed.settings } };
+        this._data = { 
+          ...DEFAULT_SAVE, 
+          ...parsed, 
+          settings: { ...DEFAULT_SAVE.settings, ...parsed.settings },
+          seenEntities: Array.isArray(parsed.seenEntities) ? parsed.seenEntities : [...DEFAULT_SAVE.seenEntities]
+        };
       } catch (e) {
         this._data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
       }
     } else {
       this._data = JSON.parse(JSON.stringify(DEFAULT_SAVE));
+    }
+
+    if (DEV_UNLOCK_ALL_ENTITIES) {
+      this._data.seenEntities = [...DEFAULT_SAVE.seenEntities];
     }
   }
 
@@ -166,6 +181,22 @@ export default class DataManager {
   // C. 灵韵磁场：每级增加 4像素 的判定半径
   static getHitboxRadiusBonus(): number {
     return this.data.upgrades.auraRange * 0.01 * GameConfig.player.baseRadius; // 转为像素
+  }
+
+  // --- 图鉴系统 ---
+  static markEntitySeen(entityId: EntityId) {
+    if (!this.data.seenEntities.includes(entityId)) {
+      this.data.seenEntities.push(entityId);
+      this.save();
+    }
+  }
+
+  static isEntitySeen(entityId: EntityId): boolean {
+    return this.data.seenEntities.includes(entityId);
+  }
+
+  static getSeenEntities(): EntityId[] {
+    return this.data.seenEntities;
   }
 }
 

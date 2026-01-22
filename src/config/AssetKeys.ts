@@ -70,6 +70,11 @@ export const UITextureKeys = {
   UILiveUp: 'ui_live_up',
   UILiveOff: 'ui_live_off',
 
+  UIWeatherFrame: 'ui_weather_frame',
+  UIWeatherThunder: 'ui_weather_thunder',
+  UIWeatherBlizzard: 'ui_weather_blizzard',
+  UIWeatherAurora: 'ui_weather_aurora',
+
   UIPluginWind: 'ui_plugin_wind',
   UIPluginMagnet: 'ui_plugin_magnet',
   UIPluginG: 'ui_plugin_g',

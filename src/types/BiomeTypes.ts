@@ -1,5 +1,5 @@
 import type { AudioKey } from "../config/AssetKeys";
-import type { EntityId } from "../config/EntityConfig";
+import type { EntityId } from "../config/EntityIds";
 import type { IBuffConfig } from "../mechanics/BuffTypes";
 import type { ModifierType, StatType } from "../mechanics/StatDefinitions";
 import type { ISpawnDefinition } from "./GameTypes";

@@ -4,9 +4,11 @@ import InteractableEntity from '../entities/InteractableEntity';
 import { GameConfig } from '../config/GameConfig';
 import { EntityType, type ISpawnDefinition } from '../types/GameTypes';
 import type GameScene from '../scenes/GameScene';
-import { EntityConfig, EntityId } from '../config/EntityConfig';
+import { EntityConfig } from '../config/EntityConfig';
 import { WeightStat } from '../mechanics/WeightStat';
 import type { IModifier } from '../mechanics/StatDefinitions';
+import DataManager from '../managers/DataManager';
+import { EntityIds, type EntityId } from '../config/EntityIds';
 
 export const GroupSpawnPatterns = {
   line_vertical: 'line_vertical',
@@ -292,7 +294,7 @@ export default class SpawnManager {
     if (this.player && this.player.playerState.buffs.hasTag('State.GoldMode')) {
         const tempConfig = initFactory();
         if (tempConfig.type === EntityType.Buff) {
-            initFactory = EntityConfig[EntityId.Coin]; // 使用 ID 访问
+            initFactory = EntityConfig[EntityIds.Coin]; // 使用 ID 访问
         }
     }
 
@@ -307,7 +309,8 @@ export default class SpawnManager {
       ];
       const pattern = Phaser.Math.RND.pick(patterns);
       const count = Phaser.Math.Between(3, 8);
-      this.spawnGroup(EntityId.Coin, x, y, pattern, count);
+      this.spawnGroup(EntityIds.Coin, x, y, pattern, count);
+      DataManager.markEntitySeen(EntityIds.Coin);
       return null;
     }
 
@@ -318,6 +321,7 @@ export default class SpawnManager {
       entity.setVisible(true);
       entity.configure(initFactory());
       entity.onSpawn(this.player);
+      DataManager.markEntitySeen(selectedId);
       return selectedId; // ✅ 返回生成的 ID
     }
 

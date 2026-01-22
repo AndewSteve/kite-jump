@@ -10,35 +10,15 @@ import { WeiConversionAction } from "../actions/MechanicActions";
 import { EntityType, type IEntityConfig} from "../types/GameTypes";
 import { AudioKeys, TextureKeys } from "./AssetKeys";
 import { SkyLaternBuff, TacticsBuff, TacticsConfig } from "./BuffConfig";
+import { EntityIds, type EntityId } from "./EntityIds";
 import { SummonId } from "./SummonConfig";
-
-// ✅ 1. 定义实体 ID 常量 (替代硬编码字符串)
-export const EntityId = {
-  // --- 基础云朵 ---
-  WindRune: 'wind_rune',  // 借风符
-  SkyLantern: 'sky_lantern',    // 孔明灯
-  UnbrokenFire: 'unbroken_fire',// 霹雳火
-  WindKey: 'wind_key',        // 唤风令
-  TacticsShild: 'tactics_shild',// 八卦盾
-  HealBag: 'heal_bag',        // 急救包
-  Coin: 'coin',                 // 金币
-  
-  // --- 危险云朵 ---
-  ColdFlue: 'cold_flue',      // 寒流
-  ChaoticRune: 'chaotic_rune',// 乱流
-  IronVulture: 'iron_vulture',  // 机关秃鹫
-  // FrostVortex: 'frost_vortex', // 漩涡是召唤物，不是实体
-  FrostVortexCore: 'frost_vortex_core', // 漩涡核心
-} as const;
-
-export type EntityId = typeof EntityId[keyof typeof EntityId];
 
 export const EntityTextureScale = 0.14; // 针对 2048*2048
 
 // ✅ 工厂形式：每次调用都返回全新配置对象（尤其是 actions / Action 实例）
 export const EntityConfig = {
   // 借风符
-  [EntityId.WindRune]: () => ({
+  [EntityIds.WindRune]: () => ({
     texture: TextureKeys.WindRune, 
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
@@ -52,10 +32,11 @@ export const EntityConfig = {
     ]
   }),
   // 孔明灯
-  [EntityId.SkyLantern]: () => ({
+  [EntityIds.SkyLantern]: () => ({
     texture: TextureKeys.SkyLantern,
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
+    comment: "孔明灯",
     onHit: [
       new BoostAction(-900), // 力度适中
       new ColdnessIncrementAction(-15), // 增加体温
@@ -66,10 +47,11 @@ export const EntityConfig = {
     ]
   }),
   // 霹雳火
-  [EntityId.UnbrokenFire]: () => ({
+  [EntityIds.UnbrokenFire]: () => ({
     texture: TextureKeys.Gourd, 
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
+    comment: "霹雳火",
     // color: 0xbd00ff,
     onHit: [
       new BoostAction(-1250), // 大力度
@@ -80,10 +62,11 @@ export const EntityConfig = {
     ]
   }),
   // 唤风令
-  [EntityId.WindKey]: () => ({
+  [EntityIds.WindKey]: () => ({
     texture: TextureKeys.WindKey, 
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
+    comment: "唤风令",
     // color: 0xff0000,
     onHit: [
       new DashEnergyIncrementAction(100), // 增加冲刺能量
@@ -92,10 +75,11 @@ export const EntityConfig = {
     ]
   }),
   // 八卦盾
-  [EntityId.TacticsShild]: () => ({
+  [EntityIds.TacticsShild]: () => ({
     texture: TextureKeys.TacticsShild, 
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
+    comment: "八卦盾",
     // color: 0x00ff00,
     onHit: [
       new BoostAction(-900), 
@@ -105,10 +89,11 @@ export const EntityConfig = {
     ]
   }),
   // 金币
-  [EntityId.Coin]: () => ({
+  [EntityIds.Coin]: () => ({
     texture: TextureKeys.Bamboo, 
     scale: EntityTextureScale * 0.45,
     type: EntityType.Coin,
+    comment: "金币",
     // color: 0xffd700,
     onHit: [
       new AddCoinAction(1),
@@ -117,10 +102,11 @@ export const EntityConfig = {
     ]
   }),
   // 急救包
-  [EntityId.HealBag]: () => ({
+  [EntityIds.HealBag]: () => ({
     texture: TextureKeys.Baozi,
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
+    comment: "急救包",
     // color: 0x00ffdd,
     onHit: [
       new BoostAction(-900), 
@@ -132,10 +118,11 @@ export const EntityConfig = {
 
 
   // 乱流
-  [EntityId.ChaoticRune]: () => ({
+  [EntityIds.ChaoticRune]: () => ({
     texture: TextureKeys.ChaoticRune, 
     scale: EntityTextureScale,
     type: EntityType.Hazard, // ✅ 危险
+    comment: "乱流",
     // color: 0x00ffff,
     onHit: [
       new SlowDownAction(-900+300),     // 强制减速
@@ -144,10 +131,11 @@ export const EntityConfig = {
     ]
   }),
   // 寒流
-  [EntityId.ColdFlue]: () => ({
+  [EntityIds.ColdFlue]: () => ({
     texture: TextureKeys.IceCrystals, 
     scale: EntityTextureScale,
     type: EntityType.Hazard, // ✅ 危险
+    comment: "寒流",
     // color: 0x00ffff,
     onHit: [
       new HasBuffTagOrVanishAction({
@@ -161,10 +149,11 @@ export const EntityConfig = {
     ]
   }),
   // 机关秃鹫
-  [EntityId.IronVulture]: () => ({
+  [EntityIds.IronVulture]: () => ({
     texture: TextureKeys.Vulture,
     scale: EntityTextureScale,
     type: EntityType.Hazard,
+    comment: "机关秃鹫",
     onHit: [
       // ✅ 1. 先跑转化检查
       // 如果触发了，Action 内部会把 entity disable 掉
@@ -182,10 +171,11 @@ export const EntityConfig = {
     ]
   }),
   // 霜之漩涡
-  [EntityId.FrostVortexCore]: () => ({
+  [EntityIds.FrostVortexCore]: () => ({
     texture: TextureKeys.FrostVortex, // 核心贴图 (内圈死亡判定)
     scale: EntityTextureScale * 0.01, // 核心很小
     type: EntityType.Hazard,
+    comment: "霜之漩涡核心",
     
     // ✅ 1. 刚生出来时：召唤视觉与吸力场
     onSpawn: [

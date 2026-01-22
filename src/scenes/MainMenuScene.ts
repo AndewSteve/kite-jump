@@ -7,11 +7,13 @@ import { KiteIds, type KiteId } from '../config/KiteConfig';
 import { KiteConfigs } from '../config/KiteBuffConfig';
 import { createTopBar } from '../ui/MainMenu/TopBar';
 import { createHistoryBar } from '../ui/MainMenu/HistoryBar';
+import { createEncyclopediaBar } from '../ui/MainMenu/EncyclopediaBar';
 import { createKiteSelector } from '../ui/MainMenu/KiteSelector';
 import { createUpgradePanel, UPGRADE_BAR_WIDTH } from '../ui/MainMenu/UpgradePanel';
 import { createDescriptionPanel } from '../ui/MainMenu/DescriptionPanel';
 import { createStartButton, type StartButtonUI } from '../ui/MainMenu/StartButton';
 import { showHistoryDialog } from '../ui/MainMenu/HistoryDialog';
+import { showEncyclopediaDialog } from '../ui/MainMenu/EncyclopediaDialog';
 
 // 定义风筝选项结构：将皮肤ID映射到数据存档ID
 interface KiteOption {
@@ -73,9 +75,15 @@ export default class MainMenuScene extends Phaser.Scene {
     createHistoryBar(this, width / 2, historyY, () => showHistoryDialog(this));
 
     // =========================================
+    // 2.5 图鉴入口
+    // =========================================
+    const encyclopediaY = 185;
+    createEncyclopediaBar(this, width / 2, encyclopediaY, () => showEncyclopediaDialog(this));
+
+    // =========================================
     // 3. 核心容器 (左：风筝选择 | 右：升级)
     // =========================================
-    const mainContainerY = 200;
+    const mainContainerY = 230;
     const mainContainerHeight = 500;
     
     // --- 3A. 左侧：风筝选择器 (占宽 40%) ---

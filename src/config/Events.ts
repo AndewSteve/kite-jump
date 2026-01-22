@@ -32,6 +32,9 @@ export const EVENTS = {
   
   WIND_CHANGE: 'wind-change',    // 环境风力变化
 
+  WEATHER_START: 'weather-start', // 天气开始
+  WEATHER_END: 'weather-end',     // 天气结束
+
   PHASE_TRANSITION_START: 'phase-transition-start', // 过渡态开始
   PHASE_NORMAL_START: 'phase-normal-start',         // 正常态开始
 };

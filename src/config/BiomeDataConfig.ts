@@ -1,52 +1,53 @@
-import { EntityConfig, EntityId } from "./EntityConfig";
+import { EntityConfig, } from "./EntityConfig";
 import { BiomeId, type IBiomeData } from "../types/BiomeTypes";
 import { CloudMarshMechanicBuff, RedCliffMechanicBuff, WindCaveMechanicBuff } from "./BuffConfig";
 import { ModifierType, StatType } from "../mechanics/StatDefinitions";
 import { TextureKeys } from "./AssetKeys";
 import type { ISpawnDefinition } from "../types/GameTypes";
+import { EntityIds, type EntityId } from "./EntityIds";
 
 // ✅ 1. 标准表 (L1): 借风符, 血包, 金币, 乱流 , 孔明灯
 const StandardSpawnTable = {
-  [EntityId.WindRune]:    { weight: 75, init: EntityConfig[EntityId.WindRune] }, // 基础极高，保证新手体验
-  [EntityId.Coin]:        { weight: 8,  init: EntityConfig[EntityId.Coin] },
-  [EntityId.ChaoticRune]: { weight: 13,  init: EntityConfig[EntityId.ChaoticRune] },
-  [EntityId.HealBag]:     { weight: 2,  init: EntityConfig[EntityId.HealBag] }, // 稀有掉落
-  [EntityId.SkyLantern]:      { weight: 2, init: EntityConfig[EntityId.SkyLantern] },
+  [EntityIds.WindRune]:    { weight: 75, init: EntityConfig[EntityIds.WindRune] }, // 基础极高，保证新手体验
+  [EntityIds.Coin]:        { weight: 8,  init: EntityConfig[EntityIds.Coin] },
+  [EntityIds.ChaoticRune]: { weight: 13,  init: EntityConfig[EntityIds.ChaoticRune] },
+  [EntityIds.HealBag]:     { weight: 2,  init: EntityConfig[EntityIds.HealBag] }, // 稀有掉落
+  [EntityIds.SkyLantern]:      { weight: 2, init: EntityConfig[EntityIds.SkyLantern] },
 } satisfies Partial<Record<EntityId, ISpawnDefinition>>
 
 // ✅ 2. L2 表: 标准表基础 + 新增 霹雳火, 唤风令, 八卦盾, 寒流, 机关秃鹫
 const RedCliffSpawnTable = {
-  [EntityId.WindRune]:    { weight: 70, init: EntityConfig[EntityId.WindRune] }, // 基础极高，保证新手体验
-  [EntityId.Coin]:        { weight: 8,  init: EntityConfig[EntityId.Coin] },
-  [EntityId.ChaoticRune]: { weight: 8,  init: EntityConfig[EntityId.ChaoticRune] },
-  [EntityId.HealBag]:     { weight: 2,  init: EntityConfig[EntityId.HealBag] }, // 稀有掉落
+  [EntityIds.WindRune]:    { weight: 70, init: EntityConfig[EntityIds.WindRune] }, // 基础极高，保证新手体验
+  [EntityIds.Coin]:        { weight: 8,  init: EntityConfig[EntityIds.Coin] },
+  [EntityIds.ChaoticRune]: { weight: 8,  init: EntityConfig[EntityIds.ChaoticRune] },
+  [EntityIds.HealBag]:     { weight: 2,  init: EntityConfig[EntityIds.HealBag] }, // 稀有掉落
   //80
 
   // --- 新增 L2 特有 ---
-  [EntityId.UnbrokenFire]: { weight: 5, init: EntityConfig[EntityId.UnbrokenFire] },
-  [EntityId.WindKey]:      { weight: 2, init: EntityConfig[EntityId.WindKey] }, // 较稀有
-  [EntityId.TacticsShild]: { weight: 5, init: EntityConfig[EntityId.TacticsShild] },
-  [EntityId.ColdFlue]:     { weight: 4, init: EntityConfig[EntityId.ColdFlue] }, // 危险
-  [EntityId.IronVulture]:  { weight: 3, init: EntityConfig[EntityId.IronVulture] }, // 危险
+  [EntityIds.UnbrokenFire]: { weight: 5, init: EntityConfig[EntityIds.UnbrokenFire] },
+  [EntityIds.WindKey]:      { weight: 2, init: EntityConfig[EntityIds.WindKey] }, // 较稀有
+  [EntityIds.TacticsShild]: { weight: 5, init: EntityConfig[EntityIds.TacticsShild] },
+  [EntityIds.ColdFlue]:     { weight: 4, init: EntityConfig[EntityIds.ColdFlue] }, // 危险
+  [EntityIds.IronVulture]:  { weight: 3, init: EntityConfig[EntityIds.IronVulture] }, // 危险
 
 } satisfies Partial<Record<EntityId, ISpawnDefinition>>
 
 // ✅ 3. L3 表: L2基础 + 孔明灯, 漩涡核心
 const CloudMarshSpawnTable = {
-  [EntityId.WindRune]:    { weight: 60, init: EntityConfig[EntityId.WindRune] }, 
-  [EntityId.Coin]:        { weight: 8,  init: EntityConfig[EntityId.Coin] },
-  [EntityId.ChaoticRune]: { weight: 5,  init: EntityConfig[EntityId.ChaoticRune] },
-  [EntityId.HealBag]:     { weight: 2,  init: EntityConfig[EntityId.HealBag] }, // 稀有掉落
+  [EntityIds.WindRune]:    { weight: 60, init: EntityConfig[EntityIds.WindRune] }, 
+  [EntityIds.Coin]:        { weight: 8,  init: EntityConfig[EntityIds.Coin] },
+  [EntityIds.ChaoticRune]: { weight: 5,  init: EntityConfig[EntityIds.ChaoticRune] },
+  [EntityIds.HealBag]:     { weight: 2,  init: EntityConfig[EntityIds.HealBag] }, // 稀有掉落
   //68
-  [EntityId.UnbrokenFire]: { weight: 5, init: EntityConfig[EntityId.UnbrokenFire] },
-  [EntityId.WindKey]:      { weight: 2, init: EntityConfig[EntityId.WindKey] }, // 较稀有
-  [EntityId.TacticsShild]: { weight: 5, init: EntityConfig[EntityId.TacticsShild] },
-  [EntityId.ColdFlue]:     { weight: 4, init: EntityConfig[EntityId.ColdFlue] }, // 危险
-  [EntityId.IronVulture]:  { weight: 4, init: EntityConfig[EntityId.IronVulture] }, // 危险
+  [EntityIds.UnbrokenFire]: { weight: 5, init: EntityConfig[EntityIds.UnbrokenFire] },
+  [EntityIds.WindKey]:      { weight: 2, init: EntityConfig[EntityIds.WindKey] }, // 较稀有
+  [EntityIds.TacticsShild]: { weight: 5, init: EntityConfig[EntityIds.TacticsShild] },
+  [EntityIds.ColdFlue]:     { weight: 4, init: EntityConfig[EntityIds.ColdFlue] }, // 危险
+  [EntityIds.IronVulture]:  { weight: 4, init: EntityConfig[EntityIds.IronVulture] }, // 危险
   //27
   // --- 新增 L3 特有 ---
-  [EntityId.SkyLantern]:      { weight: 3, init: EntityConfig[EntityId.SkyLantern] },
-  [EntityId.FrostVortexCore]: { weight: 2, init: EntityConfig[EntityId.FrostVortexCore] }, // 核心较少，因为它是BOSS级机制
+  [EntityIds.SkyLantern]:      { weight: 3, init: EntityConfig[EntityIds.SkyLantern] },
+  [EntityIds.FrostVortexCore]: { weight: 2, init: EntityConfig[EntityIds.FrostVortexCore] }, // 核心较少，因为它是BOSS级机制
 } satisfies Partial<Record<EntityId, ISpawnDefinition>>
 
 // ✅ 4. L4 表: 同 L3 (直接复用)

@@ -1,7 +1,7 @@
 import { DashEnergyIncrementAction, SpawnModifierAction } from "../actions/BuffActions";
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
-import { EntityId } from "./EntityConfig";
+import { EntityIds } from "./EntityIds";
 import { KiteIds } from "./KiteConfig";
 
 
@@ -78,7 +78,7 @@ export const WuBuff: IBuffConfig = {
   onAdd: [ 
     new DashEnergyIncrementAction(100),
     new SpawnModifierAction({
-      entityId: EntityId.WindRune,
+      entityId: EntityIds.WindRune,
       modifier: { type: ModifierType.Multiplier, value: 2.0, sourceId: 'Passive.WuSpawn' },
       isAdding: true
     })

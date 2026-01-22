@@ -1,11 +1,11 @@
 import { type IGamePhase } from './PhaseSystem';
 import GameScene from '../scenes/GameScene';
-import { EntityId } from '../config/EntityConfig';
 import { WeatherConfig } from '../config/WeatherConfig';
 import { SummonId } from '../config/SummonConfig';
 import { TextureKeys, VFXTextureKeys } from '../config/AssetKeys';
 import { PipelineID } from '../managers/RenderManager';
 import { GroupSpawnPatterns } from '../managers/SpawnManager';
+import { EntityIds } from '../config/EntityIds';
 
 export class LabPhase implements IGamePhase {
   onEnter(scene: GameScene): void {
@@ -66,14 +66,14 @@ export class LabPhase implements IGamePhase {
         console.log("🧪 Test: Spawn Sine Coins");
         // 在玩家上方 500 像素处生成
         const spawnY = scene.player.y - 500;
-        scene.spawnManager.spawnGroup(EntityId.Coin, scene.player.x, spawnY, GroupSpawnPatterns.sine, 8);
+        scene.spawnManager.spawnGroup(EntityIds.Coin, scene.player.x, spawnY, GroupSpawnPatterns.sine, 8);
     });
 
     // 测试 2: 生成一串金币 (竖排)
     keyboard.on('keydown-TWO', () => {
         console.log("🧪 Test: Spawn Line Coins");
         const spawnY = scene.player.y - 500;
-        scene.spawnManager.spawnGroup(EntityId.Coin, scene.player.x, spawnY, GroupSpawnPatterns.line_vertical, 6);
+        scene.spawnManager.spawnGroup(EntityIds.Coin, scene.player.x, spawnY, GroupSpawnPatterns.line_vertical, 6);
     });
     // 测试 3: 清空寒冷值
     keyboard.on('keydown-THREE', () => {

@@ -9,6 +9,8 @@ import InfoBar from "../ui/InfoBar";
 import LifeBar from "../ui/LifeBar";
 import ColdnessBar from "../ui/ColdnessBar";
 import RenderManager from "../managers/RenderManager";
+import WeatherFrame from "../ui/WeatherFrame";
+import { UITextureKeys, type UITextureKey } from "../config/AssetKeys";
 // import InputZones from "../ui/InputZones";
 
 export default class UIScene extends Phaser.Scene {
@@ -23,6 +25,7 @@ export default class UIScene extends Phaser.Scene {
   private gauge!: SciFiGauge;
 
   private coldnessBar!: ColdnessBar;
+  private weatherFrame!: WeatherFrame;
   // private inputZones!: InputZones;
 
   constructor() {
@@ -42,6 +45,15 @@ export default class UIScene extends Phaser.Scene {
     this.gameOverMenu = new GameOverMenu(this, width, height);
 
     this.lifeBar = new LifeBar(this, 50, 50);
+    const weatherFrameLeftMargin = 20;
+    const weatherIconScale = 0.9;
+    const lifeBarBounds = this.lifeBar.getBounds();
+    this.weatherFrame = new WeatherFrame(
+      this,
+      lifeBarBounds.right + weatherFrameLeftMargin,
+      50,
+      { iconScale: weatherIconScale }
+    );
 
     const centerX = this.scale.width / 2 + 150;
     this.infoBar = new InfoBar(this, centerX, 60);
@@ -110,6 +122,8 @@ export default class UIScene extends Phaser.Scene {
     gameEvents.off(EVENTS.UPDATE_LIFE);
     gameEvents.off(EVENTS.UPDATE_DASH);
     gameEvents.off(EVENTS.UPDATE_SPEED);
+    gameEvents.off(EVENTS.WEATHER_START);
+    gameEvents.off(EVENTS.WEATHER_END);
     gameEvents.off(EVENTS.SHOW_GAME_OVER);
     // 数据更新
     gameEvents.on(EVENTS.UPDATE_HEIGHT, (val: number) => this.infoBar.setHeight(val));
@@ -120,6 +134,22 @@ export default class UIScene extends Phaser.Scene {
     gameEvents.on(EVENTS.UPDATE_DASH, (val: number) => this.gauge.setEnergy(val / 100));
     gameEvents.on(EVENTS.UPDATE_COLDNESS, (val: number) => this.coldnessBar.setColdness(val));
     gameEvents.on(EVENTS.UPDATE_SPEED, (val: number) => this.gauge.setSpeed(val));
+    gameEvents.on(EVENTS.WEATHER_START, (weatherId: string) => {
+      const iconMap: Record<string, UITextureKey> = {
+        thunder: UITextureKeys.UIWeatherThunder,
+        blizzard: UITextureKeys.UIWeatherBlizzard,
+        aurora: UITextureKeys.UIWeatherAurora
+      };
+      const iconKey = iconMap[weatherId];
+      if (iconKey) {
+        this.weatherFrame.show(iconKey);
+      } else {
+        this.weatherFrame.hide();
+      }
+    });
+    gameEvents.on(EVENTS.WEATHER_END, () => {
+      this.weatherFrame.hide();
+    });
     gameEvents.on(EVENTS.SHOW_GAME_OVER, (data: {
       finalScore: number,
       finalCurrency: number,

@@ -5,8 +5,8 @@ import {
   WeatherBlizzardBuff, 
   WeatherAuroraBuff 
 } from './BuffConfig';
-import { EntityId } from './EntityConfig';
 import { AudioKeys, type AudioKey } from './AssetKeys';
+import { EntityIds, type EntityId } from './EntityIds';
 
 export interface IWeatherSpawnModifier {
   entityId: EntityId;
@@ -63,12 +63,12 @@ export const WeatherConfig: Record<string, IWeatherConfig> = {
     // 生成修正：孔明灯 +0.25 (PercentAdd)
     spawnModifiers: [
       {
-        entityId: EntityId.SkyLantern,
+        entityId: EntityIds.SkyLantern,
         type: ModifierType.PercentAdd,
         value: 0.25 
       },
       {
-        entityId: EntityId.ColdFlue,
+        entityId: EntityIds.ColdFlue,
         type: ModifierType.PercentAdd,
         value: 0.15
       }
@@ -92,30 +92,30 @@ export const WeatherConfig: Record<string, IWeatherConfig> = {
     spawnModifiers: [
       // 1. 金币 x5 倍 (或更多)
       {
-        entityId: EntityId.Coin,
+        entityId: EntityIds.Coin,
         type: ModifierType.PercentAdd,
         value: 2.0
       },
       // 2. 唤风令 +0.2
       {
-        entityId: EntityId.WindKey,
+        entityId: EntityIds.WindKey,
         type: ModifierType.PercentAdd,
         value: 0.2
       },
       // 3. 屏蔽所有危险物 (Multiplier = 0)
       {
-        entityId: EntityId.IronVulture,
+        entityId: EntityIds.IronVulture,
         type: ModifierType.Multiplier,
         value: 0
       },
       {
-        entityId: EntityId.ColdFlue,
+        entityId: EntityIds.ColdFlue,
         type: ModifierType.Multiplier,
         value: 0
       },
       // 也可以屏蔽普通云，让玩家专心吃钱
       {
-        entityId: EntityId.WindRune,
+        entityId: EntityIds.WindRune,
         type: ModifierType.Multiplier,
         value: 0 
       }

@@ -105,6 +105,11 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: UITextureKeys.UIColdnessBackIceFull, path: 'assets/ui/ui_coldness_frame_back_ice_full.png', type: 'image' },
   { key: UITextureKeys.UIColdnessBackIceMight, path: 'assets/ui/ui_coldness_frame_back_ice_might.png', type: 'image' },
 
+  { key: UITextureKeys.UIWeatherFrame, path: 'assets/ui/ui_weather_frame.png', type: 'image' },
+  { key: UITextureKeys.UIWeatherThunder, path: 'assets/ui/ui_weather_thunder.png', type: 'image' },
+  { key: UITextureKeys.UIWeatherBlizzard, path: 'assets/ui/ui_weather_blizzard.png', type: 'image' },
+  { key: UITextureKeys.UIWeatherAurora, path: 'assets/ui/ui_weather_aurora.png', type: 'image' },
+
   { key: UITextureKeys.UILiveUp, path: 'assets/ui/ui_live_up.png', type: 'image' },
   { key: UITextureKeys.UILiveOff, path: 'assets/ui/ui_live_off.png', type: 'image' },
   { key: UITextureKeys.UIPluginWind, path: 'assets/ui/ui_plugin_wind.png', type: 'image' },

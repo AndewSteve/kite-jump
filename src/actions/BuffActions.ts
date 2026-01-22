@@ -3,9 +3,9 @@ import { EVENTS, gameEvents } from "../config/Events";
 import { ModifierType, StatType } from "../mechanics/StatDefinitions";
 import type GameScene from "../scenes/GameScene";
 import type { IBuffAction, IBuffContext } from "./ActionInterfaces";
-import type { EntityId } from "../config/EntityConfig";
 import type { AudioKey } from "../config/AssetKeys";
 import AudioManager from "../managers/AudioManager";
+import type { EntityId } from "../config/EntityIds";
 
 export class ColdnessIncrementAction implements IBuffAction {
   private coldIncrease: number;
