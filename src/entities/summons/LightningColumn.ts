@@ -100,7 +100,7 @@ export class LightningColumn extends BaseSummon {
     this.alertIcon?.destroy();
     this.alertBg?.destroy();
     
-    const frameIndex = Phaser.Math.Between(0, 5);
+    const frameIndex = Phaser.Math.Between(0, 4);
     this.strikeSprite = this.scene.add.sprite(
       this.x,
       screenHeight / 2,
@@ -210,6 +210,8 @@ export class LightningColumn extends BaseSummon {
 
   protected override onDespawn(): void {
     this.warningRect?.destroy();
+    this.alertIcon?.destroy();
+    this.alertBg?.destroy();
     this.strikeSprite?.destroy();
     this.kill();
   }

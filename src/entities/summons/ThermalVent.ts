@@ -1,9 +1,10 @@
 import { TextureKeys } from '../../config/AssetKeys';
 import { GameConfig } from '../../config/GameConfig';
+import { PipelineID } from '../../managers/RenderManager';
 import { BaseSummon, type ISummonInitData } from './BaseSummon';
 
 const RedCliffConfigs = {
-  holdSpeed: -300, // 赤壁热流停留速度
+  holdSpeed: -900, // 赤壁热流停留速度
 }
 
 export class ThermalVent extends BaseSummon {
@@ -18,6 +19,11 @@ export class ThermalVent extends BaseSummon {
     // 1. 设置外观 (红光柱)
     this.setTint(0xff0000);
     this.setAlpha(0);
+
+    // ✅ 启用 Shader Pipeline
+    // 注意：一旦启用自定义 Pipeline，setTint 可能会表现不同，
+    // 取决于 Shader 里是否乘了 outTint (我们在上面的 Shader 里乘了，所以 setTint 依然有效)
+    this.setPipeline(PipelineID.ThermalVent);
     
     // 2. 尺寸与位置
     // 既然是 Screen Space，高度设为屏幕高度即可

@@ -13,7 +13,7 @@ export class FogOverlay extends BaseSummon {
   private readonly PARALLAX_X = 0.3; 
   
   // ✅ 核心配置：雾气覆盖屏幕上方的比例 (0.5 = 屏幕上半部分全是雾)
-  private readonly FOG_BOTTOM_RATIO = 0.45; // 稍微多一点，留出软化空间
+  private readonly FOG_BOTTOM_RATIO = 0.3; // 稍微多一点，留出软化空间
   private readonly FADE_SOFTNESS = 0.2;     // 渐变长度占屏幕高度的 20%
 
   constructor(scene: Phaser.Scene, x: number, y: number) {

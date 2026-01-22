@@ -30,8 +30,8 @@ export default class SpawnManager {
   private currentDefs: Map<EntityId, ISpawnDefinition> = new Map();
   public isSpawningEnabled: boolean = false;
 
-  // ✅ 新增：保底计数器 (追踪连续多少层没有正面道具)
-  private rowsSinceLastPositive: number = 0;
+  // ✅ 新增：记录连续多少层没有生成 Buff (跳跃道具)
+  private rowsSinceLastBuff: number = 0;
 
   constructor(scene: GameScene, group: Phaser.Physics.Arcade.Group, player: Player) {
     this.scene = scene;
@@ -175,6 +175,11 @@ export default class SpawnManager {
     // 用于记录已占用的 X 坐标，防止重叠
     const usedX: number[] = [];
 
+    // ✅ 1. 判断是否触发保底
+    // 如果上一行也没 Buff (rows >= 1)，这行必须有
+    const isPityTriggered = this.rowsSinceLastBuff >= 1;
+    let hasBuffInThisRow = false;
+
     for (let i = 0; i < count; i++) {
       // 尝试寻找一个不重叠的 X 坐标 (最多尝试 10 次，防止死循环)
       let x = 0;
@@ -199,32 +204,70 @@ export default class SpawnManager {
       }
 
       if (valid) {
-        this.spawnEntity(x, y);
+        // ✅ 2. 决定筛选策略
+        let filterType: EntityType | undefined = undefined;
+
+        // 只有当：触发了保底 且 当前行还没生成过 Buff 时，强制筛选
+        if (isPityTriggered && !hasBuffInThisRow) {
+          filterType = EntityType.Buff;
+        }
+
+        // ✅ 3. 调用生成 (可能返回 null，比如强制筛选 Buff 但当前池子里没有 Buff)
+        const spawnedId = this.spawnEntity(x, y, filterType);
+
+        if (spawnedId) {
+          // ✅ 4. 检查实际生成的是否是 Buff，更新标记
+          const config = EntityConfig[spawnedId]();
+          if (config.type === EntityType.Buff) {
+            hasBuffInThisRow = true;
+          }
+        }
+        
         usedX.push(x);
       }
     }
+
+    // ✅ 5. 更新计数器
+    if (hasBuffInThisRow) {
+      this.rowsSinceLastBuff = 0; // 重置
+    } else {
+      this.rowsSinceLastBuff++; // 累加
+    }
   }
 
-  private spawnEntity(x: number, y: number) {
+  private spawnEntity(x: number, y: number, filterType?: EntityType): EntityId | null {
     // A. 动态计算总权重 (Logic Driven)
     const candidates: { id: EntityId, finalWeight: number }[] = [];
-    let selectedId = candidates[0].id;
     let totalWeight = 0;
-
+    
     // 遍历所有有权重的 Stat
     this.weightStats.forEach((stat, id) => {
         const w = stat.getValue();
         if (w > 0) {
+            // ✅ 核心逻辑：如果指定了筛选类型，检查该 ID 是否符合类型
+            if (filterType) {
+              // 必须去 EntityConfig 拿原始配置来看类型
+              // (注意：这里假设 EntityConfig[id] 一定存在，且开销可接受)
+              const configFactory = EntityConfig[id];
+              if (configFactory) {
+                const tempConfig = configFactory();
+                if (tempConfig.type !== filterType) {
+                  return; // 类型不匹配，跳过，不加入候选列表
+                }
+              }
+            }
+
             candidates.push({ id, finalWeight: w });
             totalWeight += w;
         }
     });
-
-    if (totalWeight <= 0) return;
-
+    
+    if (totalWeight <= 0 || candidates.length === 0) return null;
+    
     // B. 随机取值
     let randomWeight = Phaser.Math.Between(0, totalWeight);
-
+    
+    let selectedId = candidates[0].id;
     for (const candidate of candidates) {
       randomWeight -= candidate.finalWeight;
       if (randomWeight <= 0) {
@@ -241,7 +284,7 @@ export default class SpawnManager {
 
     if (!initFactory) {
         console.warn(`[SpawnManager] No config found for ${selectedId}`);
-        return;
+        return null;
     }
 
     // ✅ 保留替换操作 (Gold Mode)
@@ -265,7 +308,7 @@ export default class SpawnManager {
       const pattern = Phaser.Math.RND.pick(patterns);
       const count = Phaser.Math.Between(3, 8);
       this.spawnGroup(EntityId.Coin, x, y, pattern, count);
-      return;
+      return null;
     }
 
     // D. 实例化
@@ -275,7 +318,10 @@ export default class SpawnManager {
       entity.setVisible(true);
       entity.configure(initFactory());
       entity.onSpawn(this.player);
+      return selectedId; // ✅ 返回生成的 ID
     }
+
+    return null;
   }
 
   /**

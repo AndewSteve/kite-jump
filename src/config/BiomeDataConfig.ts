@@ -7,16 +7,16 @@ import type { ISpawnDefinition } from "../types/GameTypes";
 
 // ✅ 1. 标准表 (L1): 借风符, 血包, 金币, 乱流 , 孔明灯
 const StandardSpawnTable = {
-  [EntityId.WindRune]:    { weight: 70, init: EntityConfig[EntityId.WindRune] }, // 基础极高，保证新手体验
+  [EntityId.WindRune]:    { weight: 75, init: EntityConfig[EntityId.WindRune] }, // 基础极高，保证新手体验
   [EntityId.Coin]:        { weight: 8,  init: EntityConfig[EntityId.Coin] },
-  [EntityId.ChaoticRune]: { weight: 15,  init: EntityConfig[EntityId.ChaoticRune] },
+  [EntityId.ChaoticRune]: { weight: 13,  init: EntityConfig[EntityId.ChaoticRune] },
   [EntityId.HealBag]:     { weight: 2,  init: EntityConfig[EntityId.HealBag] }, // 稀有掉落
-  [EntityId.SkyLantern]:      { weight: 5, init: EntityConfig[EntityId.SkyLantern] },
+  [EntityId.SkyLantern]:      { weight: 2, init: EntityConfig[EntityId.SkyLantern] },
 } satisfies Partial<Record<EntityId, ISpawnDefinition>>
 
 // ✅ 2. L2 表: 标准表基础 + 新增 霹雳火, 唤风令, 八卦盾, 寒流, 机关秃鹫
 const RedCliffSpawnTable = {
-  [EntityId.WindRune]:    { weight: 63, init: EntityConfig[EntityId.WindRune] }, // 基础极高，保证新手体验
+  [EntityId.WindRune]:    { weight: 70, init: EntityConfig[EntityId.WindRune] }, // 基础极高，保证新手体验
   [EntityId.Coin]:        { weight: 8,  init: EntityConfig[EntityId.Coin] },
   [EntityId.ChaoticRune]: { weight: 8,  init: EntityConfig[EntityId.ChaoticRune] },
   [EntityId.HealBag]:     { weight: 2,  init: EntityConfig[EntityId.HealBag] }, // 稀有掉落

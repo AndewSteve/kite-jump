@@ -4,6 +4,7 @@ import MagicFieldPipeline from '../pipelines/MagicFieldPipeline';
 import DissolvePipeline from '../pipelines/DissolvePipeline';
 import ColdnessPipeline from '../pipelines/ColdnessPipeline';
 import LightningFadePipeline from '../pipelines/LightningFadePipeline';
+import ThermalVentPipeline from '../pipelines/ThermalVentPipeline';
 
 export const PipelineID = {
   Fog: 'FogPipeline',
@@ -11,6 +12,7 @@ export const PipelineID = {
   Dissolve: 'Dissolve',
   LightningFade: 'LightningFade',
   Coldness: 'Coldness', // ✅ Add ID
+  ThermalVent: 'ThermalVent', // ✅ 新增 ID
 } as const;
 export type PipelineKey = typeof PipelineID[keyof typeof PipelineID];
 
@@ -58,6 +60,12 @@ export default class RenderManager {
       this.renderer.pipelines.add(PipelineID.LightningFade, new LightningFadePipeline(this.scene.game));
       console.log(`[RenderManager] Pipeline Registered: ${PipelineID.LightningFade}`);
     }
+
+    // ✅ 注册 ThermalVent Pipeline
+    if (!this.renderer.pipelines.has(PipelineID.ThermalVent)) {
+      this.renderer.pipelines.add(PipelineID.ThermalVent, new ThermalVentPipeline(this.scene.game));
+      console.log(`[RenderManager] Pipeline Registered: ${PipelineID.ThermalVent}`);
+    }
   }
 
   // ✅ 3. 公开获取 Pipeline 的方法
@@ -75,8 +83,19 @@ export default class RenderManager {
     // 但保留着也没坏处，以后扩展 Shader 可能用到
   }
 
-  public update(_time: number, _delta: number) {
-    // 预留 update 接口
+  public update(time: number, _delta: number) {
+    // ✅ 统一驱动 Pipeline 时间
+    // 这样场上所有 ThermalVent 都会同步滚动，性能消耗最小
+    const ventPipeline = this.getPipeline<ThermalVentPipeline>(PipelineID.ThermalVent);
+    if (ventPipeline) {
+        ventPipeline.updateTime(time);
+    }
+    
+    // 如果 ColdnessPipeline 也需要在这里驱动，也可以加上
+    const coldPipeline = this.getPipeline<ColdnessPipeline>(PipelineID.Coldness);
+    if (coldPipeline) {
+        coldPipeline.updateTime(time);
+    }
   }
 }
 

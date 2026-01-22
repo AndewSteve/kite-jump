@@ -83,7 +83,7 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: TextureKeys.TransiOverlay, path: 'assets/bg/bg_transi_overlay.png', type: 'image' },
   // { key: TextureKeys.FogOverlay, path: 'assets/bg/fog_overlay.png', type: 'image' },
   { key: TextureKeys.FogOverlay, path: 'assets/bg/bg_transi_overlay.png', type: 'image' },
-  { key: TextureKeys.ThermalVent, path: 'assets/bg/thermal_vent.png', type: 'image' },
+  { key: TextureKeys.ThermalVent, path: 'assets/items/thermal_vent.png', type: 'image' },
 
   
   // UI 资产

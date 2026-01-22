@@ -107,7 +107,7 @@ export const EntityConfig = {
   // 金币
   [EntityId.Coin]: () => ({
     texture: TextureKeys.Bamboo, 
-    scale: EntityTextureScale * 0.6,
+    scale: EntityTextureScale * 0.45,
     type: EntityType.Coin,
     // color: 0xffd700,
     onHit: [
