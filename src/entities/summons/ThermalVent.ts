@@ -17,7 +17,8 @@ export class ThermalVent extends BaseSummon {
 
   protected onStart(_data: ISummonInitData): void {
     // 1. 设置外观 (红光柱)
-    this.setTint(0xff0000);
+    this.setTint(0x0000ff);
+    this.setBlendMode(Phaser.BlendModes.ADD);
     this.setAlpha(0);
 
     // ✅ 启用 Shader Pipeline
@@ -45,7 +46,7 @@ export class ThermalVent extends BaseSummon {
     // 进场动画
     this.scene.tweens.add({
       targets: this,
-      alpha: { from: 0, to: 0.3 },
+      alpha: { from: 0, to: 0.5 },
       duration: 1000
     });
   }

@@ -6,8 +6,12 @@ import { TextureKeys, VFXTextureKeys } from '../config/AssetKeys';
 import { PipelineID } from '../managers/RenderManager';
 import { GroupSpawnPatterns } from '../managers/SpawnManager';
 import { EntityIds } from '../config/EntityIds';
+import type { BaseSummon } from '../entities/summons/BaseSummon';
 
 export class LabPhase implements IGamePhase {
+  private subaruTrail: BaseSummon | null = null;
+  private thermalVent: BaseSummon | null = null;
+
   onEnter(scene: GameScene): void {
     console.log("🧪 Entered Lab Phase: Ready for experiments.");
     scene.scoreManager.startTracking();
@@ -49,6 +53,8 @@ export class LabPhase implements IGamePhase {
     keyboard.off('keydown-FIVE');
     keyboard.off('keydown-SIX');
     keyboard.off('keydown-SEVEN');
+    keyboard.off('keydown-EIGHT');
+    keyboard.off('keydown-R');
     keyboard.off('keydown-Q');
     keyboard.off('keydown-W');
     keyboard.off('keydown-E');
@@ -96,6 +102,38 @@ export class LabPhase implements IGamePhase {
     keyboard.on('keydown-SEVEN', () => {
         console.log("🧪 Test: Summon Frost Vortex");
         scene.summonManager.summon(SummonId.FrostVortex, scene.player.x - 200, scene.player.y - 600);
+    });
+
+    // 测试 8: 召唤/回收 SubaruTrail
+    keyboard.on('keydown-EIGHT', () => {
+        if (this.subaruTrail && this.subaruTrail.active) {
+          console.log("🧪 Test: Despawn SubaruTrail");
+          this.subaruTrail.despawn();
+          this.subaruTrail = null;
+          return;
+        }
+        console.log("🧪 Test: Summon SubaruTrail");
+        this.subaruTrail = scene.summonManager.summon(
+          SummonId.SubaruTrail,
+          scene.player.x,
+          scene.player.y
+        );
+    });
+
+    // 测试 R: 召唤/回收 ThermalVent
+    keyboard.on('keydown-R', () => {
+        if (this.thermalVent && this.thermalVent.active) {
+          console.log("🧪 Test: Despawn ThermalVent");
+          this.thermalVent.despawn();
+          this.thermalVent = null;
+          return;
+        }
+        console.log("🧪 Test: Summon ThermalVent");
+        this.thermalVent = scene.summonManager.summon(
+          SummonId.ThermalVent,
+          scene.player.x,
+          scene.player.y
+        );
     });
 
     // 测试 3: 触发雷暴

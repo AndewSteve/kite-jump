@@ -26,6 +26,8 @@ export class LightningColumn extends BaseSummon {
   }
 
   protected onStart(_data: ISummonInitData): void {
+    this.setVisible(false); // 本体仅仅是逻辑锚点
+    this.setAlpha(0);
     const minZoom = GameConfig.camera.zoom.sprinting;
     const screenHeight = this.scene.scale.height;
     // const screenWidth = this.scene.scale.width;
@@ -116,6 +118,7 @@ export class LightningColumn extends BaseSummon {
     let pipeline: LightningFadePipeline | undefined;
     if (this.scene.game.renderer instanceof Phaser.Renderer.WebGL.WebGLRenderer) {
       this.strikeSprite.setPipeline(PipelineID.LightningFade);
+      this.strikeSprite.setBlendMode(Phaser.BlendModes.ADD);
       pipeline = this.strikeSprite.pipeline as LightningFadePipeline;
       pipeline?.setProgress(0);
       // pipeline?.setColor(0x3aa0ff);

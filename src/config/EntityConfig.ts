@@ -79,7 +79,7 @@ export const EntityConfig = {
     texture: TextureKeys.TacticsShild, 
     scale: EntityTextureScale,
     type: EntityType.Buff, // ✅ 有益
-    comment: "八卦盾",
+    comment: "太极盾",
     // color: 0x00ff00,
     onHit: [
       new BoostAction(-900), 
@@ -93,7 +93,7 @@ export const EntityConfig = {
     texture: TextureKeys.Bamboo, 
     scale: EntityTextureScale * 0.45,
     type: EntityType.Coin,
-    comment: "金币",
+    comment: "竹筏",
     // color: 0xffd700,
     onHit: [
       new AddCoinAction(1),

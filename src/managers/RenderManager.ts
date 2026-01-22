@@ -5,6 +5,7 @@ import DissolvePipeline from '../pipelines/DissolvePipeline';
 import ColdnessPipeline from '../pipelines/ColdnessPipeline';
 import LightningFadePipeline from '../pipelines/LightningFadePipeline';
 import ThermalVentPipeline from '../pipelines/ThermalVentPipeline';
+import SubaruTrailPipeline from '../pipelines/SubaruTrailPipeline';
 
 export const PipelineID = {
   Fog: 'FogPipeline',
@@ -13,6 +14,7 @@ export const PipelineID = {
   LightningFade: 'LightningFade',
   Coldness: 'Coldness', // ✅ Add ID
   ThermalVent: 'ThermalVent', // ✅ 新增 ID
+  SubaruTrail: 'SubaruTrail', // ✅ 新增 ID
 } as const;
 export type PipelineKey = typeof PipelineID[keyof typeof PipelineID];
 
@@ -66,6 +68,12 @@ export default class RenderManager {
       this.renderer.pipelines.add(PipelineID.ThermalVent, new ThermalVentPipeline(this.scene.game));
       console.log(`[RenderManager] Pipeline Registered: ${PipelineID.ThermalVent}`);
     }
+
+    // ✅ 注册 SubaruTrail Pipeline
+    if (!this.renderer.pipelines.has(PipelineID.SubaruTrail)) {
+      this.renderer.pipelines.add(PipelineID.SubaruTrail, new SubaruTrailPipeline(this.scene.game));
+      console.log(`[RenderManager] Pipeline Registered: ${PipelineID.SubaruTrail}`);
+    }
   }
 
   // ✅ 3. 公开获取 Pipeline 的方法
@@ -95,6 +103,11 @@ export default class RenderManager {
     const coldPipeline = this.getPipeline<ColdnessPipeline>(PipelineID.Coldness);
     if (coldPipeline) {
         coldPipeline.updateTime(time);
+    }
+
+    const trailPipeline = this.getPipeline<SubaruTrailPipeline>(PipelineID.SubaruTrail);
+    if (trailPipeline) {
+        trailPipeline.updateTime(time);
     }
   }
 }

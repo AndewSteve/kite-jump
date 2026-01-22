@@ -89,6 +89,8 @@ export default class LabScene extends GameScene {
       '[4] Add Dash Energy (增加冲刺能量)',
       '[6] Spawn Dissolve Effect (生成溶解特效)',
       '[7] Summon Frost Vortex (召唤冰霜漩涡)',
+      '[8] Toggle Subaru Trail (召唤/回收拖尾)',
+      '[R] Toggle Thermal Vent (召唤/回收热流)',
       '[Q] Thunder (雷暴)',
       '[W] Fog (大雾)',
       '[E] Thunder Summon (召唤雷柱)',

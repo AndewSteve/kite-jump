@@ -126,7 +126,7 @@ export const AssetManifest: IAssetDefinition[] = [
   // 3x3 网格，256 / 3 = 85.33，向下取整为 85
   createSpriteSheet(VFXTextureKeys.VfxAlertBg, 'assets/vfx/FX_TEX_Lightning_04.png', 85, 85, 9),
   {key: VFXTextureKeys.VfxShield, path: 'assets/vfx/tactics_effect.png', type: 'image'},
-
+  {key: VFXTextureKeys.VfxTrail, path: 'assets/vfx/FX_TEX_Speed_Line_02.png', type: 'image'},
 
   // ✅ 新增：音频资源
   // BGM

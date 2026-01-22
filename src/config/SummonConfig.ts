@@ -5,6 +5,7 @@ import { WindVane } from "../entities/summons/WindVane";
 import { FrostVortex } from "../entities/summons/FrostVortex";
 import { LightningColumn } from "../entities/summons/LightningColumn";
 import { Shield } from "../entities/summons/Shield";
+import { SubaruTrail } from "../entities/summons/SubaruTrail";
 
 // ✅ 1. 定义召唤物 ID 常量 (替代硬编码字符串)
 export const SummonId = {
@@ -14,6 +15,7 @@ export const SummonId = {
   FrostVortex: 'frost_vortex',
   LightningColumn: 'lightning_column',
   Shield: 'shield',
+  SubaruTrail: 'subaru_trail',
 } as const;
 
 export type SummonId = typeof SummonId[keyof typeof SummonId];
@@ -56,5 +58,11 @@ export const SummonConfig: Record<SummonId, ISummonDef> = {
     classType: Shield,
     space: SpaceType.World,
     poolSize: 1
+  },
+  [SummonId.SubaruTrail]: {
+    classType: SubaruTrail,
+    space: SpaceType.World,
+    poolSize: 3
   }
 };
+

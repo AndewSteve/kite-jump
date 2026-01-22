@@ -91,6 +91,7 @@ export const VFXTextureKeys = {
   VfxAlertIcon: 'vfx_alert_icon',
   VfxAlertBg: 'vfx_alert_bg',
   VfxShield: 'vfx_shield',
+  VfxTrail: 'vfx_sx_trail',
 } as const;
 export type VFXTextureKey = typeof VFXTextureKeys[keyof typeof VFXTextureKeys];
 

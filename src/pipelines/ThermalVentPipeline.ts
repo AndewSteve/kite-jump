@@ -1,14 +1,16 @@
 import Phaser from 'phaser';
 import ThermalVentFrag from '../shaders/ThermalVent.frag?raw'; // 假设你用 Vite/Webpack 导入
 
-export default class ThermalVentPipeline extends Phaser.Renderer.WebGL.Pipelines.MultiPipeline {
+export default class ThermalVentPipeline extends Phaser.Renderer.WebGL.Pipelines.SinglePipeline {
     private _time: number = 0;
 
     constructor(game: Phaser.Game) {
         super({
             game,
             // 使用 Phaser 默认的 MultiPipeline 顶点着色器即可，不需要自定义 Vert
-            fragShader: ThermalVentFrag.replace(/%count%/gi, '1'), 
+            fragShader: ThermalVentFrag,
+            topology: (game.renderer as Phaser.Renderer.WebGL.WebGLRenderer)
+                .gl.TRIANGLES 
         });
     }
 

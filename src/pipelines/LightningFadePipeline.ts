@@ -2,16 +2,15 @@ import Phaser from 'phaser';
 import LightningFadeVert from '../shaders/LightningFade.vert?raw';
 import LightningFadeFrag from '../shaders/LightningFade.frag?raw';
 
-export default class LightningFadePipeline extends Phaser.Renderer.WebGL.Pipelines.MultiPipeline {
+export default class LightningFadePipeline extends Phaser.Renderer.WebGL.Pipelines.SinglePipeline {
   private _progress: number = 0;
-  private _color = new Phaser.Display.Color(0, 0, 255);
+  private _color = new Phaser.Display.Color(255, 255, 255);
 
   constructor(game: Phaser.Game) {
-    const safeFragShader = LightningFadeFrag.replace(/%count%/gi, '1');
     super({
       game,
       vertShader: LightningFadeVert,
-      fragShader: safeFragShader,
+      fragShader: LightningFadeFrag,
     });
   }
 
