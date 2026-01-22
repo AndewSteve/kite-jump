@@ -1,8 +1,9 @@
-import { ChangeWindAction, ColdnessIncrementAction, DashEnergyIncrementAction, ResetWindAction, ScoreAction, SfxAction, SpawnMode, SummonAction } from "../actions/BuffActions";
+import { ChangeWindAction, ColdnessIncrementAction, DashEnergyIncrementAction, GameEventAction, ResetWindAction, ScoreAction, SfxAction, SpawnMode, SummonAction } from "../actions/BuffActions";
 import { LightningStrikeAction } from "../actions/MechanicActions";
 import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
 import { AudioKeys } from "./AssetKeys";
+import { EVENTS } from "./Events";
 import { SummonId } from "./SummonConfig";
 
 // --- 公共的操控性修正 (模拟之前的 2.0x 乘数) ---
@@ -202,6 +203,12 @@ export const TacticsBuff: IBuffConfig = {
   duration: -1, // 永久
   maxStack: 1,
   tags: [TacticsConfig.tag],
+  onAdd: [
+    new GameEventAction(EVENTS.ADD_SHIELD)
+  ],
+  onRemove: [
+    new GameEventAction(EVENTS.REMOVE_SHIELD)
+  ]
 };
 
 // 1. 雷暴 Buff
@@ -214,7 +221,7 @@ export const WeatherThunderBuff: IBuffConfig = {
   // 机制1：每秒回能 8%
   tickInterval: 1.0,
   onTick: [
-    new DashEnergyIncrementAction(8),
+    new DashEnergyIncrementAction(5),
     // ✅ 尝试落雷：40% 概率
     // 逻辑：每秒醒来一次 -> 检查场上没雷 -> 40%概率 -> 召唤 -> (雷存在1.5s+0.3s) -> 期间不会再召唤
     new LightningStrikeAction(0.4)

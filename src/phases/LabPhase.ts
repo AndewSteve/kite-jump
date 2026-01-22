@@ -48,6 +48,7 @@ export class LabPhase implements IGamePhase {
     keyboard.off('keydown-FOUR');
     keyboard.off('keydown-FIVE');
     keyboard.off('keydown-SIX');
+    keyboard.off('keydown-SEVEN');
     keyboard.off('keydown-Q');
     keyboard.off('keydown-W');
     keyboard.off('keydown-E');
@@ -89,6 +90,12 @@ export class LabPhase implements IGamePhase {
     keyboard.on('keydown-SIX', () => {
         console.log("🧪 Test: Spawn Dissolve Effect");
         this.spawnDissolveEffect(scene);
+    });
+
+    // 测试 7: 生成一个漩涡
+    keyboard.on('keydown-SEVEN', () => {
+        console.log("🧪 Test: Summon Frost Vortex");
+        scene.summonManager.summon(SummonId.FrostVortex, scene.player.x - 200, scene.player.y - 600);
     });
 
     // 测试 3: 触发雷暴

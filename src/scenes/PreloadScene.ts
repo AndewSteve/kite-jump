@@ -67,8 +67,8 @@ export default class PreloadScene extends Phaser.Scene {
     // 资源加载完毕，准备进入游戏
     AudioManager.init(this.game);
     
-    // this.scene.start(SceneKeys.Lab);
-    this.scene.start(SceneKeys.MainMenu);
+    this.scene.start(SceneKeys.Lab);
+    // this.scene.start(SceneKeys.MainM34enu);
     // // 🧪 检查 URL 参数，决定是进实验室还是进游戏
     // const urlParams = new URLSearchParams(window.location.search);
     // if (urlParams.has('lab')) {

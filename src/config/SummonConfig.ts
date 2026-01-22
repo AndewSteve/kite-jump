@@ -4,6 +4,7 @@ import { FogOverlay } from "../entities/summons/FogOverlay";
 import { WindVane } from "../entities/summons/WindVane";
 import { FrostVortex } from "../entities/summons/FrostVortex";
 import { LightningColumn } from "../entities/summons/LightningColumn";
+import { Shield } from "../entities/summons/Shield";
 
 // ✅ 1. 定义召唤物 ID 常量 (替代硬编码字符串)
 export const SummonId = {
@@ -12,6 +13,7 @@ export const SummonId = {
   WindVane: 'wind_vane', // ✅ 新增 ID
   FrostVortex: 'frost_vortex',
   LightningColumn: 'lightning_column',
+  Shield: 'shield',
 } as const;
 
 export type SummonId = typeof SummonId[keyof typeof SummonId];
@@ -49,5 +51,10 @@ export const SummonConfig: Record<SummonId, ISummonDef> = {
     classType: LightningColumn,
     space: SpaceType.Screen,
     poolSize: 3 // 稍微多给点，防止回收延迟导致的卡死，虽然逻辑限制了1个
+  },
+  [SummonId.Shield]: {
+    classType: Shield,
+    space: SpaceType.World,
+    poolSize: 1
   }
 };

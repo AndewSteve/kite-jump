@@ -170,7 +170,7 @@ export class LightningColumn extends BaseSummon {
     // ✅ 增加 check：如果 strikeSprite 已经被销毁了 (处于幽灵冷却期)，直接返回
     if (!this.isStriking || !this.strikeSprite || this.strikeProgress >= 1) return;
     if (!this.target || !this.target.active) return;
-
+    
     // --- 碰撞判定 (屏幕空间) ---
     const camera = this.scene.cameras.main;
     const playerScreenX = this.target.x - camera.scrollX;

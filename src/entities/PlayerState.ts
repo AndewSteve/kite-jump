@@ -5,9 +5,11 @@ import StatSystem from '../mechanics/StatSystem';
 import BuffManager from '../managers/BuffManager';
 import { ModifierType, StatType } from '../mechanics/StatDefinitions';
 import DataManager from '../managers/DataManager';
-import { DashConfig, DashLv1Buff, DashLv2Buff, DashLv3Buff, TransitionDashConfig } from '../config/BuffConfig';
+import { DashConfig, DashLv1Buff, DashLv2Buff, DashLv3Buff, TacticsConfig, TransitionDashConfig } from '../config/BuffConfig';
 import { KiteConfigs } from '../config/KiteBuffConfig';
 import { EVENTS, gameEvents } from '../config/Events';
+import { SummonId } from '../config/SummonConfig';
+import type { BaseSummon } from './summons/BaseSummon';
 
 export default class PlayerState {
   private player: Player;
@@ -22,6 +24,9 @@ export default class PlayerState {
   public maxHealth: number = 3;
   public coldness: number = 0;      // 0 - 100
   public dashEnergy: number = 0;    // 0 - 100
+
+  private shieldEffect: BaseSummon | null = null;
+  private wasDashing: boolean = false;
 
   public get isInvincible(): boolean {
     return this.buffs.hasTag('State.Invincible');
@@ -47,6 +52,9 @@ export default class PlayerState {
 
     // 2. 注入基础属性 (Base Stats)
     this.initBaseStats();
+
+    gameEvents.on(EVENTS.ADD_SHIELD, this.handleAddShield, this);
+    gameEvents.on(EVENTS.REMOVE_SHIELD, this.handleRemoveShield, this);
   }
 
   private initBaseStats() {
@@ -88,8 +96,10 @@ export default class PlayerState {
   }
 
   update(dt: number) {
+    this.refreshShieldRef();
     // 1. 更新 Buff 系统 (转为秒)
     this.buffs.update(dt / 1000);
+    this.syncDashShieldState();
     // 2. 更新寒冷值
     this.updateColdness(dt);
     // 4. ✅ 核心：将寒冷值同步到 StatSystem
@@ -245,7 +255,7 @@ export default class PlayerState {
     }
     
     // ⚡️ 冲刺效果：清除所有寒冷
-    this.coldness = 0;
+    this.addColdness(-this.coldness);
 
     // ⚡️ 冲刺效果：无敌 & 向上猛冲 (逻辑在 Player.update 里配合)
     // this.player.setVelocityY(GameConfig.playerState.dashSpeed);
@@ -328,5 +338,61 @@ export default class PlayerState {
 
   public getStartBoostForce(): number {
     return GameConfig.player.startForce;
+  }
+
+  public destroy() {
+    gameEvents.off(EVENTS.ADD_SHIELD, this.handleAddShield, this);
+    gameEvents.off(EVENTS.REMOVE_SHIELD, this.handleRemoveShield, this);
+  }
+
+  private syncDashShieldState() {
+    const isDashingNow = this.isDashing;
+    if (!this.wasDashing && isDashingNow) {
+      this.ensureShieldSummoned();
+    } else if (this.wasDashing && !isDashingNow) {
+      if (!this.buffs.hasTag(TacticsConfig.tag)) {
+        this.removeShield();
+      }
+    }
+    this.wasDashing = isDashingNow;
+  }
+
+  private handleAddShield() {
+    this.ensureShieldSummoned();
+  }
+
+  private handleRemoveShield() {
+    if (!this.isDashing) {
+      this.removeShield();
+    }
+  }
+
+  private ensureShieldSummoned() {
+    if (this.shieldEffect && this.shieldEffect.active) return;
+    const summonManager = (this.player.scene as any).summonManager;
+    if (!summonManager) return;
+    const summoned = summonManager.summon(
+      SummonId.Shield,
+      this.player.x,
+      this.player.y,
+      { lifeTime: -1 }
+    );
+    if (summoned) {
+      this.shieldEffect = summoned;
+    }
+  }
+
+  private removeShield() {
+    if (this.shieldEffect && this.shieldEffect.active) {
+      this.shieldEffect.despawn();
+    } else {
+      this.shieldEffect = null;
+    }
+  }
+
+  private refreshShieldRef() {
+    if (this.shieldEffect && !this.shieldEffect.active) {
+      this.shieldEffect = null;
+    }
   }
 }

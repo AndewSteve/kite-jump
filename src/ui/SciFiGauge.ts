@@ -51,7 +51,7 @@ const DEFAULT_CONFIG: GaugeConfig = {
 
   minAngle: -15, // 起始角度
   maxAngle: 165, // 结束角度
-  maxSpeed: 3000,
+  maxSpeed: 2100,
 };
 
 export class SciFiGauge extends Phaser.GameObjects.Container {

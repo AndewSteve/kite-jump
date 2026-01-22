@@ -3,10 +3,11 @@ import { BaseSummon, type ISummonInitData } from './BaseSummon';
 import { StatType, ModifierType } from '../../mechanics/StatDefinitions';
 import { TextureKeys } from '../../config/AssetKeys';
 import { EntityTextureScale } from '../../config/EntityConfig';
+import { GameConfig } from '../../config/GameConfig';
 
 export class FrostVortex extends BaseSummon {
-  private readonly RADIUS = 250; // 吸力半径
-  private readonly MAX_FORCE = 800; // 最大吸力
+  private readonly RADIUS = 450; // 吸力半径
+  private readonly MAX_FORCE = 3000; // 最大吸力
   private summonId: string = '';
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -14,10 +15,12 @@ export class FrostVortex extends BaseSummon {
   }
 
   protected onStart(_data: ISummonInitData): void {
+    console.log('FrostVortex spawned at', this.x, this.y);
     this.ensureSummonId();
     // 只有视觉和位置，不负责判定死亡
-    this.setAlpha(0.8);
-    this.setScale(EntityTextureScale);
+    this.setAlpha(1.0);
+    this.setScale(EntityTextureScale * 2.5);
+    this.setTint(0x99ddff);
     // this.play('vortex_anim'); 
   }
 
@@ -54,6 +57,10 @@ export class FrostVortex extends BaseSummon {
          type: ModifierType.Flat,
          value: ny * strength
        });
+    }
+
+    if (Math.abs(dy) >= GameConfig.height * 1.6) {
+      this.despawn();
     }
   }
 

@@ -75,6 +75,7 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: TextureKeys.TacticsShild, path: 'assets/items/tactics_shild.png', type: 'image' },
   { key: TextureKeys.Bamboo, path: 'assets/items/bamboo.png', type: 'image' },
   { key: TextureKeys.Vulture, path: 'assets/items/vulture.png', type: 'image' },
+  { key: TextureKeys.FrostVortex, path: 'assets/items/frost_vortex.png', type: 'image' },
   { key: TextureKeys.IceCrystals, path: 'assets/items/ice_crystals.png', type: 'image' },
   { key: TextureKeys.ChaoticRune, path: 'assets/items/chaotic_rune.png', type: 'image' },
   { key: TextureKeys.WindArrow, path: 'assets/items/arrow_indicator.png', type: 'image' },
@@ -119,7 +120,7 @@ export const AssetManifest: IAssetDefinition[] = [
   { key: VFXTextureKeys.VfxAlertIcon, path: 'assets/vfx/FX_TEX_Alert_01.png', type: 'image' },
   // 3x3 网格，256 / 3 = 85.33，向下取整为 85
   createSpriteSheet(VFXTextureKeys.VfxAlertBg, 'assets/vfx/FX_TEX_Lightning_04.png', 85, 85, 9),
-
+  {key: VFXTextureKeys.VfxShield, path: 'assets/vfx/tactics_effect.png', type: 'image'},
 
 
   // ✅ 新增：音频资源

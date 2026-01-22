@@ -167,6 +167,19 @@ export class SpawnModifierAction implements IBuffAction {
   }
 }
 
+export class GameEventAction implements IBuffAction {
+  private eventType: string;
+  private eventData: any;
+
+  constructor(eventType: string, eventData: any = null) {
+    this.eventType = eventType;
+    this.eventData = eventData;
+  }
+  execute(_ctx: IBuffContext): void {
+    gameEvents.emit(this.eventType, this.eventData);
+  }
+}
+
 
 export class SfxAction implements IBuffAction {
   private sfxAudioKey: AudioKey;

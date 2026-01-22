@@ -27,5 +27,10 @@ void main()
     vec4 color = texture2D(uMainSampler[0], scrolledUV);
 
     // 5. 应用 Phaser 标准的 Tint 和 Alpha
-    gl_FragColor = color * outTint;
+    float fadeEdge = smoothstep(0.0, 0.1, outTexCoord.y) * (1.0 - smoothstep(0.9, 1.0, outTexCoord.y));
+    
+    color.a *= fadeEdge;
+    vec4 trueTint = outTint.bgra;
+    
+    gl_FragColor = color * trueTint;
 }

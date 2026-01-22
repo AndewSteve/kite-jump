@@ -46,7 +46,7 @@ export const EntityConfig = {
     // color: 0xffffff,
     onHit: [
       new BoostAction(-900), // 普通力度
-      new DashEnergyIncrementAction(2), // 增加冲刺能量
+      new DashEnergyIncrementAction(3), // 增加冲刺能量
       new ScoreAction(1),
       new VanishAction(150, AudioKeys.SfxJump, EntityTextureScale * 1.2)     // 踩了消失
     ]
@@ -72,7 +72,7 @@ export const EntityConfig = {
     type: EntityType.Buff, // ✅ 有益
     // color: 0xbd00ff,
     onHit: [
-      new BoostAction(-1200), // 大力度
+      new BoostAction(-1250), // 大力度
       new ColdnessIncrementAction(-25), // 增加体温
       new DashEnergyIncrementAction(10), // 增加冲刺能量
       new ScoreAction(3),

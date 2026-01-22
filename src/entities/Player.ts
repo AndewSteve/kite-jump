@@ -305,6 +305,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   // 销毁时记得清空 Graphics
   destroy(fromScene?: boolean) {
     this.magnetZone.destroy();
+    this.playerState.destroy();
     gameEvents.off(EVENTS.INPUT_DIR, this.handleInputDir, this);
     // this.statusUI.destroy();
     super.destroy(fromScene);

@@ -88,6 +88,7 @@ export default class LabScene extends GameScene {
       '[3] Clear Coldness (清空寒冷值)',
       '[4] Add Dash Energy (增加冲刺能量)',
       '[6] Spawn Dissolve Effect (生成溶解特效)',
+      '[7] Summon Frost Vortex (召唤冰霜漩涡)',
       '[Q] Thunder (雷暴)',
       '[W] Fog (大雾)',
       '[E] Thunder Summon (召唤雷柱)',

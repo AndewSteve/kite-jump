@@ -23,7 +23,7 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
   protected lifeTimer: number = 0;
   protected maxLifeTime: number = -1;
   protected target: Player | null = null;
-
+  protected spaceType: SpaceType = SpaceType.World;
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string) {
     super(scene, x, y, texture);
     // 注册到 Update 列表 (类似于 Unity 的 Update)
@@ -58,6 +58,7 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
    * 设置坐标空间 (Unity: Screen Space Overlay vs World Space)
    */
   public setSpaceType(space: SpaceType) {
+    this.spaceType = space;
     if (space === SpaceType.Screen) {
       this.setScrollFactor(0); // 0 = 锁定在屏幕 (UI空间/相机空间)
     } else {
@@ -71,7 +72,7 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
   preUpdate(time: number, delta: number) {
     super.preUpdate(time, delta);
     // 如果正在退场中，就不要再触发时间的 despawn 了
-    if (this.isDespawning) return;
+    // if (this.isDespawning && this.spaceType !== SpaceType.World) return;
     
     // 自动销毁逻辑
     if (this.maxLifeTime > 0) {
