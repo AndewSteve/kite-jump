@@ -1,88 +1,73 @@
 import Phaser from 'phaser';
 import { EVENTS, gameEvents } from '../config/Events';
 
+// 定义一个简单的接口，只需要对象有 x 坐标即可
+// 这样不需要导入具体的 Player 类，避免循环依赖
+export interface IControlTarget {
+  x: number;
+}
+
 export default class InputZones {
   private scene: Phaser.Scene;
-  private leftDown = false;
-  private rightDown = false;
+  private target: IControlTarget; // 存储风筝/玩家的引用
+  
+  private isDown: boolean = false; // 是否正在按压
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private lastDir = 0;
-  private leftZone: Phaser.GameObjects.Zone;
-  private rightZone: Phaser.GameObjects.Zone;
+  private inputZone: Phaser.GameObjects.Zone;
 
-  constructor(scene: Phaser.Scene) {
+  // 灵敏度死区：防止手指正好按在风筝上时左右鬼畜抖动
+  private readonly DEAD_ZONE = 10; 
+
+  /**
+   * @param scene 场景
+   * @param target 被控制的对象（必须包含 x 属性），通常传入 this.player
+   */
+  constructor(scene: Phaser.Scene, target: IControlTarget) {
     this.scene = scene;
+    this.target = target;
     const { width, height } = scene.scale;
-    const halfWidth = width / 2;
 
-    const leftDebug = scene.add.rectangle(halfWidth / 2, height / 2, halfWidth, height, 0x00ff00, 0.0);
-    const rightDebug = scene.add.rectangle(halfWidth + halfWidth / 2, height / 2, halfWidth, height, 0xff0000, 0.0);
-    leftDebug.setScrollFactor(0).setDepth(-1000);
-    rightDebug.setScrollFactor(0).setDepth(-1000);
+    // 1. 创建全屏触控区
+    // 深度设为极低，确保作为背景层接收输入，不阻挡 UI 按钮
+    this.inputZone = scene.add.zone(width / 2, height / 2, width, height);
+    this.inputZone.setScrollFactor(0).setDepth(-999);
+    this.inputZone.setInteractive();
 
-    this.leftZone = scene.add.zone(halfWidth / 2, height / 2, halfWidth, height);
-    this.rightZone = scene.add.zone(halfWidth + halfWidth / 2, height / 2, halfWidth, height);
-    this.leftZone.setScrollFactor(0).setDepth(-999);
-    this.rightZone.setScrollFactor(0).setDepth(-999);
-
-    this.leftZone.setInteractive();
-    this.rightZone.setInteractive();
-
-    this.leftZone.on('pointerdown', () => {
-      this.leftDown = true;
-      this.emitDirection();
-    });
-    this.leftZone.on('pointerup', () => {
-      this.leftDown = false;
-      this.emitDirection();
-    });
-    this.leftZone.on('pointerout', () => {
-      this.leftDown = false;
-      this.emitDirection();
-    });
-    this.leftZone.on('pointerupoutside', () => {
-      this.leftDown = false;
+    // 2. 绑定事件
+    // 按下时标记状态，并立即触发一次方向检测
+    this.inputZone.on('pointerdown', () => {
+      this.isDown = true;
       this.emitDirection();
     });
 
-    this.rightZone.on('pointerdown', () => {
-      this.rightDown = true;
-      this.emitDirection();
-    });
-    this.rightZone.on('pointerup', () => {
-      this.rightDown = false;
-      this.emitDirection();
-    });
-    this.rightZone.on('pointerout', () => {
-      this.rightDown = false;
-      this.emitDirection();
-    });
-    this.rightZone.on('pointerupoutside', () => {
-      this.rightDown = false;
-      this.emitDirection();
-    });
+    // 各种松开的情况
+    this.inputZone.on('pointerup', this.handleUp, this);
+    this.inputZone.on('pointerupoutside', this.handleUp, this);
+    
+    // 全局松开作为保险
+    scene.input.on('pointerup', this.handleUp, this);
 
+    // 3. 键盘备用 (保持原有键盘逻辑)
     this.cursors = scene.input.keyboard?.createCursorKeys();
-
-    scene.input.on('pointerup', this.handleGlobalPointerUp, this);
   }
 
-  private handleGlobalPointerUp() {
-    if (!this.leftDown && !this.rightDown) return;
-    this.leftDown = false;
-    this.rightDown = false;
+  private handleUp() {
+    if (!this.isDown) return;
+    this.isDown = false;
     this.emitDirection();
   }
 
   private emitDirection() {
     const dir = this.getDirection();
+    // 只有方向改变时才发送事件，优化性能
     if (dir === this.lastDir) return;
     this.lastDir = dir;
     gameEvents.emit(EVENTS.INPUT_DIR, dir);
   }
 
   public update() {
-    if (!this.cursors) return;
+    // 每一帧都检测，确保如果风筝飞过了手指位置，方向会实时反转
     const dir = this.getDirection();
     if (dir === this.lastDir) return;
     this.lastDir = dir;
@@ -90,16 +75,33 @@ export default class InputZones {
   }
 
   private getDirection(): number {
-    if (this.leftDown) return -1;
-    if (this.rightDown) return 1;
+    // A. 优先检测触摸/鼠标
+    if (this.isDown) {
+      const pointer = this.scene.input.activePointer;
+      // 使用 worldX 以兼容摄像机移动
+      const targetX = pointer.worldX;
+      const currentX = this.target.x;
+      
+      const diff = targetX - currentX;
+
+      // 如果距离非常近（死区内），则不移动，防止抖动
+      if (Math.abs(diff) < this.DEAD_ZONE) {
+        return 0;
+      }
+
+      // 返回 1 (向右) 或 -1 (向左)
+      return Math.sign(diff);
+    }
+
+    // B. 如果没有触摸，检测键盘 (作为备用/PC端控制)
     if (this.cursors?.left?.isDown) return -1;
     if (this.cursors?.right?.isDown) return 1;
+
     return 0;
   }
 
   destroy() {
-    this.scene.input.off('pointerup', this.handleGlobalPointerUp, this);
-    this.leftZone.destroy();
-    this.rightZone.destroy();
+    this.scene.input.off('pointerup', this.handleUp, this);
+    this.inputZone.destroy();
   }
 }

@@ -16,10 +16,12 @@ import SummonManager from "../managers/SummonManager";
 import RenderManager from "../managers/RenderManager";
 import WeatherManager from "../managers/WeatherManager";
 import AudioManager from "../managers/AudioManager";
+import InputZones from "../ui/InputZones";
 
 export default class GameScene extends Phaser.Scene {
   // ✅ 1. 类型改为 Player 类
   public player!: Player;
+  private inputZones!: InputZones; // ✅ 新增属性
   // ✅ 修改类型：现在这是“可交互实体”组，不仅放云，以后也能放鸟
   public interactables!: Phaser.Physics.Arcade.Group;
   public backgroundManager!: BackgroundManager; // ✅ 新增
@@ -114,6 +116,7 @@ export default class GameScene extends Phaser.Scene {
     );
 
     this.scene.launch(SceneKeys.UI); // 启动 UI 场景
+    this.inputZones = new InputZones(this, this.player);
 
     // --- 事件 ---
     this.setupEvents();
@@ -205,14 +208,19 @@ export default class GameScene extends Phaser.Scene {
     // 1. 导演层：决定游戏所处阶段 (切换状态、刷怪开关、物理环境)
     this.phaseManager.update(delta);
 
+    
     // 2. 实体层：玩家逻辑 (Buff倒计时、物理运动、输入)
     this.player.update(time, delta);
+    if (this.inputZones) {
+      this.inputZones.update();
+    }
     this.spawnManager.update(this.worldWidth); // 简化参数
     this.scoreManager.update(this.player.y);      // ✅ 更新分数/高度
 
     // 3. 视差滚动
     this.cameraManager.update(delta);
     this.weatherManager.update(delta);
+    
 
     if (this.inputHintLeft || this.inputHintRight) {
       if (this.scoreManager.getCurrentHeightMeters() >= 300) {
