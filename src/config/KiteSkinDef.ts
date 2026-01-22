@@ -26,9 +26,10 @@ export interface IKiteSkin {
   stringTexture: string;
   knotTexture: string;
 
+  
   // 尺寸调整
   scale: number; 
-
+  
   // 提线挂载点 (Bridle Anchors) - 相对于主体中心
   // 即使是单张图，我们也需要定义绳子连在图的哪个位置
   bridleLeftOffset: { x: number, y: number };
@@ -38,10 +39,15 @@ export interface IKiteSkin {
   // 绳结位置 (相对于中心)
   knotOffset: { x: number, y: number };
   knotScale?: number;      // 绳结缩放 (默认 1.0)
-
+  
   stringScale?: number;    // 主垂线粗细缩放 (默认 0.5)
   stringSegments?: number; // 主垂线节数 (默认 22)
   stringSegmentLength?: number; // 主垂线每节长度 (默认 40)
+  
+  trailTexture?: string; // ✅ 新增：拖尾粒子贴图 (可选，默认用 stringTexture)
+  // ✅ 新增：翼尖发射点 (用于冲刺拖尾) - 相对于主体中心
+  wingLeftOffset?: { x: number, y: number };
+  wingRightOffset?: { x: number, y: number };
 
   // 尾巴列表 (支持多个)
   tails?: ITailDef[];
@@ -68,6 +74,11 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
     
     knotOffset: { x: 0, y: 200 }, // 绳结在身体下方一点点
     knotScale: 0.3,
+
+    trailTexture: `${TextureKeys.DefaultYellowKite}_trail`, // ✅ 新增：拖尾粒子贴图
+    // ✅ 新增：菱形风筝翼尖通常是最宽处
+    wingLeftOffset: { x: -250, y: 0 },
+    wingRightOffset: { x: 250, y: 0 },
   },
 
   // 示例：燕子风筝 (双尾)
@@ -91,7 +102,12 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
       { textureKey: `${TextureKeys.GreenKite}_body_tail`, offsetX: 0, offsetY: 260, length: 10 }, // 左尾
       { textureKey: `${TextureKeys.GreenKite}_left_tail`, offsetX: -450, offsetY: 30, length: 10 }, // 左尾
       { textureKey: `${TextureKeys.GreenKite}_right_tail`, offsetX: 450, offsetY: 30, length: 10 }   // 右尾
-    ]
+    ],
+
+    trailTexture: `${TextureKeys.DefaultYellowKite}_trail`, // ✅ 新增：拖尾粒子贴图
+    // ✅ 新增：菱形风筝翼尖通常是最宽处
+    wingLeftOffset: { x: -250, y: 0 },
+    wingRightOffset: { x: 250, y: 0 },
   },
 
 
@@ -115,7 +131,12 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
       // { textureKey: `${TextureKeys.BlueKite}_body_tail`, offsetX: 0, offsetY: 330, length: 15, scale: 0.7 }, // 左尾
       { textureKey: `${TextureKeys.BlueKite}_left_tail`, offsetX: -200, offsetY: 120, length: 10 }, // 左尾
       { textureKey: `${TextureKeys.BlueKite}_right_tail`, offsetX: 200, offsetY: 120, length: 10 }   // 右尾
-    ]
+    ],
+
+    trailTexture: `${TextureKeys.DefaultYellowKite}_trail`, // ✅ 新增：拖尾粒子贴图
+    // ✅ 新增：菱形风筝翼尖通常是最宽处
+    wingLeftOffset: { x: -250, y: 0 },
+    wingRightOffset: { x: 250, y: 0 },
   },
   [KiteSkinIDs.Red]: {
     id: KiteSkinIDs.Red,
@@ -137,6 +158,11 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
       { textureKey: `${TextureKeys.RedKite}_body_tail`, offsetX: 0, offsetY: 330, length: 15, scale: 0.7 }, // 左尾
       { textureKey: `${TextureKeys.RedKite}_left_tail`, offsetX: -190, offsetY: 140, length: 10 }, // 左尾
       { textureKey: `${TextureKeys.RedKite}_right_tail`, offsetX: 190, offsetY: 140, length: 10 }   // 右尾
-    ]
+    ],
+
+    trailTexture: `${TextureKeys.DefaultYellowKite}_trail`, // ✅ 新增：拖尾粒子贴图
+    // ✅ 新增：菱形风筝翼尖通常是最宽处
+    wingLeftOffset: { x: -250, y: 0 },
+    wingRightOffset: { x: 250, y: 0 },
   },
 };
