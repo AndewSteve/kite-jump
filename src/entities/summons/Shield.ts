@@ -23,7 +23,6 @@ export class Shield extends BaseSummon {
     this.setAlpha(0);
     // 也许你需要重置旋转角度
     this.setRotation(0);
-
     this.scene.tweens.add({
       targets: this,
       alpha: 1,

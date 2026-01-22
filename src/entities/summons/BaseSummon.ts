@@ -18,7 +18,7 @@ export interface ISummonInitData {
 /**
  * 类似于 Unity 的 MonoBehaviour (针对召唤物)
  */
-export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
+export abstract class BaseSummon extends Phaser.GameObjects.Sprite {
   protected isDespawning: boolean = false; // ✅ 移到基类，统一管理状态
   protected lifeTimer: number = 0;
   protected maxLifeTime: number = -1;
@@ -36,7 +36,6 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
   public onSpawn(data: ISummonInitData) {
     this.setActive(true);
     this.setVisible(true);
-    this.body!.enable = true; // 确保物理开启
     this.isDespawning = false; // ✅ 关键：复活时重置状态
     
     this.setPosition(data.x, data.y);
@@ -44,9 +43,6 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
     this.maxLifeTime = data.lifeTime ?? -1;
     this.target = data.target || null;
 
-    // 重置物理状态
-    this.setVelocity(0, 0);
-    this.setAcceleration(0, 0);
     this.setAlpha(1);
     this.setScale(1);
 
@@ -101,7 +97,6 @@ export abstract class BaseSummon extends Phaser.Physics.Arcade.Sprite {
   protected kill() {
     this.setActive(false);
     this.setVisible(false);
-    if (this.body) this.body.enable = false;
     // 状态已在 onSpawn 重置，这里不需要改 isDespawning
     console.log(`[BaseSummon] ${this.constructor.name} returned to pool.`);
   }

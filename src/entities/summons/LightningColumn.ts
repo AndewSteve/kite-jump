@@ -22,6 +22,7 @@ export class LightningColumn extends BaseSummon {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'pixel'); 
     this.setVisible(false); // 本体仅仅是逻辑锚点
+    this.setAlpha(0);
   }
 
   protected onStart(_data: ISummonInitData): void {
@@ -84,8 +85,6 @@ export class LightningColumn extends BaseSummon {
         duration: 180
     });
 
-    // 3. 禁用物理 (手动判定)
-    if (this.body) this.body.enable = false;
   }
 
   private strike() {
@@ -216,6 +215,5 @@ export class LightningColumn extends BaseSummon {
     this.kill();
   }
 }
-
 
 

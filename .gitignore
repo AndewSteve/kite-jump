@@ -35,3 +35,6 @@ dist-ssr
 .cooperation
 public/assets/pending
 public/assets/video_alpha_test
+android/build/*
+android/app/build/*
+android/app/release/*

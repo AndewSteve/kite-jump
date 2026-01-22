@@ -74,10 +74,6 @@ export default class SummonManager {
     
     if (entity) {
       // 确保物理组件存在 (如果是首次创建)
-      if (!entity.body) {
-        this.scene.physics.add.existing(entity);
-      }
-
       // 设置空间
       entity.setSpaceType(config.defaultSpace);
 

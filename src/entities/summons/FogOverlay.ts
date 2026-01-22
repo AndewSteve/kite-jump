@@ -24,7 +24,6 @@ export class FogOverlay extends BaseSummon {
 
   protected onStart(_data: ISummonInitData): void {
     this.isDespawning = false;
-    if (this.body) this.body.enable = false;
 
     // --- 1. 计算尺寸 ---
     const { width, height } = this.scene.scale;

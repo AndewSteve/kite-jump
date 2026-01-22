@@ -22,8 +22,6 @@ export class WindVane extends BaseSummon {
     // 2. 监听风力变化
     gameEvents.on(EVENTS.WIND_CHANGE, this.onWindChange, this);
     
-    // 3. 物理? 不需要
-    if (this.body) this.body.enable = false;
   }
 
   private onWindChange(windValue: number) {

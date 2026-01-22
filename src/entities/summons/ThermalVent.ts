@@ -42,12 +42,6 @@ export class ThermalVent extends BaseSummon {
     // 确保位置在屏幕垂直中间 (因为 y 传进来的是 screenHeight/2)
     this.y = screenHeight / 2;
 
-    // 3. 关闭不必要的物理
-    // 我们手动检测，不需要 Arcade Body 参与碰撞
-    if (this.body) {
-        this.body.enable = false; 
-    }
-    
     // 进场动画
     this.scene.tweens.add({
       targets: this,
@@ -58,7 +52,7 @@ export class ThermalVent extends BaseSummon {
 
   protected onUpdate(_dt: number): void {
     // ✅ 如果正在消失，不再生效，避免玩家觉得"明明看不见了怎么还有力"
-    if (this.isDespawning) return;
+    // 视觉更新可以继续进行
     // ✅ 核心：自定义屏幕空间碰撞检测
     // 思路：将玩家的世界坐标映射到屏幕坐标，然后看是否在光柱范围内
     
@@ -76,6 +70,7 @@ export class ThermalVent extends BaseSummon {
     const rightBound = this.x + halfWidth;
 
     // 3. 判断是否在区间内
+    if (this.isDespawning) return;
     if (playerScreenX >= leftBound && playerScreenX <= rightBound) {
         this.onPlayerStay();
     }
