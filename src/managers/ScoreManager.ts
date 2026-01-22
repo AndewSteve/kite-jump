@@ -31,6 +31,8 @@ export default class ScoreManager {
   }
 
   private setupListeners() {
+    gameEvents.off(EVENTS.ADD_SCORE, this.handleAddScore, this);
+    gameEvents.off(EVENTS.ADD_COIN, this.handleAddCoin, this);
     // 监听加分事件 (金币/杀怪)
     gameEvents.on(EVENTS.ADD_SCORE, this.handleAddScore, this);
     gameEvents.on(EVENTS.ADD_COIN, this.handleAddCoin, this);
@@ -190,7 +192,7 @@ export default class ScoreManager {
   }
 
   public destroy() {
-    gameEvents.off(EVENTS.ADD_SCORE, this.handleAddScore, this);
-    gameEvents.off(EVENTS.ADD_COIN, this.handleAddCoin, this);
+    // gameEvents.off(EVENTS.ADD_SCORE, this.handleAddScore, this);
+    // gameEvents.off(EVENTS.ADD_COIN, this.handleAddCoin, this);
   }
 }

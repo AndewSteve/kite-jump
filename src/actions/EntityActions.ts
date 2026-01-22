@@ -187,25 +187,6 @@ export class VanishAction implements IEntityAction {
 /**
  * (预留) 行为：加分
  */
-const CoinSfxs = [
-  AudioKeys.SfxCollectCoin1,
-  AudioKeys.SfxCollectCoin2,
-  AudioKeys.SfxCollectCoin3
-]
-export class CoinAction implements IEntityAction {
-  private coin: number;
-  constructor(coin: number) {
-    this.coin = coin;
-  }
-  execute(_ctx: InteractionContext): void {
-    const pattern = Phaser.Math.RND.pick(CoinSfxs);
-    AudioManager.playSfx(pattern);
-    gameEvents.emit(EVENTS.ADD_COIN, this.coin);
-  }
-}
-/**
- * (预留) 行为：加分
- */
 export class ScoreAction implements IEntityAction {
   private score: number;
   constructor(score: number) {
@@ -216,11 +197,20 @@ export class ScoreAction implements IEntityAction {
   }
 }
 
+
+const CoinSfxs = [
+  AudioKeys.SfxCollectCoin1,
+  AudioKeys.SfxCollectCoin2,
+  AudioKeys.SfxCollectCoin3
+]
 export class AddCoinAction implements IEntityAction {
   private amount: number;
   constructor(amount: number) { this.amount = amount; }
 
   execute(ctx: InteractionContext) {
+    const pattern = Phaser.Math.RND.pick(CoinSfxs);
+    AudioManager.playSfx(pattern);
+
     // ✅ 读取倍率 (蜀国默认是 1.0)
     const mult = ctx.player.playerState.stats.get(StatType.CoinMultiplier);
     

@@ -230,7 +230,7 @@ export default class GameScene extends Phaser.Scene {
 
     // 6. 死亡判定
     if (this.player.y > this.scoreManager.getDeathThresholdY()) {
-      this.handleGameOver(`高度太低`);
+      this.handleGameOver(`失速`);
     }
   }
 

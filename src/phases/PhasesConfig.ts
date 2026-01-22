@@ -46,11 +46,10 @@ export class NormalPhase implements IGamePhase {
     scene.spawnManager.isSpawningEnabled = true;
     if (data.id === BiomeId.L1_Frost) {
       // 1. 先把开头必须播放的塞进队列
-      // scene.backgroundManager.enqueue(TextureKeys.BgL1Land); // 必须先出地面
-      scene.backgroundManager.enqueue(TextureKeys.BgL1Sky);  // 紧接着出过渡天空
+      scene.backgroundManager.enqueue(TextureKeys.BgL1Sky);
       
       // 2. 设置后续无限循环的背景
-      scene.backgroundManager.setFallback(TextureKeys.BgL1Sky); // 之后全是烟雾
+      scene.backgroundManager.setFallback(TextureKeys.BgL1Sky);
 
       // 1. 激活玩家 (解决"无速度"的关键)
       scene.player.setEnabled(true);
@@ -59,8 +58,6 @@ export class NormalPhase implements IGamePhase {
       const boostForce = scene.player.playerState.getStartBoostForce();
       console.log(`Applying Boost: ${boostForce}`);
       scene.player.boost(boostForce);
-    } else {
-      scene.backgroundManager.setFallback(data.backgroundTexture);
     }
     // 2. 应用环境物理 (GAS)
     this.applyEnvStats(scene, true);
@@ -71,15 +68,9 @@ export class NormalPhase implements IGamePhase {
         scene.player.playerState.buffs.addBuff(buffConfig);
       });
     }
-
-    // 1. ✅ 视觉层：在云层掩护下，瞬间切换背景
-    // scene.backgroundManager.switchTexture(data.backgroundTexture);
-
-    
-
     // 2. ✅ 视觉层：开始淡出云层，露出新世界
     // 稍微延迟一点点再淡出(比如100ms)，防止纹理切换瞬间的闪烁
-    scene.time.delayedCall(100, () => {
+    scene.time.delayedCall(500, () => {
         scene.backgroundManager.exitCloudTunnel(1500); // 1.5秒慢慢散开，更有史诗感
     });
 
@@ -158,7 +149,7 @@ export class TransitionPhase implements IGamePhase {
     this.targetHeight = targetHeight;
   }
 
-  onEnter(scene: GameScene): void {
+  onEnter(scene: GameScene, data: IBiomeData): void {
     console.log("进入：环境过渡冲刺！");
     this.startPixelY = scene.player.y;
     // 1. 视觉：播放速度线特效 / 模糊背景
@@ -170,6 +161,7 @@ export class TransitionPhase implements IGamePhase {
     // 2. ✅ 视觉层：开启云层遮罩 (淡入)
     // 建议时间设为 1000ms 左右，让玩家感觉到“冲进了云层”
     scene.backgroundManager.enterCloudTunnel(1000);
+    scene.backgroundManager.setFallback(data.backgroundTexture);
 
     // 3. ✅ 生成控制：开启生成，但应用“白名单过滤”
     scene.spawnManager.isSpawningEnabled = true;

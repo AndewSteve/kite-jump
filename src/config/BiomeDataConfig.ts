@@ -83,7 +83,7 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L3_CloudMarsh,
     name: "云梦泽",
     durationMeters: 400,
-    backgroundTexture: TextureKeys.BgL2,
+    backgroundTexture: TextureKeys.BgL3,
     spawnTable: CloudMarshSpawnTable,
     envModifiers: [
       {
@@ -99,7 +99,7 @@ export const BiomeLibrary: Record<BiomeId, IBiomeData> = {
     id: BiomeId.L4_WindCave,
     name: "墨家风洞",
     durationMeters: 400,
-    backgroundTexture: TextureKeys.BgL2,
+    backgroundTexture: TextureKeys.BgL4,
     spawnTable: WindCaveSpawnTable,
     // ✅ 挂载机制
     buffs: [ WindCaveMechanicBuff ]

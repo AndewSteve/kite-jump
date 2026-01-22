@@ -49,6 +49,7 @@ export default class PhaseManager {
   public onPhaseComplete() {
     if (this.currentPhase instanceof NormalPhase) {
       // 正常关卡结束 -> 进过渡 (固定2000米过渡，或读取配置)
+      this.currentBiomeId = this.getNextBiomeId();
       this.switchPhase(
         new TransitionPhase(GameConfig.level.transitionHeigth), 
         BiomeLibrary[this.currentBiomeId]
@@ -56,8 +57,7 @@ export default class PhaseManager {
     } 
     else if (this.currentPhase instanceof TransitionPhase) {
       // 过渡结束 -> 进下一个生态
-      const nextId = this.getNextBiomeId();
-      this.switchPhase(new NormalPhase(), BiomeLibrary[nextId]);
+      this.switchPhase(new NormalPhase(), BiomeLibrary[this.currentBiomeId]);
     }
   }
 

@@ -1,3 +1,4 @@
+import { TextureKeys } from '../../config/AssetKeys';
 import { GameConfig } from '../../config/GameConfig';
 import { BaseSummon, type ISummonInitData } from './BaseSummon';
 
@@ -9,7 +10,8 @@ export class ThermalVent extends BaseSummon {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     // 假设你在 preload 加载了一个叫 'vfx_red_column' 的图
     // 或者直接用 'pixel' 纯色块拉伸
-    super(scene, x, y, 'pixel'); 
+    super(scene, x, y, TextureKeys.ThermalVent); 
+    this.setVisible(true); // 本体可见
   }
 
   protected onStart(_data: ISummonInitData): void {

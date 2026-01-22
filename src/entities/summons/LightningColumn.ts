@@ -81,7 +81,7 @@ export class LightningColumn extends BaseSummon {
         alpha: { from: 0.2, to: 1 },
         yoyo: true,
         repeat: 4,
-        duration: 200
+        duration: 180
     });
 
     // 3. 禁用物理 (手动判定)
@@ -123,46 +123,41 @@ export class LightningColumn extends BaseSummon {
     }
     
     // 闪电冲击动画 (0.5秒进度 + 0.5秒淡出)
-    this.scene.tweens.add({
+    this.scene.tweens.killTweensOf(this);
+    this.scene.tweens.chain({
         targets: this,
-        strikeProgress: 1,
-        duration: 500,
-        ease: 'Sine.easeOut',
-        onUpdate: () => {
-            if (pipeline) {
-              pipeline.setProgress(this.strikeProgress);
-            }
-        },
-        onComplete: () => {
-            if (!this.strikeSprite) {
-                this.isStriking = false;
-                return;
-            }
-            this.scene.tweens.add({
-                targets: this.strikeSprite,
-                alpha: 0,
-                duration: 500,
-                ease: 'Sine.easeOut',
-                onComplete: () => {
-                    // ? 1. 视觉上：彻底移除闪电，让玩家以为结束了
-                    if (this.strikeSprite) {
-                        this.strikeSprite.destroy();
-                        this.strikeSprite = undefined;
-                    }
-
-                    // ? 2. 逻辑上：强制关闭伤害判定 (防止隐形电人)
-                    this.isStriking = false;
-
-                    // ? 3. 核心修改：延迟 2秒 再真正回收
-                    // 这 2秒 期间，getActiveCount() 依然是 1，
-                    // 所以 LightningStrikeAction 会一直返回，不会生成新雷
-                    const COOLDOWN_TIME = 2000; 
-
-                    this.scene.time.delayedCall(COOLDOWN_TIME, () => {
-                         this.despawn(); 
-                    });
+        tweens: [
+          {
+            strikeProgress: 1,
+            duration: 500,
+            ease: 'Sine.easeOut',
+            onUpdate: () => {
+                if (pipeline) {
+                  pipeline.setProgress(this.strikeProgress);
                 }
-            });
+            },
+          },
+          {
+            targets: this.strikeSprite,
+            alpha: 0,
+            duration: 500,
+            ease: 'Sine.easeOut',
+          }
+        ],
+        onComplete: () => {
+          this.isStriking = false;
+          if (this.strikeSprite) {
+            this.strikeSprite.destroy();
+            this.strikeSprite = undefined;
+          }
+  
+          this.isStriking = false;
+  
+          const COOLDOWN_TIME = 2000; 
+  
+          this.scene.time.delayedCall(COOLDOWN_TIME, () => {
+               this.despawn(); 
+          });
         }
     });
 

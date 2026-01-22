@@ -30,6 +30,9 @@ export default class SpawnManager {
   private currentDefs: Map<EntityId, ISpawnDefinition> = new Map();
   public isSpawningEnabled: boolean = false;
 
+  // ✅ 新增：保底计数器 (追踪连续多少层没有正面道具)
+  private rowsSinceLastPositive: number = 0;
+
   constructor(scene: GameScene, group: Phaser.Physics.Arcade.Group, player: Player) {
     this.scene = scene;
     this.interactables = group;
@@ -205,6 +208,7 @@ export default class SpawnManager {
   private spawnEntity(x: number, y: number) {
     // A. 动态计算总权重 (Logic Driven)
     const candidates: { id: EntityId, finalWeight: number }[] = [];
+    let selectedId = candidates[0].id;
     let totalWeight = 0;
 
     // 遍历所有有权重的 Stat
@@ -220,7 +224,6 @@ export default class SpawnManager {
 
     // B. 随机取值
     let randomWeight = Phaser.Math.Between(0, totalWeight);
-    let selectedId = candidates[0].id;
 
     for (const candidate of candidates) {
       randomWeight -= candidate.finalWeight;

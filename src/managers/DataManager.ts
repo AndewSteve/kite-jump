@@ -56,7 +56,7 @@ const DEFAULT_SAVE: UserSaveData = {
 
 export default class DataManager {
   private static _data: UserSaveData;
-  private static readonly SAVE_KEY = 'kite_jump_save_v3';
+  private static readonly SAVE_KEY = 'kite_jump_save_v4';
 
   // --- 基础读写 ---
   static load() {
@@ -101,8 +101,8 @@ export default class DataManager {
         this.data.highestHeight = height;
     }
     
-    // 累加金币 (假设分数 1:1 转金币，或者你可以定义转换率)
-    this.data.currency += Math.floor(score * 0.5); 
+    // 累加金币
+    this.data.currency += Math.floor(currency); 
     
     this.save();
   }
