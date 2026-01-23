@@ -348,8 +348,10 @@ export default class PlayerState {
   private syncDashShieldState() {
     const isDashingNow = this.isDashing;
     if (!this.wasDashing && isDashingNow) {
+      gameEvents.emit(EVENTS.ToggleDash, { enabled: true });
       this.ensureShieldSummoned();
     } else if (this.wasDashing && !isDashingNow) {
+      gameEvents.emit(EVENTS.ToggleDash, { enabled: false });
       if (!this.buffs.hasTag(TacticsConfig.tag)) {
         this.removeShield();
       }

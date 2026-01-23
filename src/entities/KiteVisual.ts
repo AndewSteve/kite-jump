@@ -3,6 +3,8 @@ import Phaser from 'phaser';
 import { KiteTail } from './parts/KiteTail';
 import { KiteMainString } from './parts/KiteMainString';
 import { KiteSkinIDs, KiteSkins, type IKiteSkin, type KiteSkinID } from '../config/KiteSkinDef';
+import VisualManager from '../managers/VisualManager'; // 假设路径正确
+import { VFXTextureKeys } from '../config/AssetKeys';
 
 export class KiteVisual extends Phaser.GameObjects.Container {
   // 零件
@@ -15,14 +17,21 @@ export class KiteVisual extends Phaser.GameObjects.Container {
   private mainString: KiteMainString;
   private tails: KiteTail[] = [];
 
-  // ✅ 新增：隐形脊柱 (用于驱动绳结物理)
+  // 隐形脊柱
   private knotSpine: KiteTail;
+
+  // ✅ 新增：翼尖拖尾粒子发射器
+  // 注意：它们不添加到 Container 内部，而是添加到 Scene，但由 KiteVisual 管理
+  private trailEmitterLeft?: Phaser.GameObjects.Particles.ParticleEmitter;
+  private trailEmitterRight?: Phaser.GameObjects.Particles.ParticleEmitter;
 
   private skinConfig: IKiteSkin;
   private mainStringTailAnchored = false;
 
   // 临时矩阵
   private readonly _tmpMat = new Phaser.GameObjects.Components.TransformMatrix();
+  // 临时点
+  private readonly _tmpLoc = new Phaser.Math.Vector2();
 
   // --- 动画状态 ---
   private animState = {
@@ -41,7 +50,7 @@ export class KiteVisual extends Phaser.GameObjects.Container {
     // 1. 加载配置
     this.skinConfig = KiteSkins[skinId] || KiteSkins[KiteSkinIDs.DefaultYellow];
 
-    // 2. 主垂线 (Rope) - 独立于 Container
+    // 2. 主垂线
     const strScale = this.skinConfig.stringScale ?? 0.5;
     const strSegments = this.skinConfig.stringSegments ?? 22;
     const strSegmentLength = this.skinConfig.stringSegmentLength ?? 40;
@@ -54,67 +63,108 @@ export class KiteVisual extends Phaser.GameObjects.Container {
     this.mainString.setDepth(-1);
     scene.add.existing(this.mainString);
 
-    // 3. 提线 (Bridle Lines)
+    // 3. 提线
     this.bridleLeft = scene.add.sprite(0, 0, this.skinConfig.stringTexture).setOrigin(0, 0.5);
     this.bridleRight = scene.add.sprite(0, 0, this.skinConfig.stringTexture).setOrigin(0, 0.5);
 
-    // 4. 绳结 (Knot)
+    // 4. 绳结
     const kPos = this.skinConfig.knotOffset;
     this.knot = scene.add.sprite(kPos.x, kPos.y, this.skinConfig.knotTexture || this.skinConfig.stringTexture);
     const kScale = this.skinConfig.knotScale ?? 1.0;
     this.knot.setScale(kScale);
 
-    // 5. 主体 (Body)
+    // 5. 主体
     this.bodySprite = scene.add.sprite(0, 0, this.skinConfig.bodyTexture);
     this.bodySprite.setOrigin(0.5, 0.5);
 
-    // 6. ✅ 初始化隐形脊柱 (Knot Spine)
-    // 计算需要的长度和节数 (假设每节 10px，这样比较硬，不会太软)
-    const spineLen = Math.max(50, Math.abs(this.skinConfig.knotOffset.y)); // 至少50px长度
+    // 6. 初始化隐形脊柱
+    const spineLen = Math.max(50, Math.abs(this.skinConfig.knotOffset.y));
     const segLen = 10;
     const segCount = Math.ceil(spineLen / segLen);
 
-    // 创建脊柱 (使用 'pixel' 或任意纹理，因为不可见)
     this.knotSpine = new KiteTail(scene, 0, 0, this.skinConfig.stringTexture, segCount, 10000);
-    this.knotSpine.setVisible(false); // 关键：不可见
+    this.knotSpine.setVisible(false);
     
-    // 强制设置物理参数 (需要绕过 TS private 检查，或者你在 KiteTail 里加 setter)
-    // 这里为了方便直接 cast any，建议你在 KiteTail 加 setPhysicsConfig
     const spinePhys = this.knotSpine as any;
     spinePhys.segmentLength = segLen; 
-    spinePhys.gravity = 0.8; // 重力稍大，保持垂坠感
-    spinePhys.drag = 0.9;    // 阻力大，防止乱晃
+    spinePhys.gravity = 0.8;
+    spinePhys.drag = 0.9;
     
     // 7. 添加进容器
-    // 注意：add 顺序决定层级。先把 spine 加进去(无所谓因为不可见)，再加别的
     this.add(this.knotSpine);
     this.add([this.bridleLeft, this.bridleRight, this.bodySprite, this.knot]);
 
     // 8. 初始化装饰尾巴
     this.createTails(scene);
 
-    // 9. 应用整体缩放
+    // 9. ✅ 初始化冲刺拖尾 (如果配置了 Wing Offsets)
+    if (this.skinConfig.wingLeftOffset && this.skinConfig.wingRightOffset) {
+        this.createTrailEmitters(scene);
+    }
+
+    // 10. 应用整体缩放
     this.setScale(this.skinConfig.scale);
+  }
+
+  // ✅ 创建粒子发射器 (Phaser 3.60+ API)
+  // ✅ 创建纯代码像素风发射器
+  private createTrailEmitters(scene: Phaser.Scene) {
+    // 1. 动态生成 10x10 纯白像素块
+    const textureKey = VFXTextureKeys.VfxFlare;
+    if (!scene.textures.exists(textureKey)) {
+      const g = scene.make.graphics({ x: 0, y: 0 });
+      g.fillStyle(0xffffff, 1);
+      g.fillRect(0, 0, 10, 10);
+      g.generateTexture(textureKey, 10, 10);
+      g.destroy(); 
+    }
+
+    // 2. ✅ 杯筒状向下喷射配置
+    const trailColor = this.skinConfig.trailColor ?? 0xffffff;
+    const config: Phaser.Types.GameObjects.Particles.ParticleEmitterConfig = {
+        // --- 核心：杯筒状(Cone)方向控制 ---
+        // 90度是正下方。设定 75 到 105 度，形成一个 30 度的向下开口
+        angle: { min: 75, max: 105 }, 
+        
+        // 给予一定的初始喷射力度，数值越大，“杯筒”拉得越长
+        speed: { min: 150, max: 250 }, 
+
+        // 持续受到向下的重力拉扯，强化下落感
+        gravityY: 400,                
+
+        // --- 像素风视觉控制 ---
+        scale: 0.1,                     // 锁定10px大小，不缩放
+        lifespan: 900,                // 存在0.6秒
+        alpha: { start: 1, end: 0 },  // 逐渐消失
+        blendMode: 'NORMAL',          // 纯色覆盖，不要发光
+        color: [trailColor],              // 颜色来自皮肤配置
+
+        // --- 发射频率 ---
+        quantity: 1,                  // 每次吐出1个像素块
+        frequency: 20,                // 高频吐出 (20ms)，使流体更连贯
+        emitting: false,
+    };
+
+    // 3. 添加到场景
+    this.trailEmitterLeft = scene.add.particles(0, 0, textureKey, config);
+    this.trailEmitterLeft.setDepth(this.depth - 1);
+
+    this.trailEmitterRight = scene.add.particles(0, 0, textureKey, config);
+    this.trailEmitterRight.setDepth(this.depth - 1);
   }
 
   private createTails(scene: Phaser.Scene) {
     if (!this.skinConfig.tails) return;
-
     this.skinConfig.tails.forEach(tailDef => {
-      const tail = new KiteTail(
-        scene, 0, 0, 
-        tailDef.textureKey,
-        tailDef.length || 20
-      );
+      const tail = new KiteTail(scene, 0, 0, tailDef.textureKey, tailDef.length || 20);
       if (tailDef.scale) tail.setScale(tailDef.scale);
-      
-      // ✅ 确保尾巴加在最底层 (index 0)，避免盖住身体
       this.addAt(tail, 0); 
       this.tails.push(tail);
     });
   }
 
-  public updateVisuals(inputX: number, windX: number, windY: number) {
+  // ✅ 更新逻辑：增加 isSprinting 参数
+  public updateVisuals(inputX: number, windX: number, windY: number, isSprinting: boolean = false) {
     // --- A. 转向动画逻辑 ---
     const deadZone = 0.1;
     const dir: -1 | 0 | 1 = inputX < -deadZone ? -1 : inputX > deadZone ? 1 : 0;
@@ -127,33 +177,25 @@ export class KiteVisual extends Phaser.GameObjects.Container {
     this.setSpriteSkew(this.bodySprite, this.animState.skewX, this.animState.skewY);
 
     // --- B. 获取容器世界矩阵 ---
+    // 这个矩阵包含了 Container 的位移、旋转、缩放
     const worldMat = this.getWorldTransformMatrix(this._tmpMat);
 
-    // --- C. 🧵 更新隐形脊柱 (Knot Spine) ---
-    // 1. 脊柱头部钉在 Body 的中心 (Container World Pos)
-    // 这样当风筝移动时，脊柱头部跟着移动，剩下的部分会有物理延迟
+    // --- C. 更新隐形脊柱 ---
     const bodyWorldX = worldMat.tx;
     const bodyWorldY = worldMat.ty;
     this.knotSpine.updatePhysics(bodyWorldX, bodyWorldY, windX, windY);
 
-    // 2. 获取脊柱末端 (即绳结应该在的位置)
-    // KiteTail 已经自动把 World Points 转换回 Local Points 存放在 this.points 里了
-    // 所以我们直接取最后一个 Local Point 即可！
     const spineLocalPoints = this.knotSpine.points; 
     const tipLocal = spineLocalPoints[spineLocalPoints.length - 1];
-
-    // 3. 将绳结 Sprite 移动到这里
     this.knot.setPosition(tipLocal.x, tipLocal.y);
 
-    // --- D. 更新装饰尾巴 (Existing Tails) ---
+    // --- D. 更新装饰尾巴 ---
     this.updateTails(inputX, windX, windY, worldMat);
 
-    // --- E. 更新提线 (Bridle Lines) ---
-    // 连接 Body 上的挂载点 和 现在的 动态 Knot 位置
+    // --- E. 更新提线 ---
     this.updateBridleLines();
 
-    // --- F. 更新主垂线 (Main String) ---
-    // 主垂线需要 World 坐标。我们可以从脊柱的 pointsList (World) 里取
+    // --- F. 更新主垂线 ---
     const spineWorldPoints = (this.knotSpine as any).pointsList as Phaser.Math.Vector2[];
     const tipWorld = spineWorldPoints[spineWorldPoints.length - 1];
 
@@ -162,6 +204,61 @@ export class KiteVisual extends Phaser.GameObjects.Container {
       this.mainStringTailAnchored = true;
     }
     this.mainString.updatePhysics(tipWorld.x, tipWorld.y, windX * 0.2, windY * 0.2);
+
+    // --- ✅ G. 更新冲刺拖尾 (Wing Tips) ---
+    this.updateTrailParticles(worldMat, isSprinting);
+  }
+
+  private updateTrailParticles(worldMat: Phaser.GameObjects.Components.TransformMatrix, isSprinting: boolean) {
+    if (!this.trailEmitterLeft || !this.trailEmitterRight) return;
+    
+    // 1. 检查全局开关 和 冲刺状态
+    const shouldEmit = isSprinting || VisualManager.instance.isKiteTrailEnabled;
+
+    if (shouldEmit) {
+        // 2. 计算 Body 的局部矩阵 (包含 skew 和 rotation)
+        const bodyMat = this.bodySprite.getLocalTransformMatrix();
+        
+        // 3. 计算左翼尖的世界坐标
+        // 变换链: WingOffset (Local) -> Body Matrix -> Container Matrix (WorldMat) -> World Point
+        if (this.skinConfig.wingLeftOffset) {
+            const wx = this.calculateWorldPoint(this.skinConfig.wingLeftOffset, bodyMat, worldMat);
+            this.trailEmitterLeft.setPosition(wx.x, wx.y);
+            this.trailEmitterLeft.start(); // Phaser 3.60+ 用 start/stop 或 emitting=true
+            this.trailEmitterLeft.emitting = true;
+        }
+
+        // 4. 计算右翼尖的世界坐标
+        if (this.skinConfig.wingRightOffset) {
+            const wx = this.calculateWorldPoint(this.skinConfig.wingRightOffset, bodyMat, worldMat);
+            this.trailEmitterRight.setPosition(wx.x, wx.y);
+            this.trailEmitterRight.start();
+            this.trailEmitterRight.emitting = true;
+        }
+    } else {
+        // 停止发射 (已有的粒子会自然播放完 lifespan)
+        this.trailEmitterLeft.emitting = false;
+        this.trailEmitterRight.emitting = false;
+    }
+  }
+
+  // 辅助：计算嵌套坐标
+  private calculateWorldPoint(
+      offset: {x: number, y: number}, 
+      bodyMat: Phaser.GameObjects.Components.TransformMatrix, 
+      worldMat: Phaser.GameObjects.Components.TransformMatrix
+  ): Phaser.Math.Vector2 {
+      // Body Space -> Container Space
+      const cntX = bodyMat.tx + (offset.x * bodyMat.a + offset.y * bodyMat.c);
+      const cntY = bodyMat.ty + (offset.x * bodyMat.b + offset.y * bodyMat.d);
+
+      // Container Space -> World Space
+      // 注意：这里我们应用 worldMat 来获取最终的世界坐标
+      // this._tmpLoc 是复用的 Vector2 对象，减少 GC
+      this._tmpLoc.x = worldMat.tx + (cntX * worldMat.a + cntY * worldMat.c);
+      this._tmpLoc.y = worldMat.ty + (cntX * worldMat.b + cntY * worldMat.d);
+
+      return this._tmpLoc;
   }
 
   private updateTails(_inputX: number, windX: number, windY: number, worldMat: Phaser.GameObjects.Components.TransformMatrix) {
@@ -169,15 +266,11 @@ export class KiteVisual extends Phaser.GameObjects.Container {
 
     this.skinConfig.tails.forEach((tailDef, index) => {
       const tailObj = this.tails[index];
-      
-      // 计算挂载点 (Body Local -> World)
       const bodyMat = this.bodySprite.getLocalTransformMatrix();
       
-      // 1. Body Space -> Container Space
       const localInContainerX = bodyMat.tx + (tailDef.offsetX * bodyMat.a + tailDef.offsetY * bodyMat.c);
       const localInContainerY = bodyMat.ty + (tailDef.offsetX * bodyMat.b + tailDef.offsetY * bodyMat.d);
 
-      // 2. Container Space -> World Space
       const worldX = worldMat.tx + (localInContainerX * worldMat.a + localInContainerY * worldMat.c);
       const worldY = worldMat.ty + (localInContainerX * worldMat.b + localInContainerY * worldMat.d);
 
@@ -185,28 +278,24 @@ export class KiteVisual extends Phaser.GameObjects.Container {
     });
   }
 
+  // ... updateBridleLines, startTurnTween, alignSpriteToPoints, setSpriteSkew 保持不变 ...
+  
   private updateBridleLines() {
-    const bodyMat = this.bodySprite.getLocalTransformMatrix();
-    const def = this.skinConfig;
-
-    // 左挂载点 (Local)
-    const lx = bodyMat.tx + (def.bridleLeftOffset.x * bodyMat.a + def.bridleLeftOffset.y * bodyMat.c);
-    const ly = bodyMat.ty + (def.bridleLeftOffset.x * bodyMat.b + def.bridleLeftOffset.y * bodyMat.d);
-
-    // 右挂载点 (Local)
-    const rx = bodyMat.tx + (def.bridleRightOffset.x * bodyMat.a + def.bridleRightOffset.y * bodyMat.c);
-    const ry = bodyMat.ty + (def.bridleRightOffset.x * bodyMat.b + def.bridleRightOffset.y * bodyMat.d);
-
-    // 绳结位置 (现在的 this.knot.x/y 已经是被脊柱驱动后的位置了)
-    const kx = this.knot.x;
-    const ky = this.knot.y;
-
-    this.alignSpriteToPoints(this.bridleLeft, lx, ly, kx, ky);
-    this.alignSpriteToPoints(this.bridleRight, rx, ry, kx, ky);
+     // ... (代码同原文件) ...
+     const bodyMat = this.bodySprite.getLocalTransformMatrix();
+     const def = this.skinConfig;
+     const lx = bodyMat.tx + (def.bridleLeftOffset.x * bodyMat.a + def.bridleLeftOffset.y * bodyMat.c);
+     const ly = bodyMat.ty + (def.bridleLeftOffset.x * bodyMat.b + def.bridleLeftOffset.y * bodyMat.d);
+     const rx = bodyMat.tx + (def.bridleRightOffset.x * bodyMat.a + def.bridleRightOffset.y * bodyMat.c);
+     const ry = bodyMat.ty + (def.bridleRightOffset.x * bodyMat.b + def.bridleRightOffset.y * bodyMat.d);
+     const kx = this.knot.x;
+     const ky = this.knot.y;
+     this.alignSpriteToPoints(this.bridleLeft, lx, ly, kx, ky);
+     this.alignSpriteToPoints(this.bridleRight, rx, ry, kx, ky);
   }
-
-  // ... startTurnTween, alignSpriteToPoints, setSpriteSkew, destroy 保持不变 ...
+  
   private startTurnTween(dir: -1 | 0 | 1) {
+    // ... (代码同原文件) ...
     let tScaleX = 1; let tSkewY = 0; let tRot = 0;
     if (dir < 0) { tScaleX = 0.9; tSkewY = -0.15; tRot = -0.15; } 
     else if (dir > 0) { tScaleX = 0.9; tSkewY = 0.15; tRot = 0.15; }
@@ -219,8 +308,30 @@ export class KiteVisual extends Phaser.GameObjects.Container {
       ease: dir === 0 ? 'Sine.easeOut' : 'Quad.easeOut'
     });
   }
+  
+  private alignSpriteToPoints(sprite: Phaser.GameObjects.Sprite, x1: number, y1: number, x2: number, y2: number) {
+      // ... (代码同原文件) ...
+      sprite.setPosition(x1, y1);
+      const dist = Phaser.Math.Distance.Between(x1, y1, x2, y2);
+      const angle = Phaser.Math.Angle.Between(x1, y1, x2, y2);
+      sprite.setRotation(angle);
+      const baseThickness = 4; 
+      const scale = this.skinConfig.bridleScale ?? 1.0;
+      sprite.setDisplaySize(dist, baseThickness * scale);
+  }
+  
+  private setSpriteSkew(sprite: Phaser.GameObjects.Sprite, x: number, y: number) {
+      // ... (代码同原文件) ...
+      const s = sprite as any;
+      if (typeof s.setSkew === 'function') s.setSkew(x, y);
+      else { s.skewX = x; s.skewY = y; }
+  }
 
   public override destroy(fromScene?: boolean) {
+    // ✅ 销毁粒子发射器 (因为它们不在 Container 的 children 列表里，必须手动销毁)
+    this.trailEmitterLeft?.destroy();
+    this.trailEmitterRight?.destroy();
+
     if (this._turnTween) {
       this._turnTween.stop();
       this._turnTween.remove();
@@ -229,21 +340,5 @@ export class KiteVisual extends Phaser.GameObjects.Container {
     this.scene?.tweens?.killTweensOf(this);
     this.mainString?.destroy();
     super.destroy(fromScene);
-  }
-
-  private alignSpriteToPoints(sprite: Phaser.GameObjects.Sprite, x1: number, y1: number, x2: number, y2: number) {
-    sprite.setPosition(x1, y1);
-    const dist = Phaser.Math.Distance.Between(x1, y1, x2, y2);
-    const angle = Phaser.Math.Angle.Between(x1, y1, x2, y2);
-    sprite.setRotation(angle);
-    const baseThickness = 4; 
-    const scale = this.skinConfig.bridleScale ?? 1.0;
-    sprite.setDisplaySize(dist, baseThickness * scale);
-  }
-
-  private setSpriteSkew(sprite: Phaser.GameObjects.Sprite, x: number, y: number) {
-    const s = sprite as any;
-    if (typeof s.setSkew === 'function') s.setSkew(x, y);
-    else { s.skewX = x; s.skewY = y; }
   }
 }

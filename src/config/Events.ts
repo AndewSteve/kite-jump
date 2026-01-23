@@ -32,6 +32,8 @@ export const EVENTS = {
   
   WIND_CHANGE: 'wind-change',    // 环境风力变化
 
+  ToggleDash: 'toggle-dash',       // UI -> Game: 切换冲刺状态
+
   WEATHER_START: 'weather-start', // 天气开始
   WEATHER_END: 'weather-end',     // 天气结束
 

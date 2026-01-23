@@ -1,5 +1,6 @@
 // src/managers/VisualManager.ts
 import Phaser from 'phaser';
+import { EVENTS, gameEvents } from '../config/Events';
 
 export const VisualEventKeys = {
   ToggleKiteTrail: 'toggle_kite_trail',
@@ -18,9 +19,17 @@ export default class VisualManager {
   public events = new Phaser.Events.EventEmitter();
 
   // 状态记录
-  private _isKiteTrailEnabled: boolean = true;
+  private _isKiteTrailEnabled: boolean = false;
 
-  constructor() {}
+  constructor() {
+    gameEvents.on(EVENTS.ToggleDash, 
+      (data: { enabled: boolean; }) => this.onToggleDash(data.enabled));
+  }
+
+  private onToggleDash(enabled: boolean) {
+    console.log(`[VisualManager] Received ToggleDash: ${enabled}`);
+    this.setKiteTrailEnabled(enabled);
+  }
 
   // --- 风筝拖尾控制 ---
   

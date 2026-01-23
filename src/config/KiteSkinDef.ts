@@ -1,6 +1,6 @@
 // src/entities/parts/KiteSkinDef.ts
 
-import { TextureKeys } from "./AssetKeys";
+import { TextureKeys, VFXTextureKeys } from "./AssetKeys";
 
 export const KiteSkinIDs = {
   DefaultYellow: "kite_default_yellow",
@@ -45,6 +45,7 @@ export interface IKiteSkin {
   stringSegmentLength?: number; // 主垂线每节长度 (默认 40)
   
   trailTexture?: string; // ✅ 新增：拖尾粒子贴图 (可选，默认用 stringTexture)
+  trailColor?: number;   // ✅ 新增：拖尾粒子颜色 (可选，默认白色)
   // ✅ 新增：翼尖发射点 (用于冲刺拖尾) - 相对于主体中心
   wingLeftOffset?: { x: number, y: number };
   wingRightOffset?: { x: number, y: number };
@@ -75,7 +76,8 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
     knotOffset: { x: 0, y: 200 }, // 绳结在身体下方一点点
     knotScale: 0.3,
 
-    trailTexture: `${TextureKeys.DefaultYellowKite}_trail`, // ✅ 新增：拖尾粒子贴图
+    trailTexture: VFXTextureKeys.VfxTrail, // ✅ 新增：拖尾粒子贴图
+    trailColor: 0xfff2a8, // 淡黄色
     // ✅ 新增：菱形风筝翼尖通常是最宽处
     wingLeftOffset: { x: -250, y: 0 },
     wingRightOffset: { x: 250, y: 0 },
@@ -104,8 +106,9 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
       { textureKey: `${TextureKeys.GreenKite}_right_tail`, offsetX: 450, offsetY: 30, length: 10 }   // 右尾
     ],
 
-    trailTexture: `${TextureKeys.DefaultYellowKite}_trail`, // ✅ 新增：拖尾粒子贴图
-    // ✅ 新增：菱形风筝翼尖通常是最宽处
+    trailTexture: VFXTextureKeys.VfxTrail, // ✅ 新增：拖尾粒子贴图
+    trailColor: 0xbff2b8, // 淡绿色（蜀国）
+    // ✅ 新增：翼尖发射点与默认皮肤一致
     wingLeftOffset: { x: -250, y: 0 },
     wingRightOffset: { x: 250, y: 0 },
   },
@@ -133,8 +136,9 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
       { textureKey: `${TextureKeys.BlueKite}_right_tail`, offsetX: 200, offsetY: 120, length: 10 }   // 右尾
     ],
 
-    trailTexture: `${TextureKeys.DefaultYellowKite}_trail`, // ✅ 新增：拖尾粒子贴图
-    // ✅ 新增：菱形风筝翼尖通常是最宽处
+    trailTexture: VFXTextureKeys.VfxTrail, // ✅ 新增：拖尾粒子贴图
+    trailColor: 0x2f6bff, // 蓝色（魏国）
+    // ✅ 新增：翼尖发射点与默认皮肤一致
     wingLeftOffset: { x: -250, y: 0 },
     wingRightOffset: { x: 250, y: 0 },
   },
@@ -160,8 +164,9 @@ export const KiteSkins: Record<KiteSkinID, IKiteSkin> = {
       { textureKey: `${TextureKeys.RedKite}_right_tail`, offsetX: 190, offsetY: 140, length: 10 }   // 右尾
     ],
 
-    trailTexture: `${TextureKeys.DefaultYellowKite}_trail`, // ✅ 新增：拖尾粒子贴图
-    // ✅ 新增：菱形风筝翼尖通常是最宽处
+    trailTexture: VFXTextureKeys.VfxTrail, // ✅ 新增：拖尾粒子贴图
+    trailColor: 0x8b0000, // 殷红色（吴国）
+    // ✅ 新增：翼尖发射点与默认皮肤一致
     wingLeftOffset: { x: -250, y: 0 },
     wingRightOffset: { x: 250, y: 0 },
   },

@@ -71,7 +71,8 @@ export default class PhaseManager {
     const candidates = pool.filter(id => id !== this.currentBiomeId);
 
     // 3. 随机取一个
-    const nextId = candidates[Math.floor(Math.random() * candidates.length)];
+    // const nextId = candidates[Math.floor(Math.random() * candidates.length)];
+    const nextId = Phaser.Math.RND.pick(candidates);
 
     // 4. 更新记录
     this.currentBiomeId = nextId;

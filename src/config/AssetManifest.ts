@@ -127,7 +127,7 @@ export const AssetManifest: IAssetDefinition[] = [
   createSpriteSheet(VFXTextureKeys.VfxAlertBg, 'assets/vfx/FX_TEX_Lightning_04.png', 85, 85, 9),
   {key: VFXTextureKeys.VfxShield, path: 'assets/vfx/tactics_effect.png', type: 'image'},
   {key: VFXTextureKeys.VfxTrail, path: 'assets/vfx/FX_TEX_Speed_Line_02.png', type: 'image'},
-
+  {key: VFXTextureKeys.VfxFlare, path: 'assets/vfx/FX_TEX_Flare_02_B.png', type: 'image'},
   // ✅ 新增：音频资源
   // BGM
   // { key: AudioKeys.BgmMainMenu, path: 'assets/audio/bgm_main_menu.mp3', type: 'audio' },

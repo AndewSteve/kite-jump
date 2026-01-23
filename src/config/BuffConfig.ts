@@ -4,6 +4,7 @@ import { type IBuffConfig } from "../mechanics/BuffTypes";
 import { StatType, ModifierType } from "../mechanics/StatDefinitions";
 import { AudioKeys } from "./AssetKeys";
 import { EVENTS } from "./Events";
+
 import { SummonId } from "./SummonConfig";
 
 // --- 公共的操控性修正 (模拟之前的 2.0x 乘数) ---
@@ -44,7 +45,7 @@ export const DashLv1Buff: IBuffConfig = {
   modifiers: [...DashControlMods],
   onAdd:[
     new SfxAction(AudioKeys.SfxDash),
-    new ScoreAction(100),
+    new ScoreAction(100)
   ],
 };
 
